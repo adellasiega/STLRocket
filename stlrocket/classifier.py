@@ -15,6 +15,7 @@ def train_classifier(
     model = LogisticRegressionCV(
         Cs=np.logspace(-4, 4, 10),
         l1_ratios=[1.0],
+        penalty="elasticnet",
         fit_intercept=False,
         solver="saga",
         cv=config.cv,
