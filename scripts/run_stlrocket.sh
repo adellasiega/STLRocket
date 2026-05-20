@@ -45,6 +45,6 @@ python /share/ai-lab/adsiega/STLRocket/run_experiment.py \
   --dataset     "$DATASET" \
   --n_formulas  "$N_FORMULAS" \
   --depth_max   "$DEPTH_MAX" \
-  --n_run       10 \
+  --n_run       5 \
   --cv          3 \
   --output_dir  "$RESULTS_DIR"
