@@ -20,7 +20,6 @@ def train_classifier(
         cv=config.cv,
         max_iter=config.max_iter_lr,
         class_weight="balanced",
-        use_legacy_attributes=False,
     )
     model.fit(X_tr_feats, y_tr)
     return model
