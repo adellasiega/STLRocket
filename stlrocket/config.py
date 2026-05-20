@@ -14,8 +14,8 @@ class ExperimentConfig:
 
     # Feature extraction
     n_formulas: int = 1000
-    depth_max: int = 5
-    batch_size: int = 200
+    depth_max: int = 3
+    batch_size: int = 500
     threshold_corr: float = 0.98
     max_iter: int = 20
     only_temporal: bool = True
@@ -23,7 +23,7 @@ class ExperimentConfig:
 
     # Classifier
     cv: int = 3
-    max_iter_lr: int = 1000
+    max_iter_lr: int = 3000
 
     # Explanation
     pool_size: int = 10
