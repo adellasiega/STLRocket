@@ -5,7 +5,7 @@
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
 #SBATCH --mem=32G --time=12:00:00
 #SBATCH --partition=Main
-#SBATCH --array=0-89  # 10 datasets x 3 n_formulas x 3 depth_max
+#SBATCH --array=0-39  # n_datasets x n_formulas x  n_depth_max
 
 DATASETS=(
   "ArticularyWordRecognition"
@@ -20,8 +20,8 @@ DATASETS=(
   "Libras"
 )
 
-N_FORMULAS_LIST=(500 1000 3000)
-DEPTH_MAX_LIST=(2 3 4)
+N_FORMULAS_LIST=(100 1000)
+DEPTH_MAX_LIST=(2 3)
 
 N_DATASETS=${#DATASETS[@]}
 N_FORMULAS_VALS=${#N_FORMULAS_LIST[@]}
@@ -35,7 +35,7 @@ N_FORMULAS=${N_FORMULAS_LIST[$FORMULAS_IDX]}
 DEPTH_MAX=${DEPTH_MAX_LIST[$DEPTH_IDX]}
 
 source /share/ai-lab/adsiega/STLKernel/venv/bin/activate
-DATA_DIR="/share/ai-lab/adsiega/STLRocket/Multivariate_arff"
+DATA_DIR="/share/ai-lab/adsiega/STELIS/Multivariate_arff"
 RESULTS_DIR="/share/ai-lab/adsiega/STLRocket/results"
 export MPLBACKEND=Agg
 
@@ -46,5 +46,5 @@ python /share/ai-lab/adsiega/STLRocket/run_experiment.py \
   --n_formulas  "$N_FORMULAS" \
   --depth_max   "$DEPTH_MAX" \
   --n_run       10 \
-  --cv          5 \
+  --cv          3 \
   --output_dir  "$RESULTS_DIR"
