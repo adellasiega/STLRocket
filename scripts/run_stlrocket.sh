@@ -5,23 +5,39 @@
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
 #SBATCH --mem=32G --time=12:00:00
 #SBATCH --partition=Main
-#SBATCH --array=0-39  # n_datasets x n_formulas x  n_depth_max
+#SBATCH --array=0-51  # n_datasets x n_formulas x  n_depth_max
 
 DATASETS=(
-  "ArticularyWordRecognition"
-  "AtrialFibrillation"
-  "BasicMotions"
-  "Cricket"
-  "ERing"
-  "Epilepsy"
-  "EthanolConcentration"
-  "HandMovementDirection"
-  "Handwriting"
-  "Libras"
+    "ArticularyWordRecognition"
+    "AtrialFibrillation"
+    "BasicMotions"
+    "Cricket"
+    "DuckDuckGeese"
+    "EigenWorms"
+    "Epilepsy"
+    "EthanolConcentration"
+    "ERing"
+    "FaceDetection"
+    "FingerMovements"
+    "HandMovementDirection"
+    "Handwriting"
+    "Heartbeat"
+    "Libras"
+    "LSST"
+    "MotorImagery"
+    "NATOPS"
+    "PenDigits"
+    "PEMS-SF"
+    "PhonemeSpectra"
+    "RacketSports"
+    "SelfRegulationSCP1"
+    "SelfRegulationSCP2"
+    "StandWalkJump"
+    "UWaveGestureLibrary"
 )
 
 N_FORMULAS_LIST=(100 1000)
-DEPTH_MAX_LIST=(2 3)
+DEPTH_MAX_LIST=(3)
 
 N_DATASETS=${#DATASETS[@]}
 N_FORMULAS_VALS=${#N_FORMULAS_LIST[@]}

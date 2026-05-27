@@ -235,8 +235,8 @@ def main() -> None:
     save_accuracy_summary(run_results, out_dir / "accuracy.json")
 
     # --- Extra explanation run ---
-    extra_seed = config.base_seed + config.n_run
-    run_extra(X_tr_raw, y_tr, X_te_raw, y_te, config, extra_seed, out_dir)
+    #extra_seed = config.base_seed + config.n_run
+    #run_extra(X_tr_raw, y_tr, X_te_raw, y_te, config, extra_seed, out_dir)
 
     print(f"\nDone. Results saved to: {out_dir}")
 
