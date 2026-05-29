@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import numpy as np
-from sklearn.linear_model import LogisticRegressionCV
+from glmnet import LogitNet
 from sklearn.metrics import balanced_accuracy_score, classification_report
+from sklearn.utils.class_weight import compute_sample_weight
 
 from .config import ExperimentConfig
 
@@ -11,23 +12,19 @@ def train_classifier(
     X_tr_feats: np.ndarray,
     y_tr: np.ndarray,
     config: ExperimentConfig,
-) -> LogisticRegressionCV:
-    model = LogisticRegressionCV(
-        Cs=np.logspace(-4, 4, 10),
-        l1_ratios=[1.0],
-        penalty="elasticnet",
+) -> LogitNet:
+    model = LogitNet(
+        alpha=1.0,
+        n_splits=config.cv,
         fit_intercept=False,
-        solver="saga",
-        cv=config.cv,
-        max_iter=config.max_iter_lr,
-        class_weight="balanced",
     )
-    model.fit(X_tr_feats, y_tr)
+    sample_weight = compute_sample_weight("balanced", y_tr)
+    model.fit(X_tr_feats, y_tr, sample_weight=sample_weight)
     return model
 
 
 def evaluate_classifier(
-    model: LogisticRegressionCV,
+    model: LogitNet,
     X_te_feats: np.ndarray,
     y_te: np.ndarray,
 ) -> dict:

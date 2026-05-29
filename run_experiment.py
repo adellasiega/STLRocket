@@ -194,7 +194,6 @@ def parse_args() -> ExperimentConfig:
     parser.add_argument("--only_temporal", type=lambda x: x.lower() != "false", default=True)
     parser.add_argument("--until_weight", type=float, default=0.0)
     parser.add_argument("--cv", type=int, default=3)
-    parser.add_argument("--max_iter_lr", type=int, default=1000)
     parser.add_argument("--pool_size", type=int, default=10)
     parser.add_argument("--precision_threshold", type=float, default=0.75)
     parser.add_argument("--n_run", type=int, default=5)

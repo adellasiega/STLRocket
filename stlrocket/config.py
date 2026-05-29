@@ -23,7 +23,6 @@ class ExperimentConfig:
 
     # Classifier
     cv: int = 3
-    max_iter_lr: int = 1000
 
     # Explanation
     pool_size: int = 10
