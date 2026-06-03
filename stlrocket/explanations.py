@@ -185,6 +185,11 @@ def build_global_explanations(
     pool_size: int = 20,
     precision_threshold: float = 0.9,
 ) -> tuple[dict, dict, dict]:
+    if len(y_tr) > 1000:
+        idx = np.random.choice(len(y_tr), 1000, replace=False)
+        X_tr = X_tr[idx]
+        y_tr = y_tr[idx]
+
     locals_per_class: dict = defaultdict(list)
     formula_cache: dict = {}
     n_test = X_te_feats.shape[0]
