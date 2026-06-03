@@ -2,9 +2,8 @@
 """
 Run the STL-Rocket experiment pipeline.
 
-For n_run seeds: generate formulas, train logistic regression, evaluate
-balanced accuracy. Then one extra run computes and saves local/global
-explanations.
+For each of n_run seeds: generate formulas, train logistic regression,
+evaluate balanced accuracy, and build local/global explanations.
 """
 from __future__ import annotations
 
@@ -41,14 +40,35 @@ def save_accuracy_summary(results: list[dict], path: Path) -> None:
     macro_f1s = [r["macro_f1"] for r in results]
     feat_times = [r["time_features_s"] for r in results]
     train_times = [r["time_train_s"] for r in results]
+    expl_times = [r["time_explanations_s"] for r in results]
     total_times = [r["time_total_s"] for r in results]
+
+    all_classes = set()
+    for r in results:
+        all_classes.update(r.get("local_metrics", {}).keys())
+
+    explanation_per_class = {}
+    for cls in sorted(all_classes):
+        local_runs = [r["local_metrics"][cls] for r in results if cls in r.get("local_metrics", {})]
+        global_runs = [r["global_metrics"].get(cls, {}) for r in results if "global_metrics" in r]
+        precs = [m["avg_precision"] for m in local_runs if m["avg_precision"] is not None]
+        covs = [m["avg_coverage"] for m in local_runs if m["avg_coverage"] is not None]
+        f1s = [m["f1"] for m in global_runs if m and m.get("f1") is not None]
+        explanation_per_class[cls] = {
+            "mean_local_avg_precision": float(np.mean(precs)) if precs else None,
+            "mean_local_avg_coverage": float(np.mean(covs)) if covs else None,
+            "mean_global_f1": float(np.mean(f1s)) if f1s else None,
+        }
+
     summary = {
         "mean_balanced_accuracy": float(np.mean(bal_accs)),
         "std_balanced_accuracy": float(np.std(bal_accs)),
         "mean_macro_f1": float(np.mean(macro_f1s)),
         "mean_time_features_s": float(np.mean(feat_times)),
         "mean_time_train_s": float(np.mean(train_times)),
+        "mean_time_explanations_s": float(np.mean(expl_times)),
         "mean_time_total_s": float(np.mean(total_times)),
+        "explanation_per_class": explanation_per_class,
         "per_run": results,
     }
     with open(path, "w") as f:
@@ -61,8 +81,19 @@ def save_accuracy_summary(results: list[dict], path: Path) -> None:
     print(
         f"Timing  — features: {summary['mean_time_features_s']:.2f}s  "
         f"train: {summary['mean_time_train_s']:.2f}s  "
+        f"explanations: {summary['mean_time_explanations_s']:.2f}s  "
         f"total: {summary['mean_time_total_s']:.2f}s  (means over {len(results)} runs)"
     )
+    if explanation_per_class:
+        print("\nExplanation metrics (mean over runs):")
+        print(f"  {'class':<14} {'local_prec':>10} {'local_cov':>10} {'global_f1':>10}")
+        for cls, m in explanation_per_class.items():
+            fmt = lambda v: f"{v:>10.4f}" if v is not None else f"{'N/A':>10}"
+            print(
+                f"  {cls:<14} {fmt(m['mean_local_avg_precision'])}"
+                f" {fmt(m['mean_local_avg_coverage'])}"
+                f" {fmt(m['mean_global_f1'])}"
+            )
 
 
 def save_local_explanations(locals_per_class: dict, path: Path) -> None:
@@ -72,7 +103,7 @@ def save_local_explanations(locals_per_class: dict, path: Path) -> None:
             rows.append({
                 "sample_idx": sample_idx,
                 "target_class": cls,
-                "formula": str(phi_local),
+                "formula": str(phi_local) if phi_local is not None else "",
                 "n_picks": len(picks),
                 "precision_train": round(precision, 6),
                 "n_tp": n_tp,
@@ -97,11 +128,12 @@ def save_global_explanations(
         writer.writeheader()
         for cls, phi_global in global_per_class.items():
             metrics = global_results.get(cls, {})
+            f1 = metrics.get("f1")
             writer.writerow({
                 "class": cls,
                 "formula": str(phi_global),
                 "n_unique_locals": n_unique_per_class.get(cls, 0),
-                "f1": round(metrics.get("f1", float("nan")), 6),
+                "f1": round(f1, 6) if f1 is not None else "",
             })
 
 
@@ -116,6 +148,7 @@ def run_single(
     y_te: np.ndarray,
     config: ExperimentConfig,
     seed: int,
+    out_dir: Path,
 ) -> dict:
     scaler = StateVariableStandardScaler()
     X_tr = scaler.fit_transform(X_tr_raw)
@@ -130,53 +163,44 @@ def run_single(
     metrics = evaluate_classifier(model, X_te_feats, y_te)
     metrics["time_features_s"] = round(t1 - t0, 4)
     metrics["time_train_s"] = round(t2 - t1, 4)
-    metrics["time_total_s"] = round(t2 - t0, 4)
-    return metrics
-
-
-def run_extra(
-    X_tr_raw: np.ndarray,
-    y_tr: np.ndarray,
-    X_te_raw: np.ndarray,
-    y_te: np.ndarray,
-    config: ExperimentConfig,
-    seed: int,
-    out_dir: Path,
-) -> None:
-    print(f"\n--- Extra run (seed={seed}) for explanations ---")
-    scaler = StateVariableStandardScaler()
-    X_tr = scaler.fit_transform(X_tr_raw)
-    X_te = scaler.transform(X_te_raw)
-
-    formulas, X_tr_feats, X_te_feats = build_formula_bank(X_tr, X_te, config, seed)
-    model = train_classifier(X_tr_feats, y_tr, config)
 
     W = model.coef_
     b = model.intercept_
 
-    print("\nBuilding local/global explanations...")
+    print("  Building explanations...")
+    t3 = time.perf_counter()
     global_per_class, locals_per_class, n_unique_per_class = build_global_explanations(
-        X_te_feats, W, b, model, formulas, X_tr, y_tr,
+        X_te_feats, X_te, W, b, model, formulas, X_tr, y_tr,
         pool_size=config.pool_size,
         precision_threshold=config.precision_threshold,
     )
-
     global_results = evaluate_global(global_per_class, X_te, y_te)
+    t4 = time.perf_counter()
 
-    save_local_explanations(locals_per_class, out_dir / "local_explanations.csv")
-    save_global_explanations(global_per_class, global_results, n_unique_per_class, out_dir / "global_explanations.csv")
+    metrics["time_explanations_s"] = round(t4 - t3, 4)
+    metrics["time_total_s"] = round(t4 - t0, 4)
 
-    print("\nGlobal explanation metrics:")
-    print(f"{'class':<14} {'n_unique':>8} {'f1':>8}")
-    print("-" * 34)
-    for cls, m in global_results.items():
-        if cls == "macro_avg":
-            continue
-        print(f"{cls:<14} {n_unique_per_class.get(cls, 0):>8d} {m['f1']:>7.1%}")
-    macro = global_results.get("macro_avg", {})
-    if macro:
-        print("-" * 34)
-        print(f"{'macro_avg':<14} {'':>8} {macro['f1']:>7.1%}")
+    local_metrics: dict = {}
+    for cls, lst in locals_per_class.items():
+        valid = [(prec, n_tp) for _, phi, _, prec, n_tp in lst if phi is not None]
+        precs = [p for p, _ in valid]
+        covs = [n / len(y_tr) for _, n in valid]
+        local_metrics[str(cls)] = {
+            "avg_precision": float(np.mean(precs)) if precs else None,
+            "avg_coverage": float(np.mean(covs)) if covs else None,
+            "n_explained": len(valid),
+            "n_total": len(lst),
+        }
+
+    metrics["local_metrics"] = local_metrics
+    metrics["global_metrics"] = {
+        str(cls): m for cls, m in global_results.items() if cls != "macro_avg"
+    }
+
+    save_local_explanations(locals_per_class, out_dir / f"seed{seed}_local_explanations.csv")
+    save_global_explanations(global_per_class, global_results, n_unique_per_class, out_dir / f"seed{seed}_global_explanations.csv")
+
+    return metrics
 
 
 # ---------------------------------------------------------------------------
@@ -218,12 +242,12 @@ def main() -> None:
     X_tr_raw, y_tr, X_te_raw, y_te = load_dataset(config.dataset)
     print(f"  train: {X_tr_raw.shape}  test: {X_te_raw.shape}")
 
-    # --- n_run accuracy loop ---
+    # --- n_run loop ---
     run_results = []
     for run_idx in range(config.n_run):
         seed = config.base_seed + run_idx
         print(f"\n--- Run {run_idx} (seed={seed}) ---")
-        metrics = run_single(X_tr_raw, y_tr, X_te_raw, y_te, config, seed)
+        metrics = run_single(X_tr_raw, y_tr, X_te_raw, y_te, config, seed, out_dir)
         entry = {"run": run_idx, "seed": seed, **metrics}
         run_results.append(entry)
         print(
@@ -232,11 +256,6 @@ def main() -> None:
         )
 
     save_accuracy_summary(run_results, out_dir / "accuracy.json")
-
-    # --- Extra explanation run ---
-    #extra_seed = config.base_seed + config.n_run
-    #run_extra(X_tr_raw, y_tr, X_te_raw, y_te, config, extra_seed, out_dir)
-
     print(f"\nDone. Results saved to: {out_dir}")
 
 

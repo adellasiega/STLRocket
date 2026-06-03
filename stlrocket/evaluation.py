@@ -5,15 +5,26 @@ import numpy as np
 from .features import eval_robustness
 
 
+def evaluate_local_explanation(
+    phi_local,
+    target_class,
+    X_tr: np.ndarray,
+    y_tr: np.ndarray,
+) -> tuple[float, int]:
+    rhos = eval_robustness(phi_local, X_tr)
+    pos_mask = rhos > 0
+    tot_positive = int(pos_mask.sum())
+    if tot_positive == 0:
+        return 0.0, 0
+    true_positive = int((y_tr[pos_mask] == target_class).sum())
+    return float(true_positive / tot_positive), true_positive
+
+
 def evaluate_global(
     global_per_class: dict,
     X_eval: np.ndarray,
     y_eval: np.ndarray,
 ) -> dict:
-    """Evaluate coverage and precision of global explanations.
-
-    Returns {cls: {"coverage": float, "fp_rate": float, "precision": float}}.
-    """
     results = {}
     for cls, phi_global in global_per_class.items():
         rho = eval_robustness(phi_global, X_eval)

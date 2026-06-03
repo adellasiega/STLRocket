@@ -8,6 +8,7 @@ from torcheck.stl import Not, And, Or
 from torcheck import simplify
 
 from .features import eval_robustness, shift_atom_thresholds
+from .evaluation import evaluate_local_explanation
 
 
 def reparametrize_formula(phi_original, X: np.ndarray, y: np.ndarray, target_class):
@@ -21,7 +22,9 @@ def reparametrize_formula(phi_original, X: np.ndarray, y: np.ndarray, target_cla
     below = {c: m for c, m in med_others.items() if m < med_target}
     above = {c: m for c, m in med_others.items() if m > med_target}
 
-    if len(below) == 0:
+    if len(below) == 0 and len(above) == 0:
+        ref_class = other_classes[0]
+    elif len(below) == 0:
         ref_class = min(above, key=lambda c: above[c])
     elif len(above) == 0:
         ref_class = max(below, key=lambda c: below[c])
@@ -40,9 +43,8 @@ def reparametrize_formula(phi_original, X: np.ndarray, y: np.ndarray, target_cla
         med_ref = -med_ref
 
     delta_star = -(med_target + med_ref) / 2
-    phi_new = copy.deepcopy(phi)
-    shift_atom_thresholds(phi_new, delta_star)
-    return phi_new
+    shift_atom_thresholds(phi, delta_star)
+    return phi
 
 
 def per_competitor_contributions(
@@ -53,16 +55,15 @@ def per_competitor_contributions(
     return np.stack([(W[class_idx] - W[k]) * x for k in others])
 
 
-def get_top_m_features(contrib_matrix: np.ndarray, m: int) -> tuple[list, np.ndarray]:
+def get_top_m_features(contrib_matrix: np.ndarray, m: int) -> list:
     agg = contrib_matrix.sum(axis=0)
-    order = np.argsort(-agg)
-    return order[:m].tolist(), agg
+    return np.argsort(-agg)[:m].tolist()
 
 
 def greedy_precise_picks(
     x: np.ndarray,
+    x_ts: np.ndarray,
     W: np.ndarray,
-    b: np.ndarray,
     model,
     formulas: list,
     X_tr: np.ndarray,
@@ -75,9 +76,16 @@ def greedy_precise_picks(
     others = [k for k in range(len(model.classes_)) if k != class_idx]
 
     contrib = per_competitor_contributions(W, x, class_idx, others)
-    pool_indices, _ = get_top_m_features(contrib, pool_size)
+    pool_indices = get_top_m_features(contrib, pool_size)
 
-    remaining = list(pool_indices)
+    cache = {}
+    for j in pool_indices:
+        phi_j = reparametrize_formula(formulas[j], X_tr, y_tr, target_class)
+        if eval_robustness(phi_j, x_ts)[0] <= 0:
+            continue
+        cache[j] = (phi_j, eval_robustness(phi_j, X_tr))
+
+    remaining = [j for j in pool_indices if j in cache]
     picks = []
     reparametrized = {}
     rho_current = np.full(len(y_tr), np.inf)
@@ -86,8 +94,7 @@ def greedy_precise_picks(
         best_j, best_precision, best_rho, best_phi = None, -np.inf, None, None
 
         for j in remaining:
-            phi_j = reparametrize_formula(formulas[j], X_tr, y_tr, target_class)
-            rho_j = eval_robustness(phi_j, X_tr)
+            phi_j, rho_j = cache[j]
             rho_combined = np.minimum(rho_current, rho_j)
 
             pos_mask = rho_combined > 0
@@ -97,6 +104,8 @@ def greedy_precise_picks(
             if precision > best_precision:
                 best_precision, best_j, best_rho, best_phi = precision, j, rho_j, phi_j
 
+        if best_j is None:
+            break
         picks.append(best_j)
         remaining.remove(best_j)
         reparametrized[best_j] = best_phi
@@ -128,6 +137,7 @@ def disjunction(phis: list):
 
 def build_local_explanation(
     x: np.ndarray,
+    x_ts: np.ndarray,
     W: np.ndarray,
     b: np.ndarray,
     model,
@@ -145,33 +155,19 @@ def build_local_explanation(
     target_class = model.classes_[class_idx]
 
     picks, reparametrized = greedy_precise_picks(
-        x, W, b, model, formulas, X_tr, y_tr,
+        x, x_ts, W, model, formulas, X_tr, y_tr,
         class_idx, pool_size=pool_size, precision_threshold=precision_threshold,
     )
 
+    if not picks:
+        return None, target_class, []
     phis = [reparametrized[j] for j in picks]
     return conjunction(phis), target_class, picks
 
 
-def evaluate_local_explanation(
-    phi_local,
-    target_class: str,
-    X_tr: np.ndarray,
-    y_tr: np.ndarray,
-) -> tuple[float, int]:
-    """Returns (precision_train, n_tp)."""
-    rhos = eval_robustness(phi_local, X_tr)
-    pos_mask = rhos > 0
-    tot_positive = int(pos_mask.sum())
-    if tot_positive == 0:
-        return 0.0, 0
-    true_positive = int((y_tr[pos_mask] == target_class).sum())
-    precision = float(true_positive / tot_positive)
-    return precision, true_positive
-
-
 def build_global_explanations(
     X_te_feats: np.ndarray,
+    X_te: np.ndarray,
     W: np.ndarray,
     b: np.ndarray,
     model,
@@ -181,21 +177,18 @@ def build_global_explanations(
     pool_size: int = 20,
     precision_threshold: float = 0.9,
 ) -> tuple[dict, dict, dict]:
-    """Build global explanations from per-sample local explanations.
-
-    locals_per_class maps class -> list of
-        (sample_idx, phi_local, picks, precision, support)
-    where support = n_pos / len(y_tr).
-    """
     locals_per_class: dict = defaultdict(list)
     n_test = X_te_feats.shape[0]
 
     for i in range(n_test):
         phi_local, target_class, picks = build_local_explanation(
-            X_te_feats[i], W, b, model, formulas,
+            X_te_feats[i], X_te[i:i+1], W, b, model, formulas,
             X_tr, y_tr, pool_size=pool_size, precision_threshold=precision_threshold,
         )
-        precision, n_tp = evaluate_local_explanation(phi_local, target_class, X_tr, y_tr)
+        if phi_local is not None:
+            precision, n_tp = evaluate_local_explanation(phi_local, target_class, X_tr, y_tr)
+        else:
+            precision, n_tp = 0.0, 0
         print(
             f"  sample {i:3d} | class {target_class} | {len(picks)} formula(s) "
             f"| precision {precision:.2f} | n_tp {n_tp}"
@@ -207,11 +200,14 @@ def build_global_explanations(
     for cls, lst in locals_per_class.items():
         seen: dict = {}
         for _, phi, _, _, _ in lst:
+            if phi is None:
+                continue
             key = str(phi)
             if key not in seen:
                 seen[key] = phi
         unique_phis = list(seen.values())
         n_unique_per_class[cls] = len(unique_phis)
-        global_per_class[cls] = disjunction(unique_phis)
+        if unique_phis:
+            global_per_class[cls] = disjunction(unique_phis)
 
     return global_per_class, locals_per_class, n_unique_per_class
