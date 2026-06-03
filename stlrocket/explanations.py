@@ -69,6 +69,7 @@ def greedy_precise_picks(
     X_tr: np.ndarray,
     y_tr: np.ndarray,
     class_idx: int,
+    formula_cache: dict,
     pool_size: int = 10,
     precision_threshold: float = 0.9,
 ) -> tuple[list, dict]:
@@ -80,10 +81,14 @@ def greedy_precise_picks(
 
     cache = {}
     for j in pool_indices:
-        phi_j = reparametrize_formula(formulas[j], X_tr, y_tr, target_class)
+        key = (j, target_class)
+        if key not in formula_cache:
+            phi_j = reparametrize_formula(formulas[j], X_tr, y_tr, target_class)
+            formula_cache[key] = (phi_j, eval_robustness(phi_j, X_tr))
+        phi_j, rho_tr = formula_cache[key]
         if eval_robustness(phi_j, x_ts)[0] <= 0:
             continue
-        cache[j] = (phi_j, eval_robustness(phi_j, X_tr))
+        cache[j] = (phi_j, rho_tr)
 
     remaining = [j for j in pool_indices if j in cache]
     picks = []
@@ -144,19 +149,22 @@ def build_local_explanation(
     formulas: list,
     X_tr: np.ndarray,
     y_tr: np.ndarray,
+    formula_cache: dict,
     pool_size: int = 20,
     precision_threshold: float = 0.9,
 ) -> tuple[object, str, list]:
     if W.shape[0] == 1:
         W = np.vstack([-W, W])
-        b = np.array([-b[0], b[0]])
+        b_scalar = float(np.squeeze(b))
+        b = np.array([-b_scalar, b_scalar])
     scores = W @ x + b
     class_idx = int(np.argmax(scores))
     target_class = model.classes_[class_idx]
 
     picks, reparametrized = greedy_precise_picks(
         x, x_ts, W, model, formulas, X_tr, y_tr,
-        class_idx, pool_size=pool_size, precision_threshold=precision_threshold,
+        class_idx, formula_cache,
+        pool_size=pool_size, precision_threshold=precision_threshold,
     )
 
     if not picks:
@@ -178,12 +186,14 @@ def build_global_explanations(
     precision_threshold: float = 0.9,
 ) -> tuple[dict, dict, dict]:
     locals_per_class: dict = defaultdict(list)
+    formula_cache: dict = {}
     n_test = X_te_feats.shape[0]
 
     for i in range(n_test):
         phi_local, target_class, picks = build_local_explanation(
             X_te_feats[i], X_te[i:i+1], W, b, model, formulas,
-            X_tr, y_tr, pool_size=pool_size, precision_threshold=precision_threshold,
+            X_tr, y_tr, formula_cache,
+            pool_size=pool_size, precision_threshold=precision_threshold,
         )
         if phi_local is not None:
             precision, n_tp = evaluate_local_explanation(phi_local, target_class, X_tr, y_tr)
