@@ -189,10 +189,7 @@ def build_global_explanations(
             precision, n_tp = evaluate_local_explanation(phi_local, target_class, X_tr, y_tr)
         else:
             precision, n_tp = 0.0, 0
-        print(
-            f"  sample {i:3d} | class {target_class} | {len(picks)} formula(s) "
-            f"| precision {precision:.2f} | n_tp {n_tp}"
-        )
+
         locals_per_class[target_class].append((i, phi_local, picks, precision, n_tp))
 
     global_per_class = {}
