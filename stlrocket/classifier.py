@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 from glmnet import LogitNet
-from sklearn.metrics import balanced_accuracy_score, f1_score
+from sklearn.metrics import balanced_accuracy_score
 from sklearn.utils.class_weight import compute_sample_weight
 
 from .config import ExperimentConfig
@@ -36,5 +36,4 @@ def evaluate_classifier(
     y_pred = model.predict(X_te_feats)
     return {
         "balanced_accuracy": float(balanced_accuracy_score(y_te, y_pred)),
-        "macro_f1": float(f1_score(y_te, y_pred, average="macro", zero_division=0)),
     }

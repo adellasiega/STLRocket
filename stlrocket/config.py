@@ -10,9 +10,10 @@ class ExperimentConfig:
 
     # Feature extraction
     n_formulas: int = 100
+    n_formulas_freq: int = 0
     depth_max: int = 3
     batch_size: int = 200
-    threshold_corr: float = 0.5
+    threshold_corr: float = 1.0
     max_iter: int = 100
     only_temporal: bool = True
     until_weight: float = 0.0

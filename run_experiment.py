@@ -21,7 +21,7 @@ import numpy as np
 from stlrocket.config import ExperimentConfig
 from stlrocket.data import load_dataset
 from stlrocket.preprocessing import StateVariableStandardScaler
-from stlrocket.features import build_formula_bank
+from stlrocket.features import build_formula_bank, build_freq_formula_bank
 from stlrocket.classifier import train_classifier, evaluate_classifier
 from stlrocket.explanations import build_global_explanations
 from stlrocket.evaluation import evaluate_global
@@ -38,7 +38,6 @@ def save_config(config: ExperimentConfig, path: Path) -> None:
 
 def save_accuracy_summary(results: list[dict], path: Path) -> None:
     bal_accs = [r["balanced_accuracy"] for r in results]
-    macro_f1s = [r["macro_f1"] for r in results]
     feat_times = [r["time_features_s"] for r in results]
     train_times = [r["time_train_s"] for r in results]
     total_times = [r["time_total_s"] for r in results]
@@ -65,7 +64,6 @@ def save_accuracy_summary(results: list[dict], path: Path) -> None:
     summary = {
         "mean_balanced_accuracy": float(np.mean(bal_accs)),
         "std_balanced_accuracy": float(np.std(bal_accs)),
-        "mean_macro_f1": float(np.mean(macro_f1s)),
         "mean_time_features_s": float(np.mean(feat_times)),
         "mean_time_train_s": float(np.mean(train_times)),
         "mean_time_total_s": float(np.mean(total_times)),
@@ -80,8 +78,7 @@ def save_accuracy_summary(results: list[dict], path: Path) -> None:
         json.dump(summary, f, indent=2)
     print(
         f"Accuracy — mean bal_acc: {summary['mean_balanced_accuracy']:.4f}  "
-        f"std: {summary['std_balanced_accuracy']:.4f}  "
-        f"mean macro_f1: {summary['mean_macro_f1']:.4f}"
+        f"std: {summary['std_balanced_accuracy']:.4f}"
     )
     expl_str = f"  explanations: {summary['mean_time_explanations_s']:.2f}s" if has_explanations else ""
     print(
@@ -162,6 +159,13 @@ def run_single(
 
     t0 = time.perf_counter()
     formulas, X_tr_feats, X_te_feats = build_formula_bank(X_tr, X_te, config, seed)
+    if config.n_formulas_freq > 0:
+        freq_formulas, X_tr_freq_feats, X_te_freq_feats = build_freq_formula_bank(
+            X_tr, X_te, config, seed
+        )
+        formulas = formulas + freq_formulas
+        X_tr_feats = np.concatenate([X_tr_feats, X_tr_freq_feats], axis=1)
+        X_te_feats = np.concatenate([X_te_feats, X_te_freq_feats], axis=1)
     t1 = time.perf_counter()
     model = train_classifier(X_tr_feats, y_tr, config)
     t2 = time.perf_counter()
@@ -234,6 +238,7 @@ def parse_args() -> ExperimentConfig:
     parser.add_argument("--n_run", type=int, default=_d.n_run)
     parser.add_argument("--base_seed", type=int, default=_d.base_seed)
     parser.add_argument("--output_dir", default=_d.output_dir)
+    parser.add_argument("--n_formulas_freq", type=int, default=_d.n_formulas_freq)
     parser.add_argument("--explain", type=lambda x: x.lower() != "false", default=_d.explain)
     args = parser.parse_args()
     return ExperimentConfig(**vars(args))
@@ -264,7 +269,7 @@ def main() -> None:
         entry = {"run": run_idx, "seed": seed, **metrics}
         run_results.append(entry)
         print(
-            f"  bal_acc={metrics['balanced_accuracy']:.4f}  macro_f1={metrics['macro_f1']:.4f}"
+            f"  bal_acc={metrics['balanced_accuracy']:.4f}"
             f"  features={metrics['time_features_s']:.2f}s  train={metrics['time_train_s']:.2f}s"
         )
 
