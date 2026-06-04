@@ -56,11 +56,12 @@ DATA_DIR="/share/ai-lab/adsiega/STELIS/Multivariate_arff"
 RESULTS_DIR="/share/ai-lab/adsiega/STLRocket/results"
 export MPLBACKEND=Agg
 
-echo "Task ${SLURM_ARRAY_TASK_ID}: dataset=${DATASET} n_formulas=${N_FORMULAS} threshold_corr=${THRESHOLD_CORR}"
+echo "Task ${SLURM_ARRAY_TASK_ID}: dataset=${DATASET} n_formulas=${N_FORMULAS} n_formulas_freq=${N_FORMULAS} threshold_corr=${THRESHOLD_CORR}"
 
 python /share/ai-lab/adsiega/STLRocket/run_experiment.py \
   --dataset          "$DATASET" \
   --n_formulas       "$N_FORMULAS" \
+  --n_formulas_freq  "$N_FORMULAS" \
   --threshold_corr   "$THRESHOLD_CORR" \
   --output_dir       "$RESULTS_DIR" \
   --explain          False
