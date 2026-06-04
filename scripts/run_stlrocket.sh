@@ -5,7 +5,7 @@
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
 #SBATCH --mem=32G --time=12:00:00
 #SBATCH --partition=Main
-#SBATCH --array=0-3  # n_datasets x n_formulas x threshold_corr
+#SBATCH --array=0-7  # n_datasets x n_formulas x threshold_corr
 
 DATASETS=(
 #    "ArticularyWordRecognition"
@@ -36,8 +36,8 @@ DATASETS=(
 #    "UWaveGestureLibrary"
 )
 
-N_FORMULAS_LIST=(100 1000)
-THRESHOLD_CORR_LIST=(0.5 0.9)
+N_FORMULAS_LIST=(16 32 64 128)
+THRESHOLD_CORR_LIST=(0.8 1.0)
 
 N_DATASETS=${#DATASETS[@]}
 N_FORMULAS_VALS=${#N_FORMULAS_LIST[@]}
