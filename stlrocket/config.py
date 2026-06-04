@@ -28,5 +28,8 @@ class ExperimentConfig:
     n_run: int = 5
     base_seed: int = 0  # run i uses seed=base_seed+i
 
+    # Explanations
+    explain: bool = True
+
     # Output
     output_dir: str = "results"

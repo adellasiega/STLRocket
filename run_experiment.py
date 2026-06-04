@@ -40,8 +40,9 @@ def save_accuracy_summary(results: list[dict], path: Path) -> None:
     macro_f1s = [r["macro_f1"] for r in results]
     feat_times = [r["time_features_s"] for r in results]
     train_times = [r["time_train_s"] for r in results]
-    expl_times = [r["time_explanations_s"] for r in results]
     total_times = [r["time_total_s"] for r in results]
+
+    has_explanations = any("time_explanations_s" in r for r in results)
 
     all_classes = set()
     for r in results:
@@ -66,11 +67,14 @@ def save_accuracy_summary(results: list[dict], path: Path) -> None:
         "mean_macro_f1": float(np.mean(macro_f1s)),
         "mean_time_features_s": float(np.mean(feat_times)),
         "mean_time_train_s": float(np.mean(train_times)),
-        "mean_time_explanations_s": float(np.mean(expl_times)),
         "mean_time_total_s": float(np.mean(total_times)),
-        "explanation_per_class": explanation_per_class,
         "per_run": results,
     }
+    if has_explanations:
+        expl_times = [r["time_explanations_s"] for r in results if "time_explanations_s" in r]
+        summary["mean_time_explanations_s"] = float(np.mean(expl_times))
+        summary["explanation_per_class"] = explanation_per_class
+
     with open(path, "w") as f:
         json.dump(summary, f, indent=2)
     print(
@@ -78,10 +82,11 @@ def save_accuracy_summary(results: list[dict], path: Path) -> None:
         f"std: {summary['std_balanced_accuracy']:.4f}  "
         f"mean macro_f1: {summary['mean_macro_f1']:.4f}"
     )
+    expl_str = f"  explanations: {summary['mean_time_explanations_s']:.2f}s" if has_explanations else ""
     print(
         f"Timing  — features: {summary['mean_time_features_s']:.2f}s  "
-        f"train: {summary['mean_time_train_s']:.2f}s  "
-        f"explanations: {summary['mean_time_explanations_s']:.2f}s  "
+        f"train: {summary['mean_time_train_s']:.2f}s"
+        f"{expl_str}  "
         f"total: {summary['mean_time_total_s']:.2f}s  (means over {len(results)} runs)"
     )
     if explanation_per_class:
@@ -164,6 +169,10 @@ def run_single(
     metrics["time_features_s"] = round(t1 - t0, 4)
     metrics["time_train_s"] = round(t2 - t1, 4)
 
+    if not config.explain:
+        metrics["time_total_s"] = round(t2 - t0, 4)
+        return metrics
+
     W = model.coef_
     b = model.intercept_
 
@@ -224,6 +233,7 @@ def parse_args() -> ExperimentConfig:
     parser.add_argument("--n_run", type=int, default=_d.n_run)
     parser.add_argument("--base_seed", type=int, default=_d.base_seed)
     parser.add_argument("--output_dir", default=_d.output_dir)
+    parser.add_argument("--explain", type=lambda x: x.lower() != "false", default=_d.explain)
     args = parser.parse_args()
     return ExperimentConfig(**vars(args))
 

@@ -62,4 +62,5 @@ python /share/ai-lab/adsiega/STLRocket/run_experiment.py \
   --dataset          "$DATASET" \
   --n_formulas       "$N_FORMULAS" \
   --threshold_corr   "$THRESHOLD_CORR" \
-  --output_dir       "$RESULTS_DIR"
+  --output_dir       "$RESULTS_DIR" \
+  --explain          False
