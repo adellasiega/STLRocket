@@ -120,9 +120,10 @@ def build_formula_bank(
         X_tr_feats = combined_tr[:, keep]
         X_te_feats = combined_te[:, keep]
 
+        n_combined = len(combined_formulas)
         print(
-            f"  iter {it}: kept {len(formulas)} / {config.n_formulas} "
-            f"(dropped {len(drop)} this round)"
+            f"  iter {it}: kept {len(keep)} / {n_combined} "
+            f"(dropped {n_combined - len(keep)} this round)"
         )
 
     if len(formulas) > config.n_formulas:
