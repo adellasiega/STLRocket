@@ -5,7 +5,7 @@
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
 #SBATCH --mem=32G --time=12:00:00
 #SBATCH --partition=Main
-#SBATCH --array=0-7  # n_datasets x n_formulas x threshold_corr
+#SBATCH --array=0-26  # n_datasets x n_formulas x threshold_corr
 
 DATASETS=(
 #    "ArticularyWordRecognition"
