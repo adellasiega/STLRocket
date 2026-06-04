@@ -102,13 +102,19 @@ def build_formula_bank(
         combined_te = np.concatenate([X_te_feats, new_te], axis=1)
         combined_formulas = formulas + batch
 
-        corr = np.corrcoef(combined_tr, rowvar=False)
-        upper = np.triu(np.ones(corr.shape), k=1).astype(bool)
-        drop = [
-            i for i in range(corr.shape[1])
-            if np.any(np.abs(corr[upper[:, i], i]) > config.threshold_corr)
-        ]
-        keep = np.setdiff1d(np.arange(corr.shape[1]), drop)
+        keep: list[int] = []
+        for i in range(combined_tr.shape[1]):
+            if not keep:
+                keep.append(i)
+                continue
+            accepted_feats = combined_tr[:, keep]
+            corrs = np.corrcoef(
+                np.column_stack([accepted_feats, combined_tr[:, i]]),
+                rowvar=False,
+            )[-1, :-1]
+            if not np.any(np.abs(corrs) > config.threshold_corr):
+                keep.append(i)
+        keep = np.array(keep)
 
         formulas = [combined_formulas[i] for i in keep]
         X_tr_feats = combined_tr[:, keep]

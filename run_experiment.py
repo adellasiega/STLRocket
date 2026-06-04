@@ -12,6 +12,7 @@ import csv
 import dataclasses
 import json
 import time
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -242,7 +243,8 @@ def main() -> None:
     config = parse_args()
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_dir = Path(config.output_dir) / f"{config.dataset}_{timestamp}"
+    uid = uuid.uuid4().hex[:8]
+    out_dir = Path(config.output_dir) / f"{config.dataset}_{timestamp}_{uid}"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     save_config(config, out_dir / "config.json")
