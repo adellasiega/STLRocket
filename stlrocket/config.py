@@ -25,7 +25,7 @@ class ExperimentConfig:
     precision_threshold: float = 0.75
 
     # Experiment loop
-    n_run: int = 5
+    n_run: int = 10
     base_seed: int = 0  # run i uses seed=base_seed+i
 
     # Explanations

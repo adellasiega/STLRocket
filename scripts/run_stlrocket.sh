@@ -8,36 +8,36 @@
 #SBATCH --array=0-51  # n_datasets x n_formulas x threshold_corr
 
 DATASETS=(
-    "ArticularyWordRecognition"
-    "AtrialFibrillation"
-    "BasicMotions"
+#    "ArticularyWordRecognition"
+#    "AtrialFibrillation"
+#    "BasicMotions"
     "Cricket"
-    "DuckDuckGeese"
-    "EigenWorms"
-    "Epilepsy"
-    "EthanolConcentration"
-    "ERing"
-    "FaceDetection"
-    "FingerMovements"
-    "HandMovementDirection"
-    "Handwriting"
-    "Heartbeat"
-    "Libras"
-    "LSST"
-    "MotorImagery"
-    "NATOPS"
-    "PenDigits"
-    "PEMS-SF"
-    "PhonemeSpectra"
-    "RacketSports"
-    "SelfRegulationSCP1"
-    "SelfRegulationSCP2"
-    "StandWalkJump"
-    "UWaveGestureLibrary"
+#    "DuckDuckGeese"
+#    "EigenWorms"
+#    "Epilepsy"
+#    "EthanolConcentration"
+#    "ERing"
+#    "FaceDetection"
+#    "FingerMovements"
+#    "HandMovementDirection"
+#    "Handwriting"
+#    "Heartbeat"
+#    "Libras"
+#    "LSST"
+#    "MotorImagery"
+#    "NATOPS"
+#    "PenDigits"
+#    "PEMS-SF"
+#    "PhonemeSpectra"
+#    "RacketSports"
+#    "SelfRegulationSCP1"
+#    "SelfRegulationSCP2"
+#    "StandWalkJump"
+#    "UWaveGestureLibrary"
 )
 
-N_FORMULAS_LIST=(100)
-THRESHOLD_CORR_LIST=(0.5 0.95)
+N_FORMULAS_LIST=(100 1000)
+THRESHOLD_CORR_LIST=(0.5 0.9)
 
 N_DATASETS=${#DATASETS[@]}
 N_FORMULAS_VALS=${#N_FORMULAS_LIST[@]}
