@@ -5,62 +5,66 @@
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
 #SBATCH --mem=32G --time=12:00:00
 #SBATCH --partition=Main
-#SBATCH --array=0-26  # n_datasets x n_formulas x threshold_corr
+#SBATCH --array=0-52  # 26 datasets x n_formulas x depth_max x use_fourier
 
 DATASETS=(
-#    "ArticularyWordRecognition"
-#    "AtrialFibrillation"
-#    "BasicMotions"
+    "ArticularyWordRecognition"
+    "AtrialFibrillation"
+    "BasicMotions"
     "Cricket"
-#    "DuckDuckGeese"
-#    "EigenWorms"
-#    "Epilepsy"
-#    "EthanolConcentration"
-#    "ERing"
-#    "FaceDetection"
-#    "FingerMovements"
-#    "HandMovementDirection"
-#    "Handwriting"
-#    "Heartbeat"
-#    "Libras"
-#    "LSST"
-#    "MotorImagery"
-#    "NATOPS"
-#    "PenDigits"
-#    "PEMS-SF"
-#    "PhonemeSpectra"
-#    "RacketSports"
-#    "SelfRegulationSCP1"
-#    "SelfRegulationSCP2"
-#    "StandWalkJump"
-#    "UWaveGestureLibrary"
+    "DuckDuckGeese"
+    "EigenWorms"
+    "Epilepsy"
+    "EthanolConcentration"
+    "ERing"
+    "FaceDetection"
+    "FingerMovements"
+    "HandMovementDirection"
+    "Handwriting"
+    "Heartbeat"
+    "Libras"
+    "LSST"
+    "MotorImagery"
+    "NATOPS"
+    "PenDigits"
+    "PEMS-SF"
+    "PhonemeSpectra"
+    "RacketSports"
+    "SelfRegulationSCP1"
+    "SelfRegulationSCP2"
+    "StandWalkJump"
+    "UWaveGestureLibrary"
 )
 
-N_FORMULAS_LIST=(1 2 4 8 16 32 64 128 256)
-THRESHOLD_CORR_LIST=(0.4 0.8 1.0)
+N_FORMULAS_LIST=(1000)
+DEPTH_MAX_LIST=(2)
+USE_FOURIER_LIST=(false true)
 
 N_DATASETS=${#DATASETS[@]}
 N_FORMULAS_VALS=${#N_FORMULAS_LIST[@]}
-N_THRESHOLD_VALS=${#THRESHOLD_CORR_LIST[@]}
+N_DEPTH_VALS=${#DEPTH_MAX_LIST[@]}
+N_FOURIER_VALS=${#USE_FOURIER_LIST[@]}
 
 DATASET_IDX=$(( SLURM_ARRAY_TASK_ID % N_DATASETS ))
 FORMULAS_IDX=$(( (SLURM_ARRAY_TASK_ID / N_DATASETS) % N_FORMULAS_VALS ))
-THRESHOLD_IDX=$(( SLURM_ARRAY_TASK_ID / (N_DATASETS * N_FORMULAS_VALS) ))
+DEPTH_IDX=$(( (SLURM_ARRAY_TASK_ID / (N_DATASETS * N_FORMULAS_VALS)) % N_DEPTH_VALS ))
+FOURIER_IDX=$(( SLURM_ARRAY_TASK_ID / (N_DATASETS * N_FORMULAS_VALS * N_DEPTH_VALS) ))
 
 DATASET=${DATASETS[$DATASET_IDX]}
 N_FORMULAS=${N_FORMULAS_LIST[$FORMULAS_IDX]}
-THRESHOLD_CORR=${THRESHOLD_CORR_LIST[$THRESHOLD_IDX]}
+DEPTH_MAX=${DEPTH_MAX_LIST[$DEPTH_IDX]}
+USE_FOURIER=${USE_FOURIER_LIST[$FOURIER_IDX]}
 
 source /share/ai-lab/adsiega/STLKernel/venv/bin/activate
-DATA_DIR="/share/ai-lab/adsiega/STELIS/Multivariate_arff"
 RESULTS_DIR="/share/ai-lab/adsiega/STLRocket/results"
 export MPLBACKEND=Agg
 
-echo "Task ${SLURM_ARRAY_TASK_ID}: dataset=${DATASET} n_formulas=${N_FORMULAS} threshold_corr=${THRESHOLD_CORR}"
+echo "Task ${SLURM_ARRAY_TASK_ID}: dataset=${DATASET} n_formulas=${N_FORMULAS} depth_max=${DEPTH_MAX} use_fourier=${USE_FOURIER}"
 
 python /share/ai-lab/adsiega/STLRocket/run_experiment.py \
-  --dataset          "$DATASET" \
-  --n_formulas       "$N_FORMULAS" \
-  --threshold_corr   "$THRESHOLD_CORR" \
-  --output_dir       "$RESULTS_DIR" \
-  --explain          False
+  --dataset      "$DATASET" \
+  --n_formulas   "$N_FORMULAS" \
+  --depth_max    "$DEPTH_MAX" \
+  --use_fourier  "$USE_FOURIER" \
+  --output_dir   "$RESULTS_DIR" \
+  --explain      false

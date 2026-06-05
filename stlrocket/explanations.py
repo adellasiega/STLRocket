@@ -1,12 +1,9 @@
 from __future__ import annotations
-
 import copy
 from collections import defaultdict
-
 import numpy as np
 from torcheck.stl import Not, And, Or
 from torcheck import simplify
-
 from .features import eval_robustness, shift_atom_thresholds
 from .evaluation import evaluate_local_explanation
 

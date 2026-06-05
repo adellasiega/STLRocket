@@ -21,7 +21,7 @@ import numpy as np
 from stlrocket.config import ExperimentConfig
 from stlrocket.data import load_dataset
 from stlrocket.preprocessing import StateVariableStandardScaler
-from stlrocket.features import build_formula_bank, build_freq_formula_bank
+from stlrocket.features import build_formula_bank
 from stlrocket.classifier import train_classifier, evaluate_classifier
 from stlrocket.explanations import build_global_explanations
 from stlrocket.evaluation import evaluate_global
@@ -159,13 +159,6 @@ def run_single(
 
     t0 = time.perf_counter()
     formulas, X_tr_feats, X_te_feats = build_formula_bank(X_tr, X_te, config, seed)
-    if config.n_formulas_freq > 0:
-        freq_formulas, X_tr_freq_feats, X_te_freq_feats = build_freq_formula_bank(
-            X_tr, X_te, config, seed
-        )
-        formulas = formulas + freq_formulas
-        X_tr_feats = np.concatenate([X_tr_feats, X_tr_freq_feats], axis=1)
-        X_te_feats = np.concatenate([X_te_feats, X_te_freq_feats], axis=1)
     t1 = time.perf_counter()
     model = train_classifier(X_tr_feats, y_tr, config)
     t2 = time.perf_counter()
@@ -227,9 +220,6 @@ def parse_args() -> ExperimentConfig:
     parser.add_argument("--dataset", default=_d.dataset)
     parser.add_argument("--n_formulas", type=int, default=_d.n_formulas)
     parser.add_argument("--depth_max", type=int, default=_d.depth_max)
-    parser.add_argument("--batch_size", type=int, default=_d.batch_size)
-    parser.add_argument("--threshold_corr", type=float, default=_d.threshold_corr)
-    parser.add_argument("--max_iter", type=int, default=_d.max_iter)
     parser.add_argument("--only_temporal", type=lambda x: x.lower() != "false", default=_d.only_temporal)
     parser.add_argument("--until_weight", type=float, default=_d.until_weight)
     parser.add_argument("--cv", type=int, default=_d.cv)
@@ -238,8 +228,8 @@ def parse_args() -> ExperimentConfig:
     parser.add_argument("--n_run", type=int, default=_d.n_run)
     parser.add_argument("--base_seed", type=int, default=_d.base_seed)
     parser.add_argument("--output_dir", default=_d.output_dir)
-    parser.add_argument("--n_formulas_freq", type=int, default=_d.n_formulas_freq)
     parser.add_argument("--explain", type=lambda x: x.lower() != "false", default=_d.explain)
+    parser.add_argument("--use_fourier", type=lambda x: x.lower() != "false", default=_d.use_fourier)
     args = parser.parse_args()
     return ExperimentConfig(**vars(args))
 

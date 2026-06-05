@@ -1,10 +1,8 @@
 from __future__ import annotations
-
 import numpy as np
 from glmnet import LogitNet
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.utils.class_weight import compute_sample_weight
-
 from .config import ExperimentConfig
 
 
@@ -25,6 +23,7 @@ def train_classifier(
     )
     sample_weight = compute_sample_weight("balanced", y_tr)
     model.fit(X_tr_feats, y_tr, sample_weight=sample_weight)
+    
     return model
 
 
