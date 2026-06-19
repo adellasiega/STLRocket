@@ -176,27 +176,38 @@ def process_run_dir(run_dir: Path, show: bool) -> tuple[str, dict[str, float]] |
     return dataset, best_accuracy_per_method(df)
 
 
-def best_accuracy_per_method(df: pd.DataFrame) -> dict[str, float]:
+def best_accuracy_per_method(df: pd.DataFrame) -> dict[str, tuple[float, float]]:
     """Best balanced accuracy each method reaches on this dataset.
 
     For the STL heads this is the maximum over every (budget, depth)
     combination; for ROCKET it is the maximum over budgets.  The per-seed
     rows are first averaged within each (method, depth, budget) group so the
     "best" is a stable mean, not a lucky single seed.
+
+    Returns ``{method: (mean, std)}`` where ``std`` is the across-seed std of
+    the same (best) combination, so it can be shown as an error bar.
     """
     agg = aggregate(df, "balanced_accuracy")
-    best = agg.groupby("method")["mean"].max()
-    return {m: float(best[m]) for m in METHODS if m in best.index}
+    out: dict[str, tuple[float, float]] = {}
+    for method in METHODS:
+        sub = agg[agg["method"] == method]
+        if sub.empty:
+            continue
+        row = sub.loc[sub["mean"].idxmax()]
+        out[method] = (float(row["mean"]), float(row["std"]))
+    return out
 
 
 def plot_overall(
-    summary: dict[str, dict[str, float]],
+    summary: dict[str, dict[str, tuple[float, float]]],
     out_path: Path | None,
     show: bool,
 ) -> None:
-    """Grouped bar chart: best accuracy per method across all datasets.
+    """Grouped bar chart: best accuracy (mean ± std) per method across datasets.
 
-    ``summary`` maps dataset -> {method: best_balanced_accuracy}.
+    ``summary`` maps dataset -> {method: (mean, std)}.  The std is the
+    across-seed std of each method's best (budget, depth) combination and is
+    drawn as an error bar.
     """
     datasets = sorted(summary)
     x = np.arange(len(datasets))
@@ -205,9 +216,13 @@ def plot_overall(
 
     fig, ax = plt.subplots(figsize=(max(8, 1.6 * len(datasets)), 5))
     for i, (method, color) in enumerate(zip(METHODS, palette)):
-        heights = [summary[d].get(method, np.nan) for d in datasets]
+        means = [summary[d].get(method, (np.nan, np.nan))[0] for d in datasets]
+        stds = [summary[d].get(method, (np.nan, np.nan))[1] for d in datasets]
         offset = (i - (len(METHODS) - 1) / 2) * width
-        ax.bar(x + offset, heights, width, label=method, color=color)
+        ax.bar(
+            x + offset, means, width, label=method, color=color,
+            yerr=stds, capsize=3, error_kw={"elinewidth": 1, "alpha": 0.7},
+        )
 
     ax.set_xticks(x)
     ax.set_xticklabels(datasets, rotation=30, ha="right")
@@ -247,7 +262,7 @@ def main() -> None:
     run_dirs = find_run_dirs(args.path, args.glob)
     if not run_dirs:
         raise SystemExit(f"no run directories with results.csv under {args.path}")
-    summary: dict[str, dict[str, float]] = {}
+    summary: dict[str, dict[str, tuple[float, float]]] = {}
     for run_dir in run_dirs:
         result = process_run_dir(run_dir, args.show)
         if result is not None:
