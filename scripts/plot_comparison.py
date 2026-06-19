@@ -20,6 +20,14 @@ as a single series; the STL heads (stl_linear, stl_tree) are split into one line
 per ``depth``.  The shaded band / error bars show ± one standard deviation over
 seeds.  Only rows with ``status == "ok"`` are aggregated.
 
+When run over several datasets (``--glob``), it also writes one overall figure:
+
+    accuracy_overall.png     grouped bar chart of best accuracy per method,
+                             one group per dataset
+
+For the STL heads the "best" is the highest mean balanced accuracy over every
+(budget, depth) combination; for ROCKET it is the best over budgets.
+
 Usage
 -----
     # one run directory
@@ -146,11 +154,11 @@ def plot_metric(
     plt.close(fig)
 
 
-def process_run_dir(run_dir: Path, show: bool) -> None:
+def process_run_dir(run_dir: Path, show: bool) -> tuple[str, dict[str, float]] | None:
     df, dataset = load_results(run_dir)
     if df.empty:
         print(f"  skip {run_dir.name}: no completed runs")
-        return
+        return None
 
     print(f"{run_dir.name} (dataset={dataset}, {len(df)} ok rows)")
     plot_metric(
@@ -165,6 +173,56 @@ def process_run_dir(run_dir: Path, show: bool) -> None:
         title="timing vs budget", logy=True,
         out_path=run_dir / f"timing_{dataset}.png", show=show,
     )
+    return dataset, best_accuracy_per_method(df)
+
+
+def best_accuracy_per_method(df: pd.DataFrame) -> dict[str, float]:
+    """Best balanced accuracy each method reaches on this dataset.
+
+    For the STL heads this is the maximum over every (budget, depth)
+    combination; for ROCKET it is the maximum over budgets.  The per-seed
+    rows are first averaged within each (method, depth, budget) group so the
+    "best" is a stable mean, not a lucky single seed.
+    """
+    agg = aggregate(df, "balanced_accuracy")
+    best = agg.groupby("method")["mean"].max()
+    return {m: float(best[m]) for m in METHODS if m in best.index}
+
+
+def plot_overall(
+    summary: dict[str, dict[str, float]],
+    out_path: Path | None,
+    show: bool,
+) -> None:
+    """Grouped bar chart: best accuracy per method across all datasets.
+
+    ``summary`` maps dataset -> {method: best_balanced_accuracy}.
+    """
+    datasets = sorted(summary)
+    x = np.arange(len(datasets))
+    width = 0.8 / max(len(METHODS), 1)
+    palette = sns.color_palette("tab10", n_colors=len(METHODS))
+
+    fig, ax = plt.subplots(figsize=(max(8, 1.6 * len(datasets)), 5))
+    for i, (method, color) in enumerate(zip(METHODS, palette)):
+        heights = [summary[d].get(method, np.nan) for d in datasets]
+        offset = (i - (len(METHODS) - 1) / 2) * width
+        ax.bar(x + offset, heights, width, label=method, color=color)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(datasets, rotation=30, ha="right")
+    ax.set_ylabel("best balanced accuracy")
+    ax.set_title("best balanced accuracy per method across datasets")
+    ax.set_ylim(0, 1)
+    ax.legend(title="method", fontsize=8)
+    fig.tight_layout()
+
+    if out_path is not None:
+        fig.savefig(out_path, dpi=150)
+        print(f"saved {out_path}")
+    if show:
+        plt.show()
+    plt.close(fig)
 
 
 def find_run_dirs(root: Path, use_glob: bool) -> list[Path]:
@@ -189,8 +247,16 @@ def main() -> None:
     run_dirs = find_run_dirs(args.path, args.glob)
     if not run_dirs:
         raise SystemExit(f"no run directories with results.csv under {args.path}")
+    summary: dict[str, dict[str, float]] = {}
     for run_dir in run_dirs:
-        process_run_dir(run_dir, args.show)
+        result = process_run_dir(run_dir, args.show)
+        if result is not None:
+            dataset, best = result
+            summary[dataset] = best
+
+    if len(summary) > 1:
+        out_path = args.path / "accuracy_overall.png"
+        plot_overall(summary, out_path=out_path, show=args.show)
 
 
 if __name__ == "__main__":
