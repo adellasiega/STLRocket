@@ -14,9 +14,8 @@ This script reads ``metrics.json`` and saves two figures per run directory:
 
     explanation_global_<dataset>.png   global per-class coverage / FP-rate /
                                        precision / F1 (train vs test)
-    explanation_local_<dataset>.png    local per-class mean precision, mean
-                                       formula length, fraction of instances
-                                       explained
+    explanation_local_<dataset>.png    local per-class mean precision and mean
+                                       formula length
 
 It mirrors the CLI of ``scripts/plot_comparison.py``: pass a single run directory,
 or a parent directory with ``--glob`` to process every run subdirectory under it.
@@ -160,12 +159,8 @@ def plot_local_quality(metrics, dataset, subtitle, out_path, show):
     mean_prec = [lpc[c].get("mean_precision", np.nan) for c in classes]
     std_prec = [lpc[c].get("std_precision", 0.0) or 0.0 for c in classes]
     mean_len = [lpc[c].get("mean_length", np.nan) for c in classes]
-    frac_expl = [
-        (lpc[c]["n_explained"] / lpc[c]["n_total"]) if lpc[c].get("n_total") else np.nan
-        for c in classes
-    ]
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4.5))
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.5))
 
     axes[0].bar(x, mean_prec, yerr=std_prec, capsize=3,
                 color=palette[2], error_kw={"elinewidth": 1, "alpha": 0.7})
@@ -175,10 +170,6 @@ def plot_local_quality(metrics, dataset, subtitle, out_path, show):
     axes[1].bar(x, mean_len, color=palette[3])
     axes[1].set_title("mean formula length (# conjuncts)")
     axes[1].set_ylim(bottom=0)
-
-    axes[2].bar(x, frac_expl, color=palette[4])
-    axes[2].set_title("fraction of instances explained")
-    axes[2].set_ylim(0, 1.05)
 
     for ax in axes:
         ax.set_xticks(x)
