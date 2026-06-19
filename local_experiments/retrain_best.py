@@ -10,7 +10,7 @@ Pipeline
    depth_max) from a ``run_comparison.py`` output directory (``summary.json`` is
    preferred; falls back to averaging ``results.csv`` per-seed rows).
 2. Retrain the STL linear model at that configuration, reproducing the notebook's
-   feature standardization and ``glmnet.LogitNet`` classifier (``cut_point=1``,
+   feature standardization and ``glmnet.LogitNet`` classifier (``cut_point=0``,
    ``standardize=True``, balanced-accuracy CV scorer).
 3. Build per-instance local explanations over the *training* set, aggregate them
    into per-class global explanations, and post-process with the notebook's
@@ -191,7 +191,7 @@ def retrain(dataset: str, n_formulae: int, depth_max: int, seed: int, cv: int):
     model = LogitNet(
         alpha=1.0,
         n_splits=cv,
-        cut_point=1,
+        cut_point=0,
         fit_intercept=False,
         standardize=True,
         n_jobs=8,
