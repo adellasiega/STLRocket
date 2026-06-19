@@ -176,7 +176,7 @@ def process_run_dir(run_dir: Path, show: bool) -> tuple[str, dict[str, float]] |
     return dataset, best_accuracy_per_method(df)
 
 
-def best_accuracy_per_method(df: pd.DataFrame) -> dict[str, tuple[float, float]]:
+def best_accuracy_per_method(df: pd.DataFrame) -> dict[str, dict]:
     """Best balanced accuracy each method reaches on this dataset.
 
     For the STL heads this is the maximum over every (budget, depth)
@@ -184,30 +184,44 @@ def best_accuracy_per_method(df: pd.DataFrame) -> dict[str, tuple[float, float]]
     rows are first averaged within each (method, depth, budget) group so the
     "best" is a stable mean, not a lucky single seed.
 
-    Returns ``{method: (mean, std)}`` where ``std`` is the across-seed std of
-    the same (best) combination, so it can be shown as an error bar.
+    Returns ``{method: {mean, std, budget, depth}}`` for the winning
+    combination, so both the error bar and the config can be shown.
     """
     agg = aggregate(df, "balanced_accuracy")
-    out: dict[str, tuple[float, float]] = {}
+    out: dict[str, dict] = {}
     for method in METHODS:
         sub = agg[agg["method"] == method]
         if sub.empty:
             continue
         row = sub.loc[sub["mean"].idxmax()]
-        out[method] = (float(row["mean"]), float(row["std"]))
+        out[method] = {
+            "mean": float(row["mean"]),
+            "std": float(row["std"]),
+            "budget": float(row["budget"]),
+            "depth": row["depth"],
+        }
     return out
 
 
+def _config_label(rec: dict) -> str:
+    """Short text describing the winning configuration for a bar."""
+    parts = [f"n={int(rec['budget'])}"]
+    if not pd.isna(rec["depth"]):
+        parts.append(f"d={int(rec['depth'])}")
+    return "\n".join(parts)
+
+
 def plot_overall(
-    summary: dict[str, dict[str, tuple[float, float]]],
+    summary: dict[str, dict[str, dict]],
     out_path: Path | None,
     show: bool,
 ) -> None:
     """Grouped bar chart: best accuracy (mean ± std) per method across datasets.
 
-    ``summary`` maps dataset -> {method: (mean, std)}.  The std is the
-    across-seed std of each method's best (budget, depth) combination and is
-    drawn as an error bar.
+    ``summary`` maps dataset -> {method: {mean, std, budget, depth}}.  The std
+    is the across-seed std of each method's best (budget, depth) combination and
+    is drawn as an error bar; the winning config (n_formulae, max depth) is
+    written on each bar.
     """
     datasets = sorted(summary)
     x = np.arange(len(datasets))
@@ -216,13 +230,22 @@ def plot_overall(
 
     fig, ax = plt.subplots(figsize=(max(8, 1.6 * len(datasets)), 5))
     for i, (method, color) in enumerate(zip(METHODS, palette)):
-        means = [summary[d].get(method, (np.nan, np.nan))[0] for d in datasets]
-        stds = [summary[d].get(method, (np.nan, np.nan))[1] for d in datasets]
+        recs = [summary[d].get(method) for d in datasets]
+        means = [r["mean"] if r else np.nan for r in recs]
+        stds = [r["std"] if r else np.nan for r in recs]
         offset = (i - (len(METHODS) - 1) / 2) * width
-        ax.bar(
+        bars = ax.bar(
             x + offset, means, width, label=method, color=color,
             yerr=stds, capsize=3, error_kw={"elinewidth": 1, "alpha": 0.7},
         )
+        for bar, rec in zip(bars, recs):
+            if rec is None:
+                continue
+            ax.text(
+                bar.get_x() + bar.get_width() / 2, 0.02,
+                _config_label(rec), ha="center", va="bottom",
+                fontsize=6, rotation=90, color="black",
+            )
 
     ax.set_xticks(x)
     ax.set_xticklabels(datasets, rotation=30, ha="right")
@@ -262,7 +285,7 @@ def main() -> None:
     run_dirs = find_run_dirs(args.path, args.glob)
     if not run_dirs:
         raise SystemExit(f"no run directories with results.csv under {args.path}")
-    summary: dict[str, dict[str, tuple[float, float]]] = {}
+    summary: dict[str, dict[str, dict]] = {}
     for run_dir in run_dirs:
         result = process_run_dir(run_dir, args.show)
         if result is not None:
