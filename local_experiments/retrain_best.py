@@ -180,12 +180,14 @@ def retrain(dataset: str, n_formulae: int, depth_max: int, seed: int, cv: int):
     )
     # build_formula_bank samples F0 formulae and mean-centres each feature on the
     # training set (shifting atom thresholds accordingly) -- the notebook's
-    # `means` step. Only the /std standardization remains to be applied below.
+    # `means` step. We do NOT divide features by their std: degenerate formulae
+    # with constant robustness have std==0, which produced NaN/inf and broke the
+    # fit. LogitNet(standardize=True) standardizes internally for the fit anyway.
+    # `std` is kept as all-ones so the explanation step (which scales robustness by
+    # std[j]) stays consistent with the unscaled features.
     formulae, X_tr, X_te = build_formula_bank(TS_tr, TS_te, config, seed)
 
-    std = X_tr.std(axis=0)
-    X_tr = X_tr / std
-    X_te = X_te / std
+    std = np.ones(X_tr.shape[1], dtype=X_tr.dtype)
 
     balanced_accuracy_scorer = make_scorer(balanced_accuracy_score)
     model = LogitNet(
