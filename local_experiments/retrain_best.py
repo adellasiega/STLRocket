@@ -333,6 +333,9 @@ def conjunction(phis):
 
 def build_local_explanation(x, model, formulae, X_tr, std, y_tr, m, precision_threshold):
     W, b = model.coef_, model.intercept_
+    # With fit_intercept=False sklearn sets intercept_ to the scalar 0.0; make it
+    # a 1-D array so the binary-case concatenate below works.
+    b = np.atleast_1d(b)
     if W.shape[0] == 1:
         W = np.vstack([-W, W])
         b = np.concatenate([-b, b])
