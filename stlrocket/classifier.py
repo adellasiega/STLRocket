@@ -15,7 +15,7 @@ def train_classifier(
         alpha=1.0,
         n_splits=config.cv,
         cut_point=0,
-        fit_intercept=True,
+        fit_intercept=False,
         standardize=False,
         n_jobs=8,
         max_iter=1_000_000,

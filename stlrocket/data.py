@@ -15,4 +15,4 @@ def load_dataset(name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndar
         X_tr, y_tr = load_classification(name, split="TRAIN")
         X_te, y_te = load_classification(name, split="TEST")
 
-    return X_tr.astype(np.float64), y_tr, X_te.astype(np.float64), y_te
+    return X_tr.astype(np.float32), y_tr, X_te.astype(np.float32), y_te
