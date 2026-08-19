@@ -40,13 +40,12 @@ def minish_logsumexp(signal, dim=0, keepdim=True, temperature=1.0, **kwargs):
 
 
 def maxish(signal, dim=0, keepdim=True, approx_method="true", temperature=1.0, **kwargs):
-    match approx_method:
-        case "true":
-            return torch.max(signal, dim=dim, keepdim=keepdim)[0]
-        case "softmax":
-            return maxish_softmax(signal, dim=dim, keepdim=keepdim, temperature=temperature)
-        case "logsumexp":
-            return maxish_logsumexp(signal, dim=dim, keepdim=keepdim, temperature=temperature)
+    if approx_method == "true":
+        return torch.max(signal, dim=dim, keepdim=keepdim)[0]
+    elif approx_method == "softmax":
+        return maxish_softmax(signal, dim=dim, keepdim=keepdim, temperature=temperature)
+    elif approx_method == "logsumexp":
+        return maxish_logsumexp(signal, dim=dim, keepdim=keepdim, temperature=temperature)
 
 
 def minish(signal, dim=0, keepdim=True, approx_method="true", temperature=1.0, **kwargs):
