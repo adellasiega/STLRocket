@@ -26,7 +26,7 @@ def reparametrize_formula(phi_original, X: np.ndarray, y: np.ndarray, target_cla
     elif len(above) == 0:
         ref_class = max(below, key=lambda c: below[c])
     elif len(above) == len(below):
-        ref_class = max(med_others, key=lambda c: abs(med_others[c] - med_target))
+        ref_class = max(med_others, key=lambda c: abs(med_others[c] - med_target)) # forse deve essere min
     elif len(below) > len(above):
         ref_class = max(below, key=lambda c: below[c])
     else:
