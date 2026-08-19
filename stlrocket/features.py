@@ -1,62 +1,61 @@
 from __future__ import annotations
 import numpy as np
 import torch
-from stlkernel.distribution_formulae import F0
-from torcheck.stl import Atom, Not, And, Or, Globally, Eventually, Until
+from .formula_sampler import F0
+from .stl import LessThan, GreaterThan, Negation, And, Or, Always, Eventually, Until
 from .config import ExperimentConfig
 
 
-class FFTFormula:
-    """Wraps an STL formula to evaluate on the FFT magnitude spectrum of the input."""
-
-    def __init__(self, formula):
-        self.formula = formula
-
-    def quantitative(self, X: torch.Tensor, **kwargs):
-        X_fft = torch.abs(torch.fft.rfft(X, dim=2))
-        return self.formula.quantitative(X_fft, **kwargs)
+_DEFAULT_DEVICE = "cpu"
 
 
-def eval_robustness(phi, X: np.ndarray) -> np.ndarray:
+def set_device(device: str) -> None:
+    """Set the default torch device used by eval_robustness/extract_features."""
+    global _DEFAULT_DEVICE
+    _DEFAULT_DEVICE = device
+
+
+def _as_signal(X: np.ndarray, device: str | None = None) -> torch.Tensor:
+    """(N, V, T) numpy array -> (N, T, V) tensor, as expected by stlrocket.stl formulas."""
+    return torch.from_numpy(X).permute(0, 2, 1).to(device or _DEFAULT_DEVICE)
+
+
+def eval_robustness(phi, X: np.ndarray, device: str | None = None) -> np.ndarray:
+    signal = _as_signal(X, device)
     with torch.no_grad():
-        rho = phi.quantitative(
-            torch.from_numpy(X), evaluate_at_all_times=False, normalize=False
-        )
+        rho = torch.func.vmap(phi.robustness)(signal)
     return rho.detach().cpu().numpy().ravel()
 
 
 def shift_atom_thresholds(node, delta: float, sign: int = 1) -> None:
-    if isinstance(node, FFTFormula):
-        shift_atom_thresholds(node.formula, delta, sign)
-    elif isinstance(node, Atom):
+    if isinstance(node, (LessThan, GreaterThan)):
         effective_delta = delta * sign
-        if node.lte:
-            node.threshold += effective_delta   # rho = threshold - x
+        if isinstance(node, LessThan):
+            node.rhs += effective_delta   # rho = threshold - x
         else:
-            node.threshold -= effective_delta   # rho = x - threshold
-    elif isinstance(node, Not):
-        shift_atom_thresholds(node.child, delta, sign=-sign)
+            node.rhs -= effective_delta   # rho = x - threshold
+    elif isinstance(node, Negation):
+        shift_atom_thresholds(node.subformula, delta, sign=-sign)
     elif isinstance(node, (And, Or)):
-        shift_atom_thresholds(node.left_child, delta, sign)
-        shift_atom_thresholds(node.right_child, delta, sign)
-    elif isinstance(node, (Globally, Eventually)):
-        shift_atom_thresholds(node.child, delta, sign)
+        shift_atom_thresholds(node.subformula1, delta, sign)
+        shift_atom_thresholds(node.subformula2, delta, sign)
+    elif isinstance(node, (Always, Eventually)):
+        shift_atom_thresholds(node.subformula, delta, sign)
     elif isinstance(node, Until):
-        shift_atom_thresholds(node.left_child, delta, sign)
-        shift_atom_thresholds(node.right_child, delta, sign)
+        shift_atom_thresholds(node.subformula1, delta, sign)
+        shift_atom_thresholds(node.subformula2, delta, sign)
     else:
         raise TypeError(f"unknown node type: {type(node).__name__}")
 
 
-def extract_features(X: np.ndarray, formulas: list) -> np.ndarray:
+def extract_features(X: np.ndarray, formulas: list, device: str | None = None) -> np.ndarray:
+    signal = _as_signal(X, device)
     with torch.no_grad():
-        feats = [
-            phi.quantitative(
-                torch.from_numpy(X), evaluate_at_all_times=False, normalize=False
-            ).detach().cpu().numpy()
-            for phi in formulas
-        ]
-    return np.stack(feats, axis=1)
+        feats = torch.stack(
+            [torch.func.vmap(phi.robustness)(signal) for phi in formulas],
+            dim=1,
+        )
+    return feats.detach().cpu().numpy()
 
 
 def _build_raw_formula_bank(
@@ -94,73 +93,18 @@ def _build_raw_formula_bank(
     return formulas, X_tr_feats, X_te_feats
 
 
-def _build_fft_formula_bank(
-    X_tr: np.ndarray,
-    X_te: np.ndarray,
-    config: ExperimentConfig,
-    seed: int,
-) -> tuple[list, np.ndarray, np.ndarray]:
-    X_tr_fft = np.abs(np.fft.rfft(X_tr, axis=2))
-    X_te_fft = np.abs(np.fft.rfft(X_te, axis=2))
-
-    N, V, T_fft = X_tr_fft.shape
-
-    v_min = np.percentile(X_tr_fft, 2,  axis=(0, 2))
-    v_max = np.percentile(X_tr_fft, 98, axis=(0, 2))
-
-    generator = F0(
-        n_vars=V,
-        v_min=v_min,
-        v_max=v_max,
-        t_max=T_fft - 1,
-        depth_max=config.depth_max,
-        seed=seed + 1,
-        only_temporal=config.only_temporal,
-        until_weight=config.until_weight,
-    )
-
-    inner_formulas = generator.sample(config.n_formulas)
-    formulas = [FFTFormula(phi) for phi in inner_formulas]
-
-    X_tr_feats = extract_features(X_tr_fft, inner_formulas)
-    for i, phi in enumerate(formulas):
-        delta = -X_tr_feats[:, i].mean()
-        X_tr_feats[:, i] += delta
-        shift_atom_thresholds(phi, delta)
-
-    X_te_feats = extract_features(X_te_fft, inner_formulas)
-
-    return formulas, X_tr_feats, X_te_feats
-
-
 def build_formula_bank(
     X_tr: np.ndarray,
     X_te: np.ndarray,
     config: ExperimentConfig,
     seed: int,
 ) -> tuple[list, np.ndarray, np.ndarray]:
-    """Sample and center STL formulas (and optionally FFT-domain formulas).
+    """Sample and center STL formulas.
 
-    Returns (formulas, X_tr_feats, X_te_feats).  When use_fourier=True the
-    feature matrices are the horizontal concatenation of raw-domain and
-    FFT-domain features; the formula list contains both, with FFTFormula
-    wrappers for the FFT-domain entries so that eval_robustness works on raw
-    signals throughout.
+    Returns (formulas, X_tr_feats, X_te_feats).
     """
 
     np.random.seed(seed)
     torch.manual_seed(seed)
 
-    formulas, X_tr_feats, X_te_feats = _build_raw_formula_bank(
-        X_tr, X_te, config, seed
-    )
-
-    if config.use_fourier:
-        fft_formulas, X_tr_fft_feats, X_te_fft_feats = _build_fft_formula_bank(
-            X_tr, X_te, config, seed
-        )
-        formulas = formulas + fft_formulas
-        X_tr_feats = np.concatenate([X_tr_feats, X_tr_fft_feats], axis=1)
-        X_te_feats = np.concatenate([X_te_feats, X_te_fft_feats], axis=1)
-
-    return formulas, X_tr_feats, X_te_feats
+    return _build_raw_formula_bank(X_tr, X_te, config, seed)

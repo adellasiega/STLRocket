@@ -2,8 +2,8 @@ from __future__ import annotations
 import copy
 from collections import defaultdict
 import numpy as np
-from torcheck.stl import Not, And, Or
-from torcheck import simplify
+from .stl import Negation, And, Or
+from .simplify import simplify
 from .features import eval_robustness, shift_atom_thresholds
 from .evaluation import evaluate_local_explanation
 
@@ -35,7 +35,7 @@ def reparametrize_formula(phi_original, X: np.ndarray, y: np.ndarray, target_cla
     med_ref = med_others[ref_class]
     negated = med_target < med_ref
     if negated:
-        phi = Not(phi)
+        phi = Negation(phi)
         med_target = -med_target
         med_ref = -med_ref
 

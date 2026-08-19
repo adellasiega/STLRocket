@@ -11,7 +11,6 @@ class ExperimentConfig:
     depth_max: int = 3
     only_temporal: bool = True
     until_weight: float = 0.0
-    use_fourier: bool = False
 
     # Classifier
     cv: int = 3
@@ -29,3 +28,6 @@ class ExperimentConfig:
 
     # Output
     output_dir: str = "results"
+
+    # Hardware
+    device: str = "cpu"

@@ -21,7 +21,7 @@ import numpy as np
 from stlrocket.config import ExperimentConfig
 from stlrocket.data import load_dataset
 from stlrocket.preprocessing import StateVariableStandardScaler
-from stlrocket.features import build_formula_bank
+from stlrocket.features import build_formula_bank, set_device
 from stlrocket.classifier import train_classifier, evaluate_classifier
 from stlrocket.explanations import build_global_explanations
 from stlrocket.evaluation import evaluate_global
@@ -229,13 +229,14 @@ def parse_args() -> ExperimentConfig:
     parser.add_argument("--base_seed", type=int, default=_d.base_seed)
     parser.add_argument("--output_dir", default=_d.output_dir)
     parser.add_argument("--explain", type=lambda x: x.lower() != "false", default=_d.explain)
-    parser.add_argument("--use_fourier", type=lambda x: x.lower() != "false", default=_d.use_fourier)
+    parser.add_argument("--device", default=_d.device)
     args = parser.parse_args()
     return ExperimentConfig(**vars(args))
 
 
 def main() -> None:
     config = parse_args()
+    set_device(config.device)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     uid = uuid.uuid4().hex[:8]

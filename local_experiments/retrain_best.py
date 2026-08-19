@@ -57,8 +57,8 @@ from glmnet import LogitNet
 from glmnet.scorer import make_scorer
 from sklearn.metrics import balanced_accuracy_score
 
-from torcheck.stl import Atom, Not, And, Or
-from torcheck import simplify
+from stlrocket.stl import LessThan, GreaterThan, Negation, And, Or
+from stlrocket.simplify import simplify
 
 from stlrocket.config import ExperimentConfig
 from stlrocket.data import load_dataset
@@ -260,7 +260,7 @@ def _reparametrize(phi_original, rho, rho_target, k, y_tr):
 
     med_ref = med_others[ref_class]
     if rho_target < med_ref:
-        phi = Not(phi)
+        phi = Negation(phi)
         rho, rho_target, med_ref = -rho, -rho_target, -med_ref
 
     delta_star = -(rho_target + med_ref) / 2
@@ -496,20 +496,20 @@ def positive_mask(phi, TS):
 
 def _children_replacements(node):
     if isinstance(node, (And, Or)):
-        return [node.left_child, node.right_child]
-    if isinstance(node, Not):
-        if isinstance(node.child, Not):
-            return [node.child.child]
+        return [node.subformula1, node.subformula2]
+    if isinstance(node, Negation):
+        if isinstance(node.subformula, Negation):
+            return [node.subformula.subformula]
     return []
 
 
 def _iter_nodes(node):
-    for attr in ("child", "left_child", "right_child"):
+    for attr in ("subformula", "subformula1", "subformula2"):
         child = getattr(node, attr, None)
-        if child is not None and not isinstance(child, Atom):
+        if child is not None and not isinstance(child, (LessThan, GreaterThan)):
             yield node, attr, child
             yield from _iter_nodes(child)
-        elif isinstance(child, Atom):
+        elif isinstance(child, (LessThan, GreaterThan)):
             yield node, attr, child
 
 
@@ -548,13 +548,13 @@ def round_thresholds(phi, TS, decimals, agreement):
     ref_mask = positive_mask(phi, TS)
 
     def visit(node):
-        if isinstance(node, Atom):
-            old = node.threshold
-            node.threshold = round(float(old), decimals)
+        if isinstance(node, (LessThan, GreaterThan)):
+            old = node.rhs
+            node.rhs = round(float(old), decimals)
             if (positive_mask(phi, TS) == ref_mask).mean() < agreement:
-                node.threshold = old
+                node.rhs = old
             return
-        for attr in ("child", "left_child", "right_child"):
+        for attr in ("subformula", "subformula1", "subformula2"):
             child = getattr(node, attr, None)
             if child is not None:
                 visit(child)
