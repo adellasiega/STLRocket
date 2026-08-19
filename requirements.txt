@@ -1,9 +1,9 @@
-numpy>=1.24
+numpy
 torch>=2.0
-aeon>=0.9
-python-glmnet>=2.6
-scikit-learn>=1.0
-scipy>=1.10
-pandas>=1.5
-matplotlib>=3.5
-seaborn>=0.12
+aeon
+python-glmnet
+scikit-learn
+scipy
+pandas
+matplotlib
+seaborn
