@@ -1,2 +1,0 @@
-/var/spool/slurm/slurmd/job100836/slurm_script: line 82: 2623886 Killed                  python /share/ai-lab/adsiega/STLRocket/scripts/run_stlinear_stltree.py --dataset "$DATASET" --budgets "$N_FORMULAS" --depths "$DEPTH_MAX" --until_weight "$UNTIL_WEIGHT" --config_budget 28800 --output_dir "$RESULTS_DIR"
-slurmstepd: error: Detected 1 oom_kill event in StepId=100836.batch. Some of the step tasks have been OOM Killed.

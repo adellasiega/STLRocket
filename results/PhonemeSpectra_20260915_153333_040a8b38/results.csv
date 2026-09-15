@@ -1,5 +1,0 @@
-dataset,method,budget,depth,until_weight,only_temporal,seed,balanced_accuracy,time_fit_s,time_feats_s,time_total_s,status
-PhonemeSpectra,stl_linear,1000,1,0.0,True,0,0.10827107229296014,2331.7725,3.8846,2335.6571,ok
-PhonemeSpectra,stl_tree,1000,1,0.0,True,0,0.0825949700094707,125.84,3.8846,129.7246,ok
-PhonemeSpectra,stl_linear,1000,1,0.0,True,1,0.10946367813672875,2267.7179,4.2928,2272.0107,ok
-PhonemeSpectra,stl_tree,1000,1,0.0,True,1,0.07904872145638218,121.6836,4.2928,125.9764,ok

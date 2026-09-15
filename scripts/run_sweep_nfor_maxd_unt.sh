@@ -13,7 +13,7 @@
 # versus ~128 for all 26. Commented-out entries are ordered by that same cost,
 # so uncomment from the top down to trade runtime for coverage.
 DATASETS=(
-    "AtrialFibrillation"            #    1.5 min
+    #"AtrialFibrillation"            #    1.5 min
     "StandWalkJump"                 #    2.2 min
     "ERing"                         #    2.3 min
     "BasicMotions"                  #    2.6 min
@@ -23,8 +23,7 @@ DATASETS=(
     "Heartbeat"                     #    7.7 min
     "UWaveGestureLibrary"           #    8.3 min
     "Epilepsy"                      #    8.4 min
-    # ---- excluded below this line; cost climbs steeply ----
-    # "Cricket"                     #    9.4 min
+    "Cricket"                       #    9.4 min
     # "PEMS-SF"                     #   10.1 min
     # "SelfRegulationSCP2"          #   10.6 min
     # "SelfRegulationSCP1"          #   11.2 min
