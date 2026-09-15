@@ -7,3 +7,7 @@ scipy
 pandas
 matplotlib
 seaborn
+
+# torcheck is not on PyPI -- install separately from the local project, e.g.:
+#   pip install -e ~/Projects/TorCheck
+# (or wherever TorCheck is checked out on this machine)

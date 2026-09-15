@@ -2,10 +2,11 @@ from __future__ import annotations
 import copy
 from collections import defaultdict
 import numpy as np
-from .stl import Negation, And, Or
-from .simplify import simplify
+from torcheck.stl import Not, And, Or
+from torcheck import simplify
 from .features import eval_robustness, shift_atom_thresholds
 from .evaluation import evaluate_local_explanation
+from .simplification import simplify_global, simplify_data_aware, round_thresholds
 
 
 def reparametrize_formula(phi_original, X: np.ndarray, y: np.ndarray, target_class):
@@ -26,7 +27,7 @@ def reparametrize_formula(phi_original, X: np.ndarray, y: np.ndarray, target_cla
     elif len(above) == 0:
         ref_class = max(below, key=lambda c: below[c])
     elif len(above) == len(below):
-        ref_class = max(med_others, key=lambda c: abs(med_others[c] - med_target)) # forse deve essere min
+        ref_class = max(med_others, key=lambda c: abs(med_others[c] - med_target))
     elif len(below) > len(above):
         ref_class = max(below, key=lambda c: below[c])
     else:
@@ -35,7 +36,7 @@ def reparametrize_formula(phi_original, X: np.ndarray, y: np.ndarray, target_cla
     med_ref = med_others[ref_class]
     negated = med_target < med_ref
     if negated:
-        phi = Negation(phi)
+        phi = Not(phi)
         med_target = -med_target
         med_ref = -med_ref
 
@@ -53,8 +54,9 @@ def per_competitor_contributions(
 
 
 def get_top_m_features(contrib_matrix: np.ndarray, m: int) -> list:
-    agg = contrib_matrix.sum(axis=0)
-    return np.argsort(-agg)[:m].tolist()
+    s = contrib_matrix.mean(axis=0)
+    order = np.argsort(-s)
+    return [int(j) for j in order if s[j] > 0][:m]
 
 
 def greedy_precise_picks(
@@ -68,7 +70,7 @@ def greedy_precise_picks(
     class_idx: int,
     formula_cache: dict,
     pool_size: int = 10,
-    precision_threshold: float = 0.9,
+    precision_threshold: float = 0.75,
 ) -> tuple[list, dict]:
     target_class = model.classes_[class_idx]
     others = [k for k in range(len(model.classes_)) if k != class_idx]
@@ -147,8 +149,8 @@ def build_local_explanation(
     X_tr: np.ndarray,
     y_tr: np.ndarray,
     formula_cache: dict,
-    pool_size: int = 20,
-    precision_threshold: float = 0.9,
+    pool_size: int = 10,
+    precision_threshold: float = 0.75,
 ) -> tuple[object, str, list]:
     if W.shape[0] == 1:
         W = np.vstack([-W, W])
@@ -173,22 +175,68 @@ def build_local_explanation(
 def build_global_explanations(
     X_te_feats: np.ndarray,
     X_te: np.ndarray,
+    X_tr_feats: np.ndarray,
+    X_tr: np.ndarray,
     W: np.ndarray,
     b: np.ndarray,
     model,
     formulas: list,
-    X_tr: np.ndarray,
     y_tr: np.ndarray,
-    pool_size: int = 20,
-    precision_threshold: float = 0.9,
+    pool_size: int = 10,
+    precision_threshold: float = 0.75,
+    simplify_agreement: float = 0.98,
+    simplify_min_gain: float = 0.0,
+    simplify_decimals: int = 1,
 ) -> tuple[dict, dict, dict]:
     if len(y_tr) > 1000:
         idx = np.random.choice(len(y_tr), 1000, replace=False)
+        X_tr_feats = X_tr_feats[idx]
         X_tr = X_tr[idx]
         y_tr = y_tr[idx]
 
-    locals_per_class: dict = defaultdict(list)
     formula_cache: dict = {}
+
+    # Global explanations (eq. 20): OR of unique local explanations over
+    # train-set instances predicted as class k -- not the test set, so
+    # evaluate_global's F1 on the test set is a genuine held-out score.
+    global_locals: dict = defaultdict(list)
+    for i in range(len(y_tr)):
+        phi_local, target_class, _ = build_local_explanation(
+            X_tr_feats[i], X_tr[i:i+1], W, b, model, formulas,
+            X_tr, y_tr, formula_cache,
+            pool_size=pool_size, precision_threshold=precision_threshold,
+        )
+        if phi_local is not None:
+            global_locals[target_class].append(phi_local)
+
+    # Simplification of global explanations (paper §3.4): cheap exact-string
+    # dedup first, then mask-agreement dedup + score-based pruning of
+    # disjuncts, then structural/threshold simplification of the resulting
+    # formula -- all evaluated against the same capped train subsample.
+    global_per_class = {}
+    n_unique_per_class = {}
+    for cls, phis in global_locals.items():
+        seen: dict = {}
+        for phi in phis:
+            key = str(phi)
+            if key not in seen:
+                seen[key] = phi
+        unique_phis = list(seen.values())
+
+        kept_phis = simplify_global(
+            unique_phis, X_tr, y_tr, cls,
+            agreement=simplify_agreement, min_gain=simplify_min_gain,
+        )
+        n_unique_per_class[cls] = len(kept_phis)
+        if kept_phis:
+            phi_global = disjunction(kept_phis)
+            phi_global = simplify_data_aware(phi_global, X_tr, agreement=simplify_agreement)
+            phi_global = round_thresholds(phi_global, X_tr, decimals=simplify_decimals, agreement=simplify_agreement)
+            global_per_class[cls] = phi_global
+
+    # Per-instance local explanations for reporting (test set) -- separate
+    # from the global-explanation construction above.
+    locals_per_class: dict = defaultdict(list)
     n_test = X_te_feats.shape[0]
 
     for i in range(n_test):
@@ -203,20 +251,5 @@ def build_global_explanations(
             precision, n_tp = 0.0, 0
 
         locals_per_class[target_class].append((i, phi_local, picks, precision, n_tp))
-
-    global_per_class = {}
-    n_unique_per_class = {}
-    for cls, lst in locals_per_class.items():
-        seen: dict = {}
-        for _, phi, _, _, _ in lst:
-            if phi is None:
-                continue
-            key = str(phi)
-            if key not in seen:
-                seen[key] = phi
-        unique_phis = list(seen.values())
-        n_unique_per_class[cls] = len(unique_phis)
-        if unique_phis:
-            global_per_class[cls] = disjunction(unique_phis)
 
     return global_per_class, locals_per_class, n_unique_per_class

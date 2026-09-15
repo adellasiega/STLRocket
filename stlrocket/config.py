@@ -4,30 +4,35 @@ from dataclasses import dataclass
 @dataclass
 class ExperimentConfig:
     # Dataset
-    dataset: str = "BasicMotions"
+    dataset: str 
 
     # Feature extraction
-    n_formulas: int = 100
-    depth_max: int = 3
-    only_temporal: bool = True
-    until_weight: float = 0.0
+    n_formulas: int
+    depth_max: int 
+    only_temporal: bool 
+    until_weight: float
 
     # Classifier
-    cv: int = 3
+    cv: int
 
     # Explanation
-    pool_size: int = 10
-    precision_threshold: float = 0.75
+    pool_size: int 
+    precision_threshold: float 
+
+    # Global explanation simplification
+    simplify_agreement: float 
+    simplify_min_gain: float 
+    simplify_decimals: int 
 
     # Experiment loop
-    n_run: int = 10
-    base_seed: int = 0  # run i uses seed=base_seed+i
+    n_run: int 
+    base_seed: int  # run i uses seed=base_seed+i
 
     # Explanations
-    explain: bool = True
+    explain: bool
 
     # Output
-    output_dir: str = "results"
+    output_dir: str 
 
     # Hardware
-    device: str = "cpu"
+    device: str

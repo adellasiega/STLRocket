@@ -1,25 +1,22 @@
 #!/usr/bin/env python
 """
-Three-way classification comparison on a single time-series dataset.
+Two-way classification comparison on a single time-series dataset.
 
 Methods:
-  1. rocket      -- aeon RocketClassifier (random convolutional kernels + ridge head)
-  2. stl_linear  -- STL robustness features -> glmnet LogitNet (L1 logistic regression)
-  3. stl_tree    -- same STL robustness features -> sklearn DecisionTreeClassifier (CV-tuned)
+  1. stl_linear  -- STL robustness features -> glmnet LogitNet (L1 logistic regression)
+  2. stl_tree    -- same STL robustness features -> sklearn DecisionTreeClassifier (CV-tuned)
 
-For each "budget" b in {10,100,1000,10000} (kernel count for rocket, formula count for
-STL) we run n_run seeds.  The STL approaches additionally sweep depth_max in {1,2,3}; the
-two STL heads share a single robustness feature matrix per (budget, depth, seed) that is
-computed exactly once.
+For each "budget" b in {10,100,1000,10000} (formula count for STL) we run n_run seeds.
+The STL approaches additionally sweep depth_max in {1,2,3}; the two STL heads share a
+single robustness feature matrix per (budget, depth, seed) that is computed exactly once.
 
 Hyperparameter fairness: each head CV-tunes its primary capacity/regularization knob with
-the same --cv fold count (ridge alpha for rocket, L1 lambda for glmnet, tree structure for
-the decision tree).
+the same --cv fold count (L1 lambda for glmnet, tree structure for the decision tree).
 
 Cost control: each configuration gets a wall-clock budget (--config_budget). A configuration
-is one rocket (budget) or one STL (budget, depth) pair-of-heads. Seeds are the inner loop;
-before each seed we check elapsed time and skip the remaining seeds once the budget is spent.
-Completed runs are written to results.csv immediately, so partial results survive.
+is one STL (budget, depth) pair-of-heads. Seeds are the inner loop; before each seed we
+check elapsed time and skip the remaining seeds once the budget is spent. Completed runs
+are written to results.csv immediately, so partial results survive.
 """
 from __future__ import annotations
 
@@ -33,21 +30,24 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
+import sys
+
 import numpy as np
-from sklearn.linear_model import RidgeClassifierCV
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.tree import DecisionTreeClassifier
 
+# Run correctly regardless of CWD (the SLURM sweep invokes this by absolute path).
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from stlrocket.config import ExperimentConfig
 from stlrocket.data import load_dataset
-from stlrocket.preprocessing import StateVariableStandardScaler
 from stlrocket.features import build_formula_bank
-from stlrocket.classifier import train_classifier, evaluate_classifier
+from stlrocket.classifier import available_cpus, train_classifier, evaluate_classifier
 
 
 ROW_FIELDS = [
-    "dataset", "method", "budget", "depth", "seed",
+    "dataset", "method", "budget", "depth", "until_weight", "only_temporal", "seed",
     "balanced_accuracy", "time_fit_s", "time_feats_s", "time_total_s", "status",
 ]
 
@@ -56,36 +56,11 @@ ROW_FIELDS = [
 # Per-method fits
 # ---------------------------------------------------------------------------
 
-def run_rocket(X_tr_raw, y_tr, X_te_raw, y_te, n_kernels: int, seed: int, cv: int) -> dict:
-    """ROCKET on raw (N,V,T) arrays with a cv-tuned ridge head."""
-    estimator = RidgeClassifierCV(
-        alphas=np.logspace(-3, 3, 10), cv=cv, class_weight="balanced"
-    )
-    clf = RocketClassifier(
-        n_kernels=n_kernels, random_state=seed, n_jobs=8, estimator=estimator
-    )
-    t0 = time.perf_counter()
-    clf.fit(X_tr_raw, y_tr)
-    t1 = time.perf_counter()
-    y_pred = clf.predict(X_te_raw)
-    return {
-        "balanced_accuracy": float(balanced_accuracy_score(y_te, y_pred)),
-        "time_fit_s": round(t1 - t0, 4),
-        "time_feats_s": None,
-        "time_total_s": round(time.perf_counter() - t0, 4),
-        "status": "ok",
-    }
-
-
 def build_stl_features(X_tr_raw, y_tr, X_te_raw, n_formulas, depth_max, seed, args):
     """Build STL robustness features once for both STL heads.
 
     Returns (config, X_tr_feats, X_te_feats, time_feats_s).
     """
-    scaler = StateVariableStandardScaler()
-    X_tr = scaler.fit_transform(X_tr_raw)
-    X_te = scaler.transform(X_te_raw)
-
     config = ExperimentConfig(
         dataset=args.dataset,
         n_formulas=n_formulas,
@@ -93,17 +68,26 @@ def build_stl_features(X_tr_raw, y_tr, X_te_raw, n_formulas, depth_max, seed, ar
         only_temporal=args.only_temporal,
         until_weight=args.until_weight,
         cv=args.cv,
+        pool_size=0,
+        precision_threshold=0.0,
+        simplify_agreement=0.0,
+        simplify_min_gain=0.0,
+        simplify_decimals=0,
+        n_run=args.n_run,
+        base_seed=args.base_seed,
         explain=False,
+        output_dir=args.output_dir,
+        device="cpu",
     )
     t0 = time.perf_counter()
-    _formulas, X_tr_feats, X_te_feats = build_formula_bank(X_tr, X_te, config, seed)
+    _formulas, X_tr_feats, X_te_feats = build_formula_bank(X_tr_raw, X_te_raw, config, seed)
     time_feats_s = round(time.perf_counter() - t0, 4)
     return config, X_tr_feats, X_te_feats, time_feats_s
 
 
-def run_stl_linear(X_tr_feats, y_tr, X_te_feats, y_te, config, time_feats_s) -> dict:
+def run_stl_linear(X_tr_feats, y_tr, X_te_feats, y_te, config, seed, time_feats_s) -> dict:
     t0 = time.perf_counter()
-    model = train_classifier(X_tr_feats, y_tr, config)
+    model = train_classifier(X_tr_feats, y_tr, config, seed=seed)
     t1 = time.perf_counter()
     metrics = evaluate_classifier(model, X_te_feats, y_te)
     return {
@@ -116,9 +100,10 @@ def run_stl_linear(X_tr_feats, y_tr, X_te_feats, y_te, config, time_feats_s) -> 
 
 
 def run_stl_tree(X_tr_feats, y_tr, X_te_feats, y_te, seed, cv, time_feats_s) -> dict:
-    # Guard against tiny per-class counts breaking StratifiedKFold.
+    # Guard against tiny per-class counts breaking StratifiedKFold. Floor of 3
+    # matches train_classifier, so both heads CV-tune over identical folds.
     _, counts = np.unique(y_tr, return_counts=True)
-    n_splits = max(2, min(cv, int(counts.min())))
+    n_splits = max(3, min(cv, int(counts.min())))
 
     param_grid = {
         "max_depth": [None, 3, 5, 10],
@@ -130,7 +115,8 @@ def run_stl_tree(X_tr_feats, y_tr, X_te_feats, y_te, seed, cv, time_feats_s) -> 
         param_grid,
         cv=StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed),
         scoring="balanced_accuracy",
-        n_jobs=8,
+        # 36 param combos x n_splits folds, so the full allocation is usable here.
+        n_jobs=available_cpus(),
     )
     t0 = time.perf_counter()
     search.fit(X_tr_feats, y_tr)
@@ -149,12 +135,16 @@ def run_stl_tree(X_tr_feats, y_tr, X_te_feats, y_te, seed, cv, time_feats_s) -> 
 # IO helpers
 # ---------------------------------------------------------------------------
 
-def make_row(dataset, method, budget, depth, seed, metrics) -> dict:
+def make_row(args, method, budget, depth, seed, metrics) -> dict:
     return {
-        "dataset": dataset,
+        "dataset": args.dataset,
         "method": method,
         "budget": budget,
         "depth": depth if depth is not None else "",
+        # Ablation axes are recorded per row so results.csv is self-describing:
+        # many single-config runs can be concatenated without joining config.json.
+        "until_weight": args.until_weight,
+        "only_temporal": args.only_temporal,
         "seed": seed,
         "balanced_accuracy": metrics.get("balanced_accuracy"),
         "time_fit_s": metrics.get("time_fit_s"),
@@ -179,45 +169,12 @@ class ResultsWriter:
 
     def __init__(self, path: Path):
         self.path = path
-        self.rows: list[dict] = []
         with open(path, "w", newline="") as f:
             csv.DictWriter(f, fieldnames=ROW_FIELDS).writeheader()
 
     def append(self, row: dict) -> None:
-        self.rows.append(row)
         with open(self.path, "a", newline="") as f:
             csv.DictWriter(f, fieldnames=ROW_FIELDS).writerow(row)
-
-
-def summarize(rows: list[dict], config: dict, path: Path, dataset: str) -> None:
-    groups: dict[tuple, list[dict]] = {}
-    for r in rows:
-        groups.setdefault((r["method"], r["budget"], r["depth"]), []).append(r)
-
-    per_config = {}
-    print(f"\n=== {dataset} summary (mean bal_acc over completed runs) ===")
-    print(f"  {'method':<11} {'budget':>7} {'depth':>5} {'bal_acc':>16} {'runs':>7}")
-    for key in sorted(groups, key=lambda k: (k[0], k[1], str(k[2]))):
-        method, budget, depth = key
-        grp = groups[key]
-        ok = [r for r in grp if r["status"] == "ok"]
-        n_ok = len(ok)
-        n_skipped = sum(1 for r in grp if r["status"] == "skipped")
-        accs = [r["balanced_accuracy"] for r in ok]
-        mean_acc = float(np.mean(accs)) if accs else None
-        std_acc = float(np.std(accs)) if accs else None
-        per_config[f"{method}|{budget}|{depth}"] = {
-            "method": method, "budget": budget, "depth": depth,
-            "mean_balanced_accuracy": mean_acc,
-            "std_balanced_accuracy": std_acc,
-            "n_ok": n_ok, "n_skipped": n_skipped,
-            "mean_time_total_s": float(np.mean([r["time_total_s"] for r in ok])) if ok else None,
-        }
-        acc_str = f"{mean_acc:.4f}±{std_acc:.4f}" if mean_acc is not None else "n/a"
-        print(f"  {method:<11} {budget:>7} {str(depth):>5} {acc_str:>16} {f'{n_ok}/{len(grp)}':>7}")
-
-    with open(path, "w") as f:
-        json.dump({"config": config, "per_config": per_config}, f, indent=2)
 
 
 # ---------------------------------------------------------------------------
@@ -225,32 +182,27 @@ def summarize(rows: list[dict], config: dict, path: Path, dataset: str) -> None:
 # ---------------------------------------------------------------------------
 
 def parse_args():
-    _d = ExperimentConfig()
-    p = argparse.ArgumentParser(description="Three-way TS classification comparison")
-    p.add_argument("--dataset", default=_d.dataset)
+    p = argparse.ArgumentParser(description="Two-way TS classification comparison")
+    p.add_argument("--dataset", default="BasicMotions")
     p.add_argument("--budgets", default="10,100,1000,10000",
-                   help="comma list of feature budgets (kernels / formulae)")
+                   help="comma list of feature budgets (formula count)")
     p.add_argument("--depths", default="1,2,3",
                    help="comma list of STL depth_max values")
-    p.add_argument("--n_run", type=int, default=_d.n_run)
-    p.add_argument("--base_seed", type=int, default=_d.base_seed)
-    p.add_argument("--config_budget", type=float, default=1800.0,
-                   help="wall-clock seconds per configuration's run loop")
-    p.add_argument("--cv", type=int, default=_d.cv,
-                   help="shared CV folds for all three heads")
-    p.add_argument("--only_temporal", type=lambda x: x.lower() != "false", default=_d.only_temporal)
-    p.add_argument("--until_weight", type=float, default=_d.until_weight)
+    p.add_argument("--n_run", type=int, default=10)
+    p.add_argument("--base_seed", type=int, default=0)
+    p.add_argument("--config_budget", type=float, default=39600.0,
+                   help="wall-clock seconds per configuration's run loop "
+                        "(default 11h, sized to fit inside a 12h SLURM job)")
+    p.add_argument("--cv", type=int, default=5,
+                   help="shared CV folds for both heads; each head clamps it down "
+                        "when a class has fewer members than folds")
+    p.add_argument("--only_temporal", type=lambda x: x.lower() != "false", default=True)
+    p.add_argument("--until_weight", type=float, default=0.0)
     p.add_argument("--output_dir", default="comparison_results")
     return p.parse_args()
 
 
 def main() -> None:
-    global RocketClassifier
-    # Imported here so the rest of the module loads even if aeon is unavailable
-    # (e.g. running only the STL methods on a minimal env).
-    from aeon.classification.convolution_based import RocketClassifier as _Rocket
-    RocketClassifier = _Rocket
-
     args = parse_args()
     budgets = [int(b) for b in args.budgets.split(",") if b.strip()]
     depths = [int(d) for d in args.depths.split(",") if d.strip()]
@@ -275,26 +227,14 @@ def main() -> None:
     writer = ResultsWriter(out_dir / "results.csv")
     feat_build_calls = 0  # invariant check: should equal len(budgets)*len(depths)*n_run
 
-    # --- ROCKET configurations: one per budget ---
-    for b in budgets:
-        t_start = time.perf_counter()
-        for seed in seeds:
-            if time.perf_counter() - t_start >= args.config_budget:
-                writer.append(make_row(args.dataset, "rocket", b, None, seed, skipped_metrics()))
-                continue
-            print(f"[rocket  b={b:<6} seed={seed}] fitting...")
-            m = run_rocket(X_tr_raw, y_tr, X_te_raw, y_te, b, seed, args.cv)
-            writer.append(make_row(args.dataset, "rocket", b, None, seed, m))
-            print(f"    bal_acc={m['balanced_accuracy']:.4f}  fit={m['time_fit_s']:.2f}s")
-
     # --- STL configurations: one per (budget, depth), both heads share features ---
     for b in budgets:
         for d in depths:
             t_start = time.perf_counter()
             for seed in seeds:
                 if time.perf_counter() - t_start >= args.config_budget:
-                    writer.append(make_row(args.dataset, "stl_linear", b, d, seed, skipped_metrics()))
-                    writer.append(make_row(args.dataset, "stl_tree", b, d, seed, skipped_metrics()))
+                    writer.append(make_row(args, "stl_linear", b, d, seed, skipped_metrics()))
+                    writer.append(make_row(args, "stl_tree", b, d, seed, skipped_metrics()))
                     continue
                 print(f"[stl     b={b:<6} d={d} seed={seed}] building features...")
                 config, X_tr_feats, X_te_feats, time_feats_s = build_stl_features(
@@ -302,10 +242,10 @@ def main() -> None:
                 )
                 feat_build_calls += 1
 
-                m_lin = run_stl_linear(X_tr_feats, y_tr, X_te_feats, y_te, config, time_feats_s)
-                writer.append(make_row(args.dataset, "stl_linear", b, d, seed, m_lin))
+                m_lin = run_stl_linear(X_tr_feats, y_tr, X_te_feats, y_te, config, seed, time_feats_s)
+                writer.append(make_row(args, "stl_linear", b, d, seed, m_lin))
                 m_tree = run_stl_tree(X_tr_feats, y_tr, X_te_feats, y_te, seed, args.cv, time_feats_s)
-                writer.append(make_row(args.dataset, "stl_tree", b, d, seed, m_tree))
+                writer.append(make_row(args, "stl_tree", b, d, seed, m_tree))
                 print(f"    feats={time_feats_s:.2f}s  linear={m_lin['balanced_accuracy']:.4f}"
                       f"  tree={m_tree['balanced_accuracy']:.4f}")
 
@@ -313,7 +253,6 @@ def main() -> None:
     print(f"\nFeature builds: {feat_build_calls} (full sweep would be {expected_builds}; "
           f"fewer if any STL configuration hit its time budget)")
 
-    summarize(writer.rows, vars(args), out_dir / "summary.json", args.dataset)
     print(f"\nDone. Results saved to: {out_dir}")
 
 
