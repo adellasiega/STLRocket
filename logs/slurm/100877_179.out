@@ -1,0 +1,7 @@
+Task 179: dataset=Cricket n_formulas=100 depth_max=2 until_weight=1
+Output directory: /share/ai-lab/adsiega/STLRocket/results/Cricket_20260915_184417_bb7f029c
+Dataset: Cricket  budgets: [100]  depths: [2]  n_run: 10  cv: 5  config_budget: 28800.0s
+
+Loading dataset...
+  train: (108, 6, 1197)  test: (72, 6, 1197)
+[stl     b=100    d=2 seed=0] building features...

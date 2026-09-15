@@ -1,0 +1,5 @@
+dataset,method,budget,depth,until_weight,only_temporal,seed,balanced_accuracy,time_fit_s,time_feats_s,time_total_s,status
+Heartbeat,stl_linear,10000,1,1.0,True,0,0.6907302038880987,3.1035,1165.2112,1168.3147,ok
+Heartbeat,stl_tree,10000,1,1.0,True,0,0.5618183973447132,27.034,1165.2112,1192.2452,ok
+Heartbeat,stl_linear,10000,1,1.0,True,1,0.6481744902797535,2.6498,1206.5791,1209.2289,ok
+Heartbeat,stl_tree,10000,1,1.0,True,1,0.5693456614509246,27.8123,1206.5791,1234.3914,ok

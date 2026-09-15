@@ -1,0 +1,7 @@
+dataset,method,budget,depth,until_weight,only_temporal,seed,balanced_accuracy,time_fit_s,time_feats_s,time_total_s,status
+UWaveGestureLibrary,stl_linear,10000,1,1.0,True,0,0.878125,15.4046,748.1158,763.5204,ok
+UWaveGestureLibrary,stl_tree,10000,1,1.0,True,0,0.6781250000000001,19.7649,748.1158,767.8807,ok
+UWaveGestureLibrary,stl_linear,10000,1,1.0,True,1,0.890625,17.2877,559.421,576.7087,ok
+UWaveGestureLibrary,stl_tree,10000,1,1.0,True,1,0.6312500000000001,19.1639,559.421,578.5849,ok
+UWaveGestureLibrary,stl_linear,10000,1,1.0,True,2,0.8374999999999999,13.8512,555.5166,569.3678,ok
+UWaveGestureLibrary,stl_tree,10000,1,1.0,True,2,0.68125,19.1672,555.5166,574.6838,ok

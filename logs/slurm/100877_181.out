@@ -1,0 +1,7 @@
+Task 181: dataset=ERing n_formulas=1000 depth_max=2 until_weight=1
+Output directory: /share/ai-lab/adsiega/STLRocket/results/ERing_20260915_184539_c5359632
+Dataset: ERing  budgets: [1000]  depths: [2]  n_run: 10  cv: 5  config_budget: 28800.0s
+
+Loading dataset...
+  train: (30, 4, 65)  test: (270, 4, 65)
+[stl     b=1000   d=2 seed=0] building features...
