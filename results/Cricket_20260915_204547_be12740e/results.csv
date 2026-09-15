@@ -1,0 +1,3 @@
+dataset,method,budget,depth,until_weight,only_temporal,seed,balanced_accuracy,time_fit_s,time_feats_s,time_total_s,status
+Cricket,stl_linear,10000,2,1.0,True,0,0.9444444444444445,13.1599,5101.4009,5114.5608,ok
+Cricket,stl_tree,10000,2,1.0,True,0,0.8055555555555555,20.3739,5101.4009,5121.7748,ok

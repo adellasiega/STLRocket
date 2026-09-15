@@ -1,0 +1,9 @@
+dataset,method,budget,depth,until_weight,only_temporal,seed,balanced_accuracy,time_fit_s,time_feats_s,time_total_s,status
+StandWalkJump,stl_linear,10000,2,1.0,True,0,0.3333333333333333,0.7202,3667.3697,3668.0899,ok
+StandWalkJump,stl_tree,10000,2,1.0,True,0,0.39999999999999997,3.6221,3667.3697,3670.9918,ok
+StandWalkJump,stl_linear,10000,2,1.0,True,1,0.3333333333333333,0.8206,3663.6064,3664.427,ok
+StandWalkJump,stl_tree,10000,2,1.0,True,1,0.3333333333333333,3.6956,3663.6064,3667.302,ok
+StandWalkJump,stl_linear,10000,2,1.0,True,2,0.26666666666666666,0.7751,3504.9984,3505.7735,ok
+StandWalkJump,stl_tree,10000,2,1.0,True,2,0.3333333333333333,3.6181,3504.9984,3508.6165,ok
+StandWalkJump,stl_linear,10000,2,1.0,True,3,0.3333333333333333,0.7496,3642.7671,3643.5167,ok
+StandWalkJump,stl_tree,10000,2,1.0,True,3,0.3333333333333333,3.1788,3642.7671,3645.9459,ok

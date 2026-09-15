@@ -1,0 +1,12 @@
+{
+  "dataset": "Epilepsy",
+  "budgets": "10",
+  "depths": "3",
+  "n_run": 10,
+  "base_seed": 0,
+  "config_budget": 28800.0,
+  "cv": 5,
+  "only_temporal": true,
+  "until_weight": 1.0,
+  "output_dir": "/share/ai-lab/adsiega/STLRocket/results"
+}

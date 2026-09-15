@@ -5,3 +5,17 @@ UWaveGestureLibrary,stl_linear,10000,1,1.0,True,1,0.890625,17.2877,559.421,576.7
 UWaveGestureLibrary,stl_tree,10000,1,1.0,True,1,0.6312500000000001,19.1639,559.421,578.5849,ok
 UWaveGestureLibrary,stl_linear,10000,1,1.0,True,2,0.8374999999999999,13.8512,555.5166,569.3678,ok
 UWaveGestureLibrary,stl_tree,10000,1,1.0,True,2,0.68125,19.1672,555.5166,574.6838,ok
+UWaveGestureLibrary,stl_linear,10000,1,1.0,True,3,0.8656250000000001,14.5303,591.5958,606.1261,ok
+UWaveGestureLibrary,stl_tree,10000,1,1.0,True,3,0.65,20.2494,591.5958,611.8452,ok
+UWaveGestureLibrary,stl_linear,10000,1,1.0,True,4,0.865625,16.1567,575.8607,592.0174,ok
+UWaveGestureLibrary,stl_tree,10000,1,1.0,True,4,0.665625,20.3767,575.8607,596.2374,ok
+UWaveGestureLibrary,stl_linear,10000,1,1.0,True,5,0.8687499999999999,17.7873,640.3673,658.1546,ok
+UWaveGestureLibrary,stl_tree,10000,1,1.0,True,5,0.690625,19.2067,640.3673,659.574,ok
+UWaveGestureLibrary,stl_linear,10000,1,1.0,True,6,0.86875,15.8761,606.9132,622.7893,ok
+UWaveGestureLibrary,stl_tree,10000,1,1.0,True,6,0.690625,19.3473,606.9132,626.2605,ok
+UWaveGestureLibrary,stl_linear,10000,1,1.0,True,7,0.871875,16.3625,551.3776,567.7401,ok
+UWaveGestureLibrary,stl_tree,10000,1,1.0,True,7,0.715625,19.7237,551.3776,571.1013,ok
+UWaveGestureLibrary,stl_linear,10000,1,1.0,True,8,0.859375,17.4478,638.8221,656.2699,ok
+UWaveGestureLibrary,stl_tree,10000,1,1.0,True,8,0.6625000000000001,19.8098,638.8221,658.6319,ok
+UWaveGestureLibrary,stl_linear,10000,1,1.0,True,9,0.859375,16.8479,533.8079,550.6558,ok
+UWaveGestureLibrary,stl_tree,10000,1,1.0,True,9,0.653125,20.4197,533.8079,554.2276,ok

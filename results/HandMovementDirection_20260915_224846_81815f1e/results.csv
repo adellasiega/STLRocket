@@ -1,0 +1,5 @@
+dataset,method,budget,depth,until_weight,only_temporal,seed,balanced_accuracy,time_fit_s,time_feats_s,time_total_s,status
+HandMovementDirection,stl_linear,10000,3,1.0,True,0,0.5511904761904762,5.5171,902.3122,907.8293,ok
+HandMovementDirection,stl_tree,10000,3,1.0,True,0,0.4083333333333333,26.1562,902.3122,928.4684,ok
+HandMovementDirection,stl_linear,10000,3,1.0,True,1,0.4976190476190476,5.7666,911.2832,917.0498,ok
+HandMovementDirection,stl_tree,10000,3,1.0,True,1,0.2107142857142857,25.6711,911.2832,936.9543,ok
