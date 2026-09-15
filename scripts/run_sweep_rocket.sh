@@ -4,7 +4,7 @@
 #SBATCH --error=/share/ai-lab/adsiega/STLRocket/logs/slurm/%A_%a.err
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
 #SBATCH --mem=32G --time=12:00:00
-#SBATCH --partition=Main
+#SBATCH --partition=turing-long
 #SBATCH --array=0-39  # 10 datasets x 4 n_kernels
 
 # ROCKET baseline for comparison against STLRocket. Dataset list is kept in sync
