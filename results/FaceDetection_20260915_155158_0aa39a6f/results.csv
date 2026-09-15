@@ -1,0 +1,5 @@
+dataset,method,budget,depth,until_weight,only_temporal,seed,balanced_accuracy,time_fit_s,time_feats_s,time_total_s,status
+FaceDetection,stl_linear,10000,1,0.0,True,0,0.6308172531214529,220.9967,28.0101,249.0068,ok
+FaceDetection,stl_tree,10000,1,0.0,True,0,0.5499432463110102,1620.2248,28.0101,1648.2349,ok
+FaceDetection,stl_linear,10000,1,0.0,True,1,0.6597616345062429,225.1603,30.5591,255.7194,ok
+FaceDetection,stl_tree,10000,1,0.0,True,1,0.5803064699205448,1585.9345,30.5591,1616.4936,ok

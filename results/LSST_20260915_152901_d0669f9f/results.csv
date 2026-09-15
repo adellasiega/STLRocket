@@ -1,0 +1,5 @@
+dataset,method,budget,depth,until_weight,only_temporal,seed,balanced_accuracy,time_fit_s,time_feats_s,time_total_s,status
+LSST,stl_linear,1000,1,0.0,True,0,0.3104920727907324,2028.3684,1.1555,2029.5239,ok
+LSST,stl_tree,1000,1,0.0,True,0,0.3526634332778608,81.4963,1.1555,82.6518,ok
+LSST,stl_linear,1000,1,0.0,True,1,0.31512798895592004,2109.5353,1.2805,2110.8158,ok
+LSST,stl_tree,1000,1,0.0,True,1,0.3682654121974699,80.678,1.2805,81.9585,ok

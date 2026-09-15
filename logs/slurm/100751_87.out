@@ -1,0 +1,9 @@
+Task 87: dataset=FaceDetection n_formulas=10000 depth_max=1 until_weight=0
+Output directory: /share/ai-lab/adsiega/STLRocket/results/FaceDetection_20260915_155158_0aa39a6f
+Dataset: FaceDetection  budgets: [10000]  depths: [1]  n_run: 10  cv: 5  config_budget: 28800.0s
+
+Loading dataset...
+  train: (5890, 144, 62)  test: (3524, 144, 62)
+[stl     b=10000  d=1 seed=0] building features...
+    feats=28.01s  linear=0.6308  tree=0.5499
+[stl     b=10000  d=1 seed=1] building features...

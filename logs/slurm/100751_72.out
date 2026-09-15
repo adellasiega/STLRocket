@@ -1,0 +1,9 @@
+Task 72: dataset=PhonemeSpectra n_formulas=1000 depth_max=1 until_weight=0
+Output directory: /share/ai-lab/adsiega/STLRocket/results/PhonemeSpectra_20260915_153333_040a8b38
+Dataset: PhonemeSpectra  budgets: [1000]  depths: [1]  n_run: 10  cv: 5  config_budget: 28800.0s
+
+Loading dataset...
+  train: (3315, 11, 217)  test: (3353, 11, 217)
+[stl     b=1000   d=1 seed=0] building features...
+    feats=3.88s  linear=0.1083  tree=0.0826
+[stl     b=1000   d=1 seed=1] building features...

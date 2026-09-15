@@ -1,0 +1,14 @@
+dataset,method,budget,depth,until_weight,only_temporal,seed,balanced_accuracy,time_fit_s,time_feats_s,time_total_s,status
+RacketSports,stl_linear,10000,1,0.0,True,0,0.7895715262849327,8.3788,3.2919,11.6707,ok
+RacketSports,stl_tree,10000,1,0.0,True,0,0.6982851280046903,19.6252,3.2919,22.9171,ok
+RacketSports,stl_linear,10000,1,0.0,True,1,0.811687756497948,8.1886,3.3972,11.5858,ok
+RacketSports,stl_tree,10000,1,0.0,True,1,0.7313208422904045,17.2637,3.3972,20.6609,ok
+RacketSports,stl_linear,10000,1,0.0,True,2,0.8450117256204808,8.3573,3.3977,11.755,ok
+RacketSports,stl_tree,10000,1,0.0,True,2,0.6974130349814345,17.0879,3.3977,20.4856,ok
+RacketSports,stl_linear,10000,1,0.0,True,3,0.7667725229626734,8.2625,3.3025,11.565,ok
+RacketSports,stl_tree,10000,1,0.0,True,3,0.7455857924565175,17.2693,3.3025,20.5718,ok
+RacketSports,stl_linear,10000,1,0.0,True,4,0.8459045827633379,8.8858,3.3861,12.2719,ok
+RacketSports,stl_tree,10000,1,0.0,True,4,0.7329587649013093,17.3467,3.3861,20.7328,ok
+RacketSports,stl_linear,10000,1,0.0,True,5,0.8275698651553645,8.081,3.2753,11.3563,ok
+RacketSports,stl_tree,10000,1,0.0,True,5,0.690984707836623,17.4331,3.2753,20.7084,ok
+RacketSports,stl_linear,10000,1,0.0,True,6,0.7784004299394175,8.1767,3.3721,11.5488,ok

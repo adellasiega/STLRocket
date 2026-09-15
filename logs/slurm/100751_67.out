@@ -1,0 +1,9 @@
+Task 67: dataset=LSST n_formulas=1000 depth_max=1 until_weight=0
+Output directory: /share/ai-lab/adsiega/STLRocket/results/LSST_20260915_152901_d0669f9f
+Dataset: LSST  budgets: [1000]  depths: [1]  n_run: 10  cv: 5  config_budget: 28800.0s
+
+Loading dataset...
+  train: (2459, 6, 36)  test: (2466, 6, 36)
+[stl     b=1000   d=1 seed=0] building features...
+    feats=1.16s  linear=0.3105  tree=0.3527
+[stl     b=1000   d=1 seed=1] building features...
