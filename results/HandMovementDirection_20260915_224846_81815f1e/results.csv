@@ -3,3 +3,7 @@ HandMovementDirection,stl_linear,10000,3,1.0,True,0,0.5511904761904762,5.5171,90
 HandMovementDirection,stl_tree,10000,3,1.0,True,0,0.4083333333333333,26.1562,902.3122,928.4684,ok
 HandMovementDirection,stl_linear,10000,3,1.0,True,1,0.4976190476190476,5.7666,911.2832,917.0498,ok
 HandMovementDirection,stl_tree,10000,3,1.0,True,1,0.2107142857142857,25.6711,911.2832,936.9543,ok
+HandMovementDirection,stl_linear,10000,3,1.0,True,2,0.48333333333333334,5.6347,954.1033,959.738,ok
+HandMovementDirection,stl_tree,10000,3,1.0,True,2,0.3369047619047619,27.3519,954.1033,981.4552,ok
+HandMovementDirection,stl_linear,10000,3,1.0,True,3,0.455952380952381,5.5653,897.5902,903.1555,ok
+HandMovementDirection,stl_tree,10000,3,1.0,True,3,0.29166666666666663,27.5734,897.5902,925.1636,ok

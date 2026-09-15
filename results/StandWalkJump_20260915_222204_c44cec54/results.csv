@@ -1,1 +1,3 @@
 dataset,method,budget,depth,until_weight,only_temporal,seed,balanced_accuracy,time_fit_s,time_feats_s,time_total_s,status
+StandWalkJump,stl_linear,10000,3,1.0,True,0,0.3333333333333333,0.689,4402.6604,4403.3494,ok
+StandWalkJump,stl_tree,10000,3,1.0,True,0,0.26666666666666666,3.7817,4402.6604,4406.4421,ok
