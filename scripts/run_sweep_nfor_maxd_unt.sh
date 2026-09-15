@@ -5,35 +5,41 @@
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
 #SBATCH --mem=32G --time=12:00:00
 #SBATCH --partition=Main
-#SBATCH --array=0-623  # 26 datasets x 4 n_formulas x 3 depth_max x 2 until_weight
+#SBATCH --array=0-239  # 10 datasets x 4 n_formulas x 3 depth_max x 2 until_weight
 
+# Fast subset: the 10 cheapest datasets by measured wall-clock from job 100751
+# (d=1, uw=0 arm), summed over all four n_formulas budgets and extrapolated to
+# 10 seeds. Together they are ~0.8 core-hours per (depth, until_weight) arm,
+# versus ~128 for all 26. Commented-out entries are ordered by that same cost,
+# so uncomment from the top down to trade runtime for coverage.
 DATASETS=(
-    "ArticularyWordRecognition"
-    "AtrialFibrillation"
-    "BasicMotions"
-    "Cricket"
-    "DuckDuckGeese"
-    "EigenWorms"
-    "Epilepsy"
-    "EthanolConcentration"
-    "ERing"
-    "FaceDetection"
-    "FingerMovements"
-    "HandMovementDirection"
-    "Handwriting"
-    "Heartbeat"
-    "Libras"
-    "LSST"
-    "MotorImagery"
-    "NATOPS"
-    "PenDigits"
-    "PEMS-SF"
-    "PhonemeSpectra"
-    "RacketSports"
-    "SelfRegulationSCP1"
-    "SelfRegulationSCP2"
-    "StandWalkJump"
-    "UWaveGestureLibrary"
+    "AtrialFibrillation"            #    1.5 min
+    "StandWalkJump"                 #    2.2 min
+    "ERing"                         #    2.3 min
+    "BasicMotions"                  #    2.6 min
+    "DuckDuckGeese"                 #    2.9 min
+    "RacketSports"                  #    5.7 min
+    "HandMovementDirection"         #    7.3 min
+    "Heartbeat"                     #    7.7 min
+    "UWaveGestureLibrary"           #    8.3 min
+    "Epilepsy"                      #    8.4 min
+    # ---- excluded below this line; cost climbs steeply ----
+    # "Cricket"                     #    9.4 min
+    # "PEMS-SF"                     #   10.1 min
+    # "SelfRegulationSCP2"          #   10.6 min
+    # "SelfRegulationSCP1"          #   11.2 min
+    # "FingerMovements"             #   12.3 min
+    # "NATOPS"                      #   12.5 min
+    # "MotorImagery"                #   15.1 min
+    # "Handwriting"                 #   17.0 min
+    # "EigenWorms"                  #   17.4 min  OOM-killed at b=10000, 32G
+    # "ArticularyWordRecognition"   #   42.7 min
+    # "Libras"                      #   52.9 min
+    # "EthanolConcentration"        #   80.7 min
+    # "FaceDetection"               #  351.5 min
+    # "PenDigits"                   #  946.9 min
+    # "LSST"                        # 2828.8 min
+    # "PhonemeSpectra"              # 3185.3 min
 )
 
 N_FORMULAS_LIST=(10 100 1000 10000)
