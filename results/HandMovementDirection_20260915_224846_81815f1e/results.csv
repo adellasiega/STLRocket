@@ -7,3 +7,15 @@ HandMovementDirection,stl_linear,10000,3,1.0,True,2,0.48333333333333334,5.6347,9
 HandMovementDirection,stl_tree,10000,3,1.0,True,2,0.3369047619047619,27.3519,954.1033,981.4552,ok
 HandMovementDirection,stl_linear,10000,3,1.0,True,3,0.455952380952381,5.5653,897.5902,903.1555,ok
 HandMovementDirection,stl_tree,10000,3,1.0,True,3,0.29166666666666663,27.5734,897.5902,925.1636,ok
+HandMovementDirection,stl_linear,10000,3,1.0,True,4,0.4547619047619047,5.753,941.0338,946.7868,ok
+HandMovementDirection,stl_tree,10000,3,1.0,True,4,0.2702380952380952,26.9265,941.0338,967.9603,ok
+HandMovementDirection,stl_linear,10000,3,1.0,True,5,0.4642857142857143,5.053,937.9163,942.9693,ok
+HandMovementDirection,stl_tree,10000,3,1.0,True,5,0.27261904761904765,25.7578,937.9163,963.6741,ok
+HandMovementDirection,stl_linear,10000,3,1.0,True,6,0.49880952380952376,5.2223,948.8721,954.0944,ok
+HandMovementDirection,stl_tree,10000,3,1.0,True,6,0.2702380952380952,26.0091,948.8721,974.8812,ok
+HandMovementDirection,stl_linear,10000,3,1.0,True,7,0.5154761904761904,5.5419,881.3428,886.8847,ok
+HandMovementDirection,stl_tree,10000,3,1.0,True,7,0.37857142857142856,26.8534,881.3428,908.1962,ok
+HandMovementDirection,stl_linear,10000,3,1.0,True,8,0.25,5.7215,930.9087,936.6302,ok
+HandMovementDirection,stl_tree,10000,3,1.0,True,8,0.25,27.8365,930.9087,958.7452,ok
+HandMovementDirection,stl_linear,10000,3,1.0,True,9,0.5404761904761904,5.5837,937.5035,943.0872,ok
+HandMovementDirection,stl_tree,10000,3,1.0,True,9,0.3404761904761905,25.2766,937.5035,962.7801,ok

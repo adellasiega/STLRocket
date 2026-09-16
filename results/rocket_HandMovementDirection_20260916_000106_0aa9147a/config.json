@@ -1,0 +1,9 @@
+{
+  "dataset": "HandMovementDirection",
+  "budgets": "100",
+  "n_run": 10,
+  "base_seed": 0,
+  "config_budget": 28800.0,
+  "cv": 5,
+  "output_dir": "/share/ai-lab/adsiega/STLRocket/results"
+}

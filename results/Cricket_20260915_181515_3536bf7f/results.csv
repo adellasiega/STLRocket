@@ -7,3 +7,15 @@ Cricket,stl_linear,10000,1,1.0,True,2,0.9861111111111112,23.3002,4176.6073,4199.
 Cricket,stl_tree,10000,1,1.0,True,2,0.7777777777777778,19.6658,4176.6073,4196.2731,ok
 Cricket,stl_linear,10000,1,1.0,True,3,0.9722222222222222,18.1333,4162.6468,4180.7801,ok
 Cricket,stl_tree,10000,1,1.0,True,3,0.8333333333333334,20.7302,4162.6468,4183.377,ok
+Cricket,stl_linear,10000,1,1.0,True,4,0.9444444444444445,20.2568,4390.7632,4411.02,ok
+Cricket,stl_tree,10000,1,1.0,True,4,0.8611111111111112,20.6241,4390.7632,4411.3873,ok
+Cricket,stl_linear,10000,1,1.0,True,5,0.9861111111111112,19.313,4034.5737,4053.8867,ok
+Cricket,stl_tree,10000,1,1.0,True,5,0.9305555555555555,20.256,4034.5737,4054.8297,ok
+Cricket,stl_linear,10000,1,1.0,True,6,0.9444444444444445,15.6402,3951.422,3967.0622,ok
+Cricket,stl_tree,10000,1,1.0,True,6,0.875,20.2301,3951.422,3971.6521,ok
+Cricket,stl_linear,10000,1,1.0,True,7,nan,,,,skipped
+Cricket,stl_tree,10000,1,1.0,True,7,nan,,,,skipped
+Cricket,stl_linear,10000,1,1.0,True,8,nan,,,,skipped
+Cricket,stl_tree,10000,1,1.0,True,8,nan,,,,skipped
+Cricket,stl_linear,10000,1,1.0,True,9,nan,,,,skipped
+Cricket,stl_tree,10000,1,1.0,True,9,nan,,,,skipped
