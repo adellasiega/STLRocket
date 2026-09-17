@@ -1,0 +1,3 @@
+class,formula,n_unique_locals,depth,coverage_train,fp_train,precision_train,f1_train,coverage_test,fp_test,precision_test,f1_test
+jumping,"( F[1102,1936]( G[37,174](x_3 => -0.1) ) )",1,2,0.75,0.75,0.3333333333333333,0.46153846153846156,1.0,0.7,0.4166666666666667,0.5882352941176471
+walking,"( F[1102,1936]( G[37,174](x_3 => 0.0) ) )",1,2,1.0,0.0,1.0,1.0,0.2,0.2,0.3333333333333333,0.25

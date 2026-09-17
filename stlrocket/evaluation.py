@@ -8,14 +8,15 @@ def evaluate_local_explanation(
     target_class,
     X_tr: np.ndarray,
     y_tr: np.ndarray,
-) -> tuple[float, int]:
+) -> tuple[float, int, int]:
+    """Precision, TP and FP of one local explanation on the train set."""
     rhos = eval_robustness(phi_local, X_tr)
     pos_mask = rhos > 0
     tot_positive = int(pos_mask.sum())
     if tot_positive == 0:
-        return 0.0, 0
+        return 0.0, 0, 0
     true_positive = int((y_tr[pos_mask] == target_class).sum())
-    return float(true_positive / tot_positive), true_positive
+    return float(true_positive / tot_positive), true_positive, tot_positive - true_positive
 
 
 def evaluate_global(
@@ -35,8 +36,23 @@ def evaluate_global(
         precision = float(tp / total_pos) if total_pos > 0 else float("nan")
         f1 = float(2 * precision * coverage / (precision + coverage)) if (precision + coverage) > 0 else float("nan")
 
-        results[cls] = {"f1": f1}
+        # Share of the non-target instances the formula wrongly accepts. Reported
+        # alongside precision because precision alone hides how much of the
+        # negative pool was swept in when classes are imbalanced.
+        n_neg = int((~target_mask).sum())
+        fp_rate = float((pos_mask & ~target_mask).sum() / n_neg) if n_neg > 0 else float("nan")
 
-    f1s = [v["f1"] for v in results.values() if not np.isnan(v["f1"])]
-    results["macro_avg"] = {"f1": float(np.mean(f1s)) if f1s else float("nan")}
+        results[cls] = {
+            "coverage": coverage,
+            "precision": precision,
+            "f1": f1,
+            "fp_rate": fp_rate,
+        }
+
+    metrics = ["coverage", "precision", "f1", "fp_rate"]
+    macro = {}
+    for key in metrics:
+        vals = [v[key] for v in results.values() if not np.isnan(v[key])]
+        macro[key] = float(np.mean(vals)) if vals else float("nan")
+    results["macro_avg"] = macro
     return results

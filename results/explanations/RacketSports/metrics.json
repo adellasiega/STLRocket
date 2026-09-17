@@ -1,0 +1,98 @@
+{
+  "local_per_class": {
+    "badminton_clear": {
+      "n_instances": 41,
+      "n_explained": 41,
+      "mean_precision": 0.8775581793172219,
+      "std_precision": 0.07106921231960009,
+      "mean_depth": 3.2195121951219514,
+      "mean_length": 2.2195121951219514
+    },
+    "squash_backhandboast": {
+      "n_instances": 42,
+      "n_explained": 42,
+      "mean_precision": 0.8417134353741498,
+      "std_precision": 0.10591556751702083,
+      "mean_depth": 2.357142857142857,
+      "mean_length": 1.3571428571428572
+    },
+    "badminton_smash": {
+      "n_instances": 36,
+      "n_explained": 36,
+      "mean_precision": 0.9236680701431731,
+      "std_precision": 0.05036799912146778,
+      "mean_depth": 2.9722222222222223,
+      "mean_length": 2.0
+    },
+    "squash_forehandboast": {
+      "n_instances": 33,
+      "n_explained": 33,
+      "mean_precision": 0.8246026082076806,
+      "std_precision": 0.07197562852844029,
+      "mean_depth": 2.121212121212121,
+      "mean_length": 1.121212121212121
+    }
+  },
+  "global_per_class": {
+    "badminton_smash": {
+      "train": {
+        "coverage": 0.8717948717948718,
+        "precision": 0.85,
+        "f1": 0.8607594936708861,
+        "fp_rate": 0.05357142857142857
+      },
+      "test": {
+        "coverage": 0.6,
+        "precision": 0.6153846153846154,
+        "f1": 0.6075949367088608,
+        "fp_rate": 0.13392857142857142
+      }
+    },
+    "badminton_clear": {
+      "train": {
+        "coverage": 0.9534883720930233,
+        "precision": 0.82,
+        "f1": 0.8817204301075269,
+        "fp_rate": 0.08333333333333333
+      },
+      "test": {
+        "coverage": 0.6511627906976745,
+        "precision": 0.5714285714285714,
+        "f1": 0.6086956521739131,
+        "fp_rate": 0.1926605504587156
+      }
+    },
+    "squash_forehandboast": {
+      "train": {
+        "coverage": 0.9714285714285714,
+        "precision": 0.723404255319149,
+        "f1": 0.8292682926829269,
+        "fp_rate": 0.11206896551724138
+      },
+      "test": {
+        "coverage": 0.8857142857142857,
+        "precision": 0.6595744680851063,
+        "f1": 0.7560975609756098,
+        "fp_rate": 0.13675213675213677
+      }
+    },
+    "squash_backhandboast": {
+      "train": {
+        "coverage": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fp_rate": 0.05128205128205128
+      },
+      "test": {
+        "coverage": 0.9411764705882353,
+        "precision": 0.7111111111111111,
+        "f1": 0.8101265822784811,
+        "fp_rate": 0.11016949152542373
+      }
+    }
+  },
+  "global_macro_f1_train": 0.8726667838450647,
+  "global_macro_f1_test": 0.6956286830342162,
+  "global_macro_precision_test": 0.639374691502351,
+  "global_macro_coverage_test": 0.7695133867500488
+}

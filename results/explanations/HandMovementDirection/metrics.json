@@ -1,0 +1,98 @@
+{
+  "local_per_class": {
+    "right": {
+      "n_instances": 14,
+      "n_explained": 14,
+      "mean_precision": 0.9056776556776558,
+      "std_precision": 0.08717745642901446,
+      "mean_depth": 4.5,
+      "mean_length": 3.2142857142857144
+    },
+    "forward": {
+      "n_instances": 29,
+      "n_explained": 29,
+      "mean_precision": 0.8176622228346367,
+      "std_precision": 0.08578193919640915,
+      "mean_depth": 3.4827586206896552,
+      "mean_length": 2.6206896551724137
+    },
+    "backward": {
+      "n_instances": 18,
+      "n_explained": 18,
+      "mean_precision": 0.8418192918192918,
+      "std_precision": 0.06698373498728175,
+      "mean_depth": 4.5,
+      "mean_length": 3.388888888888889
+    },
+    "left": {
+      "n_instances": 13,
+      "n_explained": 13,
+      "mean_precision": 0.8197136197136199,
+      "std_precision": 0.15991207000195354,
+      "mean_depth": 5.0,
+      "mean_length": 3.5384615384615383
+    }
+  },
+  "global_per_class": {
+    "right": {
+      "train": {
+        "coverage": 0.95,
+        "precision": 0.7916666666666666,
+        "f1": 0.8636363636363635,
+        "fp_rate": 0.08333333333333333
+      },
+      "test": {
+        "coverage": 0.5,
+        "precision": 0.2692307692307692,
+        "f1": 0.35000000000000003,
+        "fp_rate": 0.31666666666666665
+      }
+    },
+    "backward": {
+      "train": {
+        "coverage": 0.95,
+        "precision": 0.8085106382978723,
+        "f1": 0.8735632183908046,
+        "fp_rate": 0.075
+      },
+      "test": {
+        "coverage": 0.4666666666666667,
+        "precision": 0.2916666666666667,
+        "f1": 0.35897435897435903,
+        "fp_rate": 0.288135593220339
+      }
+    },
+    "left": {
+      "train": {
+        "coverage": 0.975,
+        "precision": 0.8125,
+        "f1": 0.8863636363636362,
+        "fp_rate": 0.075
+      },
+      "test": {
+        "coverage": 0.5333333333333333,
+        "precision": 0.3333333333333333,
+        "f1": 0.4102564102564102,
+        "fp_rate": 0.2711864406779661
+      }
+    },
+    "forward": {
+      "train": {
+        "coverage": 0.95,
+        "precision": 0.76,
+        "f1": 0.8444444444444444,
+        "fp_rate": 0.1
+      },
+      "test": {
+        "coverage": 0.43333333333333335,
+        "precision": 0.4642857142857143,
+        "f1": 0.4482758620689655,
+        "fp_rate": 0.3409090909090909
+      }
+    }
+  },
+  "global_macro_f1_train": 0.8670019157088122,
+  "global_macro_f1_test": 0.3918766578249337,
+  "global_macro_precision_test": 0.3396291208791209,
+  "global_macro_coverage_test": 0.48333333333333334
+}

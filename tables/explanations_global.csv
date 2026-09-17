@@ -1,0 +1,11 @@
+dataset,global_macro_f1_train,global_macro_f1_test,global_macro_precision_test,global_macro_coverage_test
+BasicMotions,91.7,82.9,88.1,82.5
+Cricket,89.8,75.9,72.8,81.9
+DuckDuckGeese,79.2,38.2,38.9,42.0
+ERing,97.0,70.4,73.4,70.4
+Epilepsy,91.4,85.3,78.6,93.5
+HandMovementDirection,86.7,39.2,34.0,48.3
+Heartbeat,68.4,60.0,64.7,57.7
+RacketSports,87.3,69.6,63.9,77.0
+StandWalkJump,73.1,41.9,37.5,60.0
+UWaveGestureLibrary,86.6,70.3,67.8,74.7

@@ -1,0 +1,54 @@
+{
+  "local_per_class": {
+    "walking": {
+      "n_instances": 5,
+      "n_explained": 3,
+      "mean_precision": 1.0,
+      "std_precision": 0.0,
+      "mean_depth": 2.0,
+      "mean_length": 1.0
+    },
+    "jumping": {
+      "n_instances": 10,
+      "n_explained": 3,
+      "mean_precision": 0.3333333333333333,
+      "std_precision": 0.0,
+      "mean_depth": 2.0,
+      "mean_length": 1.0
+    }
+  },
+  "global_per_class": {
+    "jumping": {
+      "train": {
+        "coverage": 0.75,
+        "precision": 0.3333333333333333,
+        "f1": 0.46153846153846156,
+        "fp_rate": 0.75
+      },
+      "test": {
+        "coverage": 1.0,
+        "precision": 0.4166666666666667,
+        "f1": 0.5882352941176471,
+        "fp_rate": 0.7
+      }
+    },
+    "walking": {
+      "train": {
+        "coverage": 1.0,
+        "precision": 1.0,
+        "f1": 1.0,
+        "fp_rate": 0.0
+      },
+      "test": {
+        "coverage": 0.2,
+        "precision": 0.3333333333333333,
+        "f1": 0.25,
+        "fp_rate": 0.2
+      }
+    }
+  },
+  "global_macro_f1_train": 0.7307692307692308,
+  "global_macro_f1_test": 0.41911764705882354,
+  "global_macro_precision_test": 0.375,
+  "global_macro_coverage_test": 0.6
+}

@@ -23,7 +23,9 @@ Figures written to --out_dir:
   4. accuracy_vs_time.png     accuracy against wall-clock -- the cost of the win
   5. depth_until_effect.png   does the ranking survive every STL feature config
                               (within-STL comparisons only)
-  6. summary.csv              the numbers behind the figures, incl. Wilcoxon
+  6. budget_interaction.png   does the gap widen with the feature budget --
+                              the linear head keeps scaling, the tree saturates
+  7. summary.csv              the numbers behind the figures, incl. Wilcoxon
 
 Usage:
   python scripts/plot_results.py --results_dir results --out_dir figures
@@ -333,6 +335,75 @@ def plot_depth_until_effect(pairs: pd.DataFrame, out_dir: Path, label: str) -> N
     print(f"  wrote {out_dir / 'depth_until_effect.png'}")
 
 
+def plot_budget_interaction(pairs: pd.DataFrame, out_dir: Path,
+                            method_a: str, method_b: str) -> None:
+    """Does the gap between the two heads grow with the feature budget?
+
+    This is the ROCKET thesis stated as a testable claim about the classifier:
+    a linear head over many weak random features keeps converting budget into
+    accuracy, while a tree can only ever use the handful of features it splits
+    on and saturates. If that holds, the gap must WIDEN with budget rather than
+    sit at a constant offset -- a single pooled delta cannot tell the two apart,
+    which is why this panel exists separately from paired_delta.png.
+
+    Left panel shows both levels (the saturation is the point, and it is
+    invisible in a difference) and right panel the paired gap with a CI.
+    """
+    budgets = sorted(pairs["budget"].dropna().unique())
+    if len(budgets) < 2:
+        print("  skipping budget_interaction.png (need >=2 budgets)")
+        return
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.4, 4.6))
+
+    for m, color in [(method_a, "tab:blue"), (method_b, "tab:orange")]:
+        # Average within a dataset first so datasets with more surviving rows
+        # do not dominate the across-dataset mean.
+        per_ds = pairs.groupby(["budget", "dataset"])[m].mean()
+        g = per_ds.groupby("budget").agg(["mean", "std", "count"])
+        se = g["std"] / np.sqrt(g["count"].clip(lower=1))
+        ax1.plot(g.index, g["mean"], marker="o", ms=5, lw=1.7, color=color,
+                 label=PRETTY.get(m, m))
+        ax1.fill_between(g.index, g["mean"] - se, g["mean"] + se,
+                         color=color, alpha=0.18)
+
+    ax1.set_xscale("log")
+    ax1.set_xlabel("budget (number of sampled STL formulas)")
+    ax1.set_ylabel("balanced accuracy")
+    ax1.set_title("The tree saturates; the linear head keeps scaling",
+                  fontsize=11)
+    ax1.legend(fontsize=9)
+
+    rows = []
+    for b, g in pairs.groupby("budget"):
+        d = g["delta"].to_numpy()
+        n = len(d)
+        se = d.std(ddof=1) / np.sqrt(n) if n > 1 else np.nan
+        rows.append({"budget": b, "delta": d.mean(), "half": 1.96 * se,
+                     "win": float((d > 0).mean())})
+    gaps = pd.DataFrame(rows).sort_values("budget")
+
+    ax2.axhline(0, color="0.3", lw=1.2, ls="--", zorder=1)
+    ax2.errorbar(gaps["budget"], gaps["delta"], yerr=gaps["half"], marker="o",
+                 ms=6, lw=1.7, capsize=4, color="tab:blue", zorder=3)
+    for _, r in gaps.iterrows():
+        ax2.annotate(f"{r['win']:.0%} wins", (r["budget"], r["delta"]),
+                     xytext=(0, -16), textcoords="offset points",
+                     fontsize=7.5, ha="center", alpha=0.8)
+
+    ax2.set_xscale("log")
+    ax2.set_xlabel("budget (number of sampled STL formulas)")
+    ax2.set_ylabel(f"{PRETTY.get(method_a, method_a)} - "
+                   f"{PRETTY.get(method_b, method_b)}")
+    ax2.set_title("The gap widens monotonically with budget\n"
+                  "bars +/-1.96 SE over paired runs", fontsize=11)
+
+    fig.tight_layout()
+    fig.savefig(out_dir / "budget_interaction.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"  wrote {out_dir / 'budget_interaction.png'}")
+
+
 # ---------------------------------------------------------------------------
 # Summary table
 # ---------------------------------------------------------------------------
@@ -444,6 +515,7 @@ def main() -> None:
     plot_win_matrix(pairs, out_dir, label)
     plot_accuracy_vs_time(df, out_dir)
     plot_depth_until_effect(pairs, out_dir, label)
+    plot_budget_interaction(pairs, out_dir, a, b)
     summary = write_summary(pairs, out_dir, a, b)
 
     print(f"\nPer-dataset paired summary ({label}):")

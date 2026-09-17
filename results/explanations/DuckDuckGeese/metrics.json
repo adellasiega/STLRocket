@@ -1,0 +1,120 @@
+{
+  "local_per_class": {
+    "canadian_goose": {
+      "n_instances": 17,
+      "n_explained": 17,
+      "mean_precision": 0.7721033868092693,
+      "std_precision": 0.21936899043172425,
+      "mean_depth": 2.2941176470588234,
+      "mean_length": 2.2941176470588234
+    },
+    "white-faced_whistling_duck": {
+      "n_instances": 8,
+      "n_explained": 8,
+      "mean_precision": 0.8888888888888888,
+      "std_precision": 0.05555555555555555,
+      "mean_depth": 1.125,
+      "mean_length": 1.125
+    },
+    "black-bellied_whistling_duck": {
+      "n_instances": 8,
+      "n_explained": 8,
+      "mean_precision": 0.7729166666666667,
+      "std_precision": 0.11271199162269983,
+      "mean_depth": 2.875,
+      "mean_length": 2.875
+    },
+    "pink-footed_goose": {
+      "n_instances": 12,
+      "n_explained": 12,
+      "mean_precision": 0.9112654320987654,
+      "std_precision": 0.2237348318795927,
+      "mean_depth": 1.0,
+      "mean_length": 1.0
+    },
+    "greylag_goose": {
+      "n_instances": 5,
+      "n_explained": 5,
+      "mean_precision": 0.703030303030303,
+      "std_precision": 0.36685444728294686,
+      "mean_depth": 3.2,
+      "mean_length": 3.2
+    }
+  },
+  "global_per_class": {
+    "black-bellied_whistling_duck": {
+      "train": {
+        "coverage": 0.8,
+        "precision": 0.8888888888888888,
+        "f1": 0.8421052631578948,
+        "fp_rate": 0.025
+      },
+      "test": {
+        "coverage": 0.2,
+        "precision": 0.5,
+        "f1": 0.28571428571428575,
+        "fp_rate": 0.05
+      }
+    },
+    "canadian_goose": {
+      "train": {
+        "coverage": 1.0,
+        "precision": 0.6666666666666666,
+        "f1": 0.8,
+        "fp_rate": 0.125
+      },
+      "test": {
+        "coverage": 0.6,
+        "precision": 0.42857142857142855,
+        "f1": 0.5,
+        "fp_rate": 0.2
+      }
+    },
+    "greylag_goose": {
+      "train": {
+        "coverage": 0.7,
+        "precision": 0.7,
+        "f1": 0.7,
+        "fp_rate": 0.075
+      },
+      "test": {
+        "coverage": 0.3,
+        "precision": 0.21428571428571427,
+        "f1": 0.25,
+        "fp_rate": 0.275
+      }
+    },
+    "pink-footed_goose": {
+      "train": {
+        "coverage": 0.7,
+        "precision": 0.875,
+        "f1": 0.7777777777777777,
+        "fp_rate": 0.025
+      },
+      "test": {
+        "coverage": 0.7,
+        "precision": 0.4666666666666667,
+        "f1": 0.56,
+        "fp_rate": 0.2
+      }
+    },
+    "white-faced_whistling_duck": {
+      "train": {
+        "coverage": 0.8,
+        "precision": 0.8888888888888888,
+        "f1": 0.8421052631578948,
+        "fp_rate": 0.025
+      },
+      "test": {
+        "coverage": 0.3,
+        "precision": 0.3333333333333333,
+        "f1": 0.3157894736842105,
+        "fp_rate": 0.15
+      }
+    }
+  },
+  "global_macro_f1_train": 0.7923976608187134,
+  "global_macro_f1_test": 0.38230075187969925,
+  "global_macro_precision_test": 0.38857142857142857,
+  "global_macro_coverage_test": 0.42000000000000004
+}

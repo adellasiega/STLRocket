@@ -1,0 +1,11 @@
+dataset,mean_local_precision,mean_local_depth,global_macro_f1_test,mean_global_depth
+BasicMotions,89.8,2.3,82.9,1.8
+Cricket,88.7,2.8,75.9,2.5
+DuckDuckGeese,81.7,2.0,38.2,2.6
+ERing,97.2,2.3,70.4,1.5
+Epilepsy,91.3,2.2,85.3,4.0
+HandMovementDirection,84.1,4.2,39.2,12.0
+Heartbeat,80.0,5.0,60.0,7.0
+RacketSports,86.7,2.7,69.6,4.8
+StandWalkJump,66.7,2.0,41.9,2.0
+UWaveGestureLibrary,92.2,3.1,70.3,4.0

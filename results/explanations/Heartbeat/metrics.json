@@ -1,0 +1,54 @@
+{
+  "local_per_class": {
+    "normal": {
+      "n_instances": 105,
+      "n_explained": 105,
+      "mean_precision": 0.740525385012226,
+      "std_precision": 0.10882730616357139,
+      "mean_depth": 7.0,
+      "mean_length": 5.0476190476190474
+    },
+    "abnormal": {
+      "n_instances": 100,
+      "n_explained": 100,
+      "mean_precision": 0.8634279631869078,
+      "std_precision": 0.007755522294197671,
+      "mean_depth": 2.99,
+      "mean_length": 1.0
+    }
+  },
+  "global_per_class": {
+    "abnormal": {
+      "train": {
+        "coverage": 0.5782312925170068,
+        "precision": 0.8585858585858586,
+        "f1": 0.6910569105691057,
+        "fp_rate": 0.24561403508771928
+      },
+      "test": {
+        "coverage": 0.5743243243243243,
+        "precision": 0.8095238095238095,
+        "f1": 0.6719367588932806,
+        "fp_rate": 0.3508771929824561
+      }
+    },
+    "normal": {
+      "train": {
+        "coverage": 0.7192982456140351,
+        "precision": 0.640625,
+        "f1": 0.6776859504132231,
+        "fp_rate": 0.1564625850340136
+      },
+      "test": {
+        "coverage": 0.5789473684210527,
+        "precision": 0.4852941176470588,
+        "f1": 0.528,
+        "fp_rate": 0.23648648648648649
+      }
+    }
+  },
+  "global_macro_f1_train": 0.6843714304911643,
+  "global_macro_f1_test": 0.5999683794466404,
+  "global_macro_precision_test": 0.6474089635854342,
+  "global_macro_coverage_test": 0.5766358463726885
+}

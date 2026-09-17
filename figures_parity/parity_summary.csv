@@ -1,0 +1,23 @@
+dataset,arm,n_pairs,stl_mean,rocket_mean,gap,ci_lo,ci_hi,within_margin,verdict,depth,until_weight
+BasicMotions,tuned,10,0.98000,0.97500,0.00500,-0.01347,0.02347,True,equivalent,3.00000,1.00000
+Cricket,tuned,7,0.96825,0.98810,-0.01984,-0.03619,-0.00350,True,equivalent,3.00000,1.00000
+DuckDuckGeese,tuned,10,0.52600,0.49600,0.03000,-0.04873,0.10873,True,inconclusive,1.00000,0.00000
+ERing,tuned,10,0.89111,0.95852,-0.06741,-0.09269,-0.04212,False,inconclusive,3.00000,1.00000
+Epilepsy,tuned,10,0.96260,0.97118,-0.00858,-0.01717,0.00000,True,equivalent,2.00000,0.00000
+HandMovementDirection,tuned,10,0.51262,0.41738,0.09524,0.03945,0.15102,False,inconclusive,3.00000,0.00000
+Heartbeat,tuned,10,0.66073,0.55235,0.10839,0.08391,0.13286,False,STL better,3.00000,0.00000
+RacketSports,tuned,10,0.86495,0.89624,-0.03129,-0.04539,-0.01719,True,equivalent,2.00000,1.00000
+StandWalkJump,tuned,10,0.36000,0.53333,-0.17333,-0.22931,-0.11735,False,ROCKET better,2.00000,0.00000
+UWaveGestureLibrary,tuned,10,0.88562,0.91937,-0.03375,-0.04305,-0.02445,True,equivalent,2.00000,1.00000
+ALL,tuned,97,0.75478,0.76402,-0.00924,-0.02803,0.00955,True,equivalent,,
+BasicMotions,default_d1_uw0,10,0.86500,0.97500,-0.11000,-0.13945,-0.08055,False,ROCKET better,3.00000,1.00000
+Cricket,default_d1_uw0,10,0.90278,0.99167,-0.08889,-0.09849,-0.07929,False,ROCKET better,3.00000,1.00000
+DuckDuckGeese,default_d1_uw0,10,0.52600,0.49600,0.03000,-0.04873,0.10873,True,inconclusive,1.00000,0.00000
+ERing,default_d1_uw0,10,0.82741,0.95852,-0.13111,-0.20012,-0.06210,False,ROCKET better,3.00000,1.00000
+Epilepsy,default_d1_uw0,10,0.92417,0.97118,-0.04702,-0.05713,-0.03690,True,inconclusive,2.00000,0.00000
+HandMovementDirection,default_d1_uw0,10,0.47000,0.41738,0.05262,-0.02496,0.13019,False,inconclusive,3.00000,0.00000
+Heartbeat,default_d1_uw0,10,0.64092,0.55235,0.08857,0.06898,0.10816,False,STL better,3.00000,0.00000
+RacketSports,default_d1_uw0,10,0.80793,0.89624,-0.08831,-0.10803,-0.06858,False,ROCKET better,2.00000,1.00000
+StandWalkJump,default_d1_uw0,10,0.28667,0.53333,-0.24667,-0.29719,-0.19615,False,ROCKET better,2.00000,0.00000
+UWaveGestureLibrary,default_d1_uw0,10,0.83844,0.91937,-0.08094,-0.09221,-0.06966,False,ROCKET better,2.00000,1.00000
+ALL,default_d1_uw0,100,0.70893,0.77110,-0.06217,-0.08449,-0.03986,False,inconclusive,,

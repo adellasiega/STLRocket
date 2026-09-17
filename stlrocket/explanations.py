@@ -5,6 +5,7 @@ import numpy as np
 from torcheck.stl import Not, And, Or
 from torcheck import simplify
 from .features import eval_robustness, shift_atom_thresholds
+from .formula_sampler import F0
 from .evaluation import evaluate_local_explanation
 from .simplification import simplify_global, simplify_data_aware, round_thresholds
 
@@ -187,9 +188,15 @@ def build_global_explanations(
     simplify_agreement: float = 0.98,
     simplify_min_gain: float = 0.0,
     simplify_decimals: int = 1,
+    rng: np.random.Generator | None = None,
 ) -> tuple[dict, dict, dict]:
+    # Seeded by default: the train-set cap below decides which instances the
+    # global explanations are built from, so an unseeded draw would make the
+    # returned formulas irreproducible on any dataset larger than the cap.
+    if rng is None:
+        rng = np.random.default_rng(0)
     if len(y_tr) > 1000:
-        idx = np.random.choice(len(y_tr), 1000, replace=False)
+        idx = rng.choice(len(y_tr), 1000, replace=False)
         X_tr_feats = X_tr_feats[idx]
         X_tr = X_tr[idx]
         y_tr = y_tr[idx]
@@ -246,10 +253,14 @@ def build_global_explanations(
             pool_size=pool_size, precision_threshold=precision_threshold,
         )
         if phi_local is not None:
-            precision, n_tp = evaluate_local_explanation(phi_local, target_class, X_tr, y_tr)
+            precision, n_tp, n_fp = evaluate_local_explanation(
+                phi_local, target_class, X_tr, y_tr)
+            depth = F0.formula_depth(phi_local)
         else:
-            precision, n_tp = 0.0, 0
+            precision, n_tp, n_fp = 0.0, 0, 0
+            depth = 0
 
-        locals_per_class[target_class].append((i, phi_local, picks, precision, n_tp))
+        locals_per_class[target_class].append(
+            (i, phi_local, picks, precision, n_tp, n_fp, depth))
 
     return global_per_class, locals_per_class, n_unique_per_class

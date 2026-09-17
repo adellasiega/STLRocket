@@ -1,0 +1,18 @@
+{
+  "dataset": "Cricket",
+  "n_formulas": 10000,
+  "depth_max": 3,
+  "until_weight": 0.0,
+  "only_temporal": true,
+  "seed": 0,
+  "cv": 5,
+  "pool_size": 10,
+  "precision_threshold": 0.75,
+  "simplify_agreement": 0.98,
+  "simplify_min_gain": 0.0,
+  "simplify_decimals": 1,
+  "balanced_accuracy": 0.9027777777777778,
+  "time_feats_s": 10.1482,
+  "time_fit_s": 13.0306,
+  "time_explain_s": 1.9323
+}
