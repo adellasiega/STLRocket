@@ -79,7 +79,6 @@ def _build_raw_formula_bank(
         t_max=T - 1,
         depth_max=config.depth_max,
         seed=seed,
-        only_temporal=config.only_temporal,
         until_weight=config.until_weight,
     )
 

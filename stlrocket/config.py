@@ -9,7 +9,6 @@ class ExperimentConfig:
     # Feature extraction
     n_formulas: int
     depth_max: int 
-    only_temporal: bool 
     until_weight: float
 
     # Classifier

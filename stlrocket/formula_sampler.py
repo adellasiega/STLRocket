@@ -1,19 +1,9 @@
-"""Random STL formula grammar sampler.
-
-Ported from stlkernel.distribution_formulae.F0 (~/Projects/STLKernel) so it lives
-in this project instead of depending on the external stlkernel package. Builds
-formulas out of torcheck.stl node classes (Atom/Not/And/Or/Globally/Eventually/
-Until) -- torcheck (~/Projects/TorCheck) remains STLRocket's STL AST/quantitative-
-semantics engine; a prior attempt to replace it with a vendored copy of stlcg++
-was reverted after stlcg++'s vmap-based batching turned out to scale as O(N*T^2)
-(O(N*W*T^2) for Until) in sample count N and signal length T, causing OOMs on
-long-time-series datasets. torcheck operates on truly-batched (N, V, T) tensors
-with O(T) / O(T*W) algorithms for the unbounded/bounded temporal operators, which
-is why we're back on it.
 """
+Random STL formula grammar sampler.
+"""
+
 import random
 from typing import Optional
-
 import torch
 from torcheck import stl
 
@@ -24,13 +14,11 @@ class F0:
         n_vars: int,
         v_min,
         v_max,
-        t_max: int = 100,        # last valid time index of the signal (T - 1)
-        depth_max: int = 3,
-        p_base: float = 0.05,        # base chance to stop at depth 0
-        only_temporal: bool = False, # if true, discard purely boolean formulae
-        until_weight: float = 0.05,
-        not_weight: float = 1.0,
-        seed: Optional[int] = None,
+        t_max: int,        # last valid time index of the signal (T - 1)
+        depth_max: int,
+        p_base: float,        # base chance to stop at depth 1 (the root is always temporal)
+        until_weight: float,
+        seed: Optional[int],
     ):
         self.n_vars = n_vars
         self.v_min = v_min
@@ -38,8 +26,6 @@ class F0:
         self.t_max = t_max
         self.depth_max = depth_max
         self.p_base = p_base
-        self.only_temporal = only_temporal
-        self.not_weight = not_weight
         self.until_weight = until_weight
 
         if seed is not None:
@@ -72,9 +58,13 @@ class F0:
 
         return stl.Atom(var_index=var_idx, threshold=threshold, lte=lte)
 
-    def _sample_operator_node(self, remaining_time: int, current_depth: int):
-        classes = ["And", "Or", "Not", "Globally", "Eventually", "Until"]
-        weights = [1.0, 1.0, self.not_weight, 1.0, 1.0, self.until_weight]
+    def _sample_operator_node(self, remaining_time: int, current_depth: int, temporal_only: bool = False):
+        if temporal_only:
+            classes = ["Globally", "Eventually", "Until"]
+            weights = [1.0, 1.0, self.until_weight]
+        else:
+            classes = ["And", "Or", "Not", "Globally", "Eventually", "Until"]
+            weights = [1.0, 1.0, 1.0, 1.0, 1.0, self.until_weight]
         op = random.choices(classes, weights=weights, k=1)[0]
 
         if op in ("Globally", "Eventually", "Until"):
@@ -137,7 +127,9 @@ class F0:
 
     @staticmethod
     def formula_depth(formula) -> int:
-        """Max nesting depth of a formula tree (0 for a bare atom)."""
+        """
+            Max nesting depth of a formula tree (0 for a bare atom).
+        """
         if isinstance(formula, stl.Atom):
             return 0
         if isinstance(formula, stl.Not):
@@ -150,7 +142,9 @@ class F0:
 
     @staticmethod
     def formula_size(formula) -> int:
-        """Total node count of a formula tree (1 for a bare atom)."""
+        """
+            Total node count of a formula tree (1 for a bare atom).
+        """
         if isinstance(formula, stl.Atom):
             return 1
         if isinstance(formula, stl.Not):
@@ -161,26 +155,16 @@ class F0:
             return 1 + F0.formula_size(formula.left_child) + F0.formula_size(formula.right_child)
         raise TypeError(f"Unknown formula node type: {type(formula)}")
 
-    def is_temporal(self, formula):
-        """Recursive check for whether a formula contains any temporal operators."""
-        if isinstance(formula, (stl.Globally, stl.Eventually, stl.Until)):
-            return True
-        if isinstance(formula, stl.Not):
-            return self.is_temporal(formula.child)
-        if isinstance(formula, (stl.And, stl.Or)):
-            return self.is_temporal(formula.left_child) or self.is_temporal(formula.right_child)
-        return False  # It's an atom
-
     def sample(self, n_formulae: int) -> list:
-        """Returns a list of n_formulae sampled formulas."""
+        """
+            Returns a list of n_formulae sampled formulas.
+        """
         # t_max is the last valid time index, so the largest bound a formula may
         # reference is t_max itself; the budget is that index, not t_max - 1.
         initial_time = self.t_max
-        sampled_formulae = []
-        while len(sampled_formulae) < n_formulae:
-            formula = self._sample_formula(initial_time, current_depth=0)
-            if self.only_temporal and not self.is_temporal(formula):
-                continue  # Discard purely boolean formulae
-            sampled_formulae.append(formula)
-
-        return sampled_formulae
+        # The root is always a temporal operator, so every formula is temporal
+        # by construction (no rejection sampling of purely boolean formulae).
+        return [
+            self._sample_operator_node(initial_time, current_depth=0, temporal_only=True)
+            for _ in range(n_formulae)
+        ]
