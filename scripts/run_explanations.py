@@ -100,7 +100,6 @@ def build_config(dataset: str, depth_max: int, args) -> ExperimentConfig:
         dataset=dataset,
         n_formulas=args.budget,
         depth_max=depth_max,
-        only_temporal=args.only_temporal,
         until_weight=args.until_weight,
         cv=args.cv,
         pool_size=args.pool_size,
@@ -197,7 +196,7 @@ def run_dataset(dataset: str, depth_max: int, args) -> dict:
           f"{len(np.unique(y_tr))} classes", flush=True)
 
     t0 = time.perf_counter()
-    formulas, X_tr_feats, X_te_feats = build_formula_bank(X_tr, X_te, config, args.seed)
+    formulas, X_tr_feats, X_te_feats, _mu, _sigma = build_formula_bank(X_tr, X_te, config, args.seed)
     time_feats_s = time.perf_counter() - t0
     print(f"  features: {time_feats_s:.1f}s", flush=True)
 
@@ -234,7 +233,6 @@ def run_dataset(dataset: str, depth_max: int, args) -> dict:
         "n_formulas": args.budget,
         "depth_max": depth_max,
         "until_weight": args.until_weight,
-        "only_temporal": args.only_temporal,
         "seed": args.seed,
         "cv": args.cv,
         "pool_size": args.pool_size,
@@ -311,7 +309,6 @@ def parse_args():
     p.add_argument("--until_weight", type=float, default=0.0)
     p.add_argument("--depth", type=int, default=None,
                    help="override the per-dataset best depth from the table")
-    p.add_argument("--only_temporal", type=lambda x: x.lower() != "false", default=True)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--cv", type=int, default=5)
     p.add_argument("--pool_size", type=int, default=10)

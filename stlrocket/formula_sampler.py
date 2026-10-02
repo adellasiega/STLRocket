@@ -16,7 +16,6 @@ class F0:
         v_max,
         t_max: int,        # last valid time index of the signal (T - 1)
         depth_max: int,
-        p_base: float,        # base chance to stop at depth 1 (the root is always temporal)
         until_weight: float,
         seed: Optional[int],
     ):
@@ -25,28 +24,39 @@ class F0:
         self.v_max = v_max
         self.t_max = t_max
         self.depth_max = depth_max
-        self.p_base = p_base
         self.until_weight = until_weight
 
         if seed is not None:
             random.seed(seed)
             torch.manual_seed(seed)
 
-    def _get_term_probability(self, current_depth: int) -> float:
-        """Probability to stop and create an atom; grows linearly from p_base to 1.0."""
-        growth = current_depth / self.depth_max
-        return min(1.0, self.p_base + (1.0 - self.p_base) * growth)
+    def _sample_target_depth(self) -> int:
+        """Per-formula depth in 1..depth_max, with P(d) proportional to 1/d (shallow formulae favoured)."""
+        depths = list(range(1, self.depth_max + 1))
+        return random.choices(depths, weights=[1.0 / d for d in depths], k=1)[0]
 
-    def _sample_formula(self, remaining_time: int, current_depth: int = 0):
-        if current_depth >= self.depth_max or random.random() < self._get_term_probability(current_depth):
+    def _sample_formula(self, remaining_time: int, current_depth: int, target_depth: int, must_reach: bool):
+        """
+            must_reach: this branch has to grow to exactly target_depth, so that every
+            formula has the depth it was assigned. Other branches stop with probability
+            growing linearly from 0 to 1 at target_depth.
+        """
+        if current_depth >= target_depth:
             return self._sample_atomic_predicate()
-        return self._sample_operator_node(remaining_time, current_depth)
+        if not must_reach and random.random() < current_depth / target_depth:
+            return self._sample_atomic_predicate()
+        return self._sample_operator_node(remaining_time, current_depth, target_depth, must_reach)
 
     @staticmethod
-    def _split_budget(remaining_time: int) -> tuple[int, int]:
-        """Split a time budget between two siblings whose depths add up."""
-        left = random.randint(0, max(0, remaining_time))
-        return left, max(0, remaining_time) - left
+    def _sample_interval(remaining_time: int) -> tuple[int, int]:
+        """
+            Bounded interval [a, b] with b <= remaining_time. The width b - a is
+            log-uniform in [1, remaining_time], so narrow windows are common and
+            every time scale is equally represented; the offset a is then uniform.
+        """
+        width = int((remaining_time + 1) ** random.random())  # in [1, remaining_time]
+        a = random.randint(0, remaining_time - width)
+        return a, a + width
 
     def _sample_atomic_predicate(self):
         var_idx = random.randint(0, self.n_vars - 1)
@@ -58,71 +68,88 @@ class F0:
 
         return stl.Atom(var_index=var_idx, threshold=threshold, lte=lte)
 
-    def _sample_operator_node(self, remaining_time: int, current_depth: int, temporal_only: bool = False):
+    def _sample_operator_node(
+        self,
+        remaining_time: int,
+        current_depth: int,
+        target_depth: int,
+        must_reach: bool,
+        temporal_only: bool = False,
+        allow_not: bool = True,
+    ):
         if temporal_only:
             classes = ["Globally", "Eventually", "Until"]
             weights = [1.0, 1.0, self.until_weight]
         else:
-            classes = ["And", "Or", "Not", "Globally", "Eventually", "Until"]
-            weights = [1.0, 1.0, 1.0, 1.0, 1.0, self.until_weight]
+            classes = ["And", "Or", "Globally", "Eventually", "Until"]
+            weights = [1.0, 1.0, 1.0, 1.0, self.until_weight]
+            # Not must wrap an operator other than Not: Not(atom) is the atom with lte
+            # flipped and Not(Not(phi)) is phi. So its child must still have room for
+            # its own children (depth current_depth + 2).
+            if allow_not and current_depth + 2 <= target_depth:
+                classes.append("Not")
+                weights.append(1.0)
         op = random.choices(classes, weights=weights, k=1)[0]
 
         if op in ("Globally", "Eventually", "Until"):
-            variants = ["unbound"]
-            if remaining_time > 2:
+            # Bounded windows are favoured (3:1:1) since unbound and right_unbound
+            # ones always extend to the end of the trace.
+            variants, variant_weights = ["unbound"], [1.0]
+            if remaining_time > 0:
                 variants += ["bounded", "right_unbound"]
-            variant = random.choice(variants)
+                variant_weights += [3.0, 1.0]
+            variant = random.choices(variants, weights=variant_weights, k=1)[0]
+
+        # Of two children, a random one inherits the obligation to reach target_depth.
+        reach_left = random.random() < 0.5
+        d = current_depth + 1
+
+        def unary(budget):
+            return self._sample_formula(budget, d, target_depth, must_reach)
+
+        def binary(left_budget, right_budget):
+            left = self._sample_formula(left_budget, d, target_depth, must_reach and reach_left)
+            right = self._sample_formula(right_budget, d, target_depth, must_reach and not reach_left)
+            return left, right
 
         if op == "And":
-            left = self._sample_formula(remaining_time, current_depth + 1)
-            right = self._sample_formula(remaining_time, current_depth + 1)
+            left, right = binary(remaining_time, remaining_time)
             return stl.And(left, right)
 
         elif op == "Or":
-            left = self._sample_formula(remaining_time, current_depth + 1)
-            right = self._sample_formula(remaining_time, current_depth + 1)
+            left, right = binary(remaining_time, remaining_time)
             return stl.Or(left, right)
 
         elif op == "Not":
-            return stl.Not(self._sample_formula(remaining_time, current_depth + 1))
+            return stl.Not(self._sample_operator_node(remaining_time, d, target_depth, must_reach, allow_not=False))
 
         elif op in ("Globally", "Eventually"):
             OpClass = stl.Globally if op == "Globally" else stl.Eventually
             if variant == "unbound":
-                child = self._sample_formula(remaining_time, current_depth + 1)
+                child = unary(remaining_time)
                 return OpClass(child, unbound=True)
             elif variant == "bounded":
-                b = random.randint(1, remaining_time)
-                a = random.randint(0, b - 1)
-                child = self._sample_formula(remaining_time - b, current_depth + 1)
+                a, b = self._sample_interval(remaining_time)
+                child = unary(remaining_time - b)
                 return OpClass(child, unbound=False, left_time_bound=a, right_time_bound=b)
             else:  # right_unbound
                 a = random.randint(0, remaining_time)
-                child = self._sample_formula(remaining_time - a, current_depth + 1)
+                child = unary(remaining_time - a)
                 return OpClass(child, right_unbound=True, left_time_bound=a)
 
         else:  # Until
-            # Until's time_depth SUMS its children's depths (unlike And/Or, which
-            # take the max), so the two children must split the remaining budget
-            # rather than each receiving all of it -- otherwise nested Untils can
-            # demand more signal than the trace provides.
+            # Until's time_depth is the MAX of its children's depths plus its own
+            # bound (as for And/Or), so both children get the whole remaining budget.
             if variant == "unbound":
-                left_budget, right_budget = self._split_budget(remaining_time)
-                left = self._sample_formula(left_budget, current_depth + 1)
-                right = self._sample_formula(right_budget, current_depth + 1)
+                left, right = binary(remaining_time, remaining_time)
                 return stl.Until(left, right, unbound=True)
             elif variant == "bounded":
-                b = random.randint(1, remaining_time)
-                a = random.randint(0, b - 1)
-                left_budget, right_budget = self._split_budget(remaining_time - b)
-                left = self._sample_formula(left_budget, current_depth + 1)
-                right = self._sample_formula(right_budget, current_depth + 1)
+                a, b = self._sample_interval(remaining_time)
+                left, right = binary(remaining_time - b, remaining_time - b)
                 return stl.Until(left, right, unbound=False, left_time_bound=a, right_time_bound=b)
             else:  # right_unbound
                 a = random.randint(0, remaining_time)
-                left_budget, right_budget = self._split_budget(remaining_time - a)
-                left = self._sample_formula(left_budget, current_depth + 1)
-                right = self._sample_formula(right_budget, current_depth + 1)
+                left, right = binary(remaining_time - a, remaining_time - a)
                 return stl.Until(left, right, right_unbound=True, left_time_bound=a)
 
     @staticmethod
@@ -165,6 +192,12 @@ class F0:
         # The root is always a temporal operator, so every formula is temporal
         # by construction (no rejection sampling of purely boolean formulae).
         return [
-            self._sample_operator_node(initial_time, current_depth=0, temporal_only=True)
+            self._sample_operator_node(
+                initial_time,
+                current_depth=0,
+                target_depth=self._sample_target_depth(),
+                must_reach=True,
+                temporal_only=True,
+            )
             for _ in range(n_formulae)
         ]

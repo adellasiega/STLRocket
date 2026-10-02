@@ -47,7 +47,7 @@ from stlrocket.classifier import available_cpus, train_classifier, evaluate_clas
 
 
 ROW_FIELDS = [
-    "dataset", "method", "budget", "depth", "until_weight", "only_temporal", "seed",
+    "dataset", "method", "budget", "depth", "until_weight", "seed",
     "balanced_accuracy", "time_fit_s", "time_feats_s", "time_total_s", "status",
 ]
 
@@ -65,7 +65,6 @@ def build_stl_features(X_tr_raw, y_tr, X_te_raw, n_formulas, depth_max, seed, ar
         dataset=args.dataset,
         n_formulas=n_formulas,
         depth_max=depth_max,
-        only_temporal=args.only_temporal,
         until_weight=args.until_weight,
         cv=args.cv,
         pool_size=0,
@@ -80,7 +79,7 @@ def build_stl_features(X_tr_raw, y_tr, X_te_raw, n_formulas, depth_max, seed, ar
         device="cpu",
     )
     t0 = time.perf_counter()
-    _formulas, X_tr_feats, X_te_feats = build_formula_bank(X_tr_raw, X_te_raw, config, seed)
+    _formulas, X_tr_feats, X_te_feats, _mu, _sigma = build_formula_bank(X_tr_raw, X_te_raw, config, seed)
     time_feats_s = round(time.perf_counter() - t0, 4)
     return config, X_tr_feats, X_te_feats, time_feats_s
 
@@ -144,7 +143,6 @@ def make_row(args, method, budget, depth, seed, metrics) -> dict:
         # Ablation axes are recorded per row so results.csv is self-describing:
         # many single-config runs can be concatenated without joining config.json.
         "until_weight": args.until_weight,
-        "only_temporal": args.only_temporal,
         "seed": seed,
         "balanced_accuracy": metrics.get("balanced_accuracy"),
         "time_fit_s": metrics.get("time_fit_s"),
@@ -196,7 +194,6 @@ def parse_args():
     p.add_argument("--cv", type=int, default=5,
                    help="shared CV folds for both heads; each head clamps it down "
                         "when a class has fewer members than folds")
-    p.add_argument("--only_temporal", type=lambda x: x.lower() != "false", default=True)
     p.add_argument("--until_weight", type=float, default=0.0)
     p.add_argument("--output_dir", default="comparison_results")
     return p.parse_args()

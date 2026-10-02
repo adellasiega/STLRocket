@@ -65,7 +65,7 @@ def run_dataset(dataset: str, depth_max: int, args) -> dict:
 
     config = ExperimentConfig(
         dataset=dataset, n_formulas=args.budget, depth_max=depth_max,
-        only_temporal=args.only_temporal, until_weight=args.until_weight,
+        until_weight=args.until_weight,
         cv=args.cv, pool_size=args.pool_size,
         precision_threshold=args.precision_threshold,
         simplify_agreement=args.simplify_agreement,
@@ -79,7 +79,7 @@ def run_dataset(dataset: str, depth_max: int, args) -> dict:
     print(f"  train {X_tr.shape}  test {X_te.shape}  "
           f"{len(np.unique(y_tr))} classes", flush=True)
 
-    formulas, X_tr_feats, X_te_feats = build_formula_bank(X_tr, X_te, config, args.seed)
+    formulas, X_tr_feats, X_te_feats, _mu, _sigma = build_formula_bank(X_tr, X_te, config, args.seed)
     model = train_classifier(X_tr_feats, y_tr, config, seed=args.seed)
     acc = evaluate_classifier(model, X_te_feats, y_te)["balanced_accuracy"]
     print(f"  fit: balanced_accuracy={acc:.4f}", flush=True)
@@ -162,7 +162,6 @@ def parse_args():
     p.add_argument("--budget", type=int, default=10000)
     p.add_argument("--until_weight", type=float, default=0.0)
     p.add_argument("--depth", type=int, default=None)
-    p.add_argument("--only_temporal", type=lambda x: x.lower() != "false", default=True)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--cv", type=int, default=5)
     p.add_argument("--pool_size", type=int, default=10)

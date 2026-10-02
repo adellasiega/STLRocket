@@ -145,14 +145,14 @@ def main() -> None:
 
     config = ExperimentConfig(
         dataset=args.dataset, n_formulas=args.budget, depth_max=args.depth_max,
-        only_temporal=True, until_weight=0.0, cv=5,
+        until_weight=0.0, cv=5,
         pool_size=args.pool_size, precision_threshold=args.precision_threshold,
         simplify_agreement=0.98, simplify_min_gain=0.0, simplify_decimals=1,
         n_run=1, base_seed=args.seed, explain=True, output_dir=".", device="cpu",
     )
 
     X_tr, y_tr, X_te, y_te = load_dataset(args.dataset)
-    formulas, X_tr_feats, X_te_feats = build_formula_bank(X_tr, X_te, config, args.seed)
+    formulas, X_tr_feats, X_te_feats, _mu, _sigma = build_formula_bank(X_tr, X_te, config, args.seed)
     model = train_classifier(X_tr_feats, y_tr, config, seed=args.seed)
 
     W, b = model.coef_, model.intercept_

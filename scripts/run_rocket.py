@@ -49,7 +49,7 @@ from stlrocket.classifier import available_cpus, train_classifier, evaluate_clas
 
 # Identical to run_stlinear_stltree.py so the two CSVs concatenate without a schema fix.
 ROW_FIELDS = [
-    "dataset", "method", "budget", "depth", "until_weight", "only_temporal", "seed",
+    "dataset", "method", "budget", "depth", "until_weight", "seed",
     "balanced_accuracy", "time_fit_s", "time_feats_s", "time_total_s", "status",
 ]
 
@@ -145,7 +145,6 @@ def make_row(args, method, budget, seed, metrics) -> dict:
         # frame can filter ROCKET rows with a simple isna() on either column.
         "depth": "",
         "until_weight": "",
-        "only_temporal": "",
         "seed": seed,
         "balanced_accuracy": metrics.get("balanced_accuracy"),
         "time_fit_s": metrics.get("time_fit_s"),
@@ -226,7 +225,6 @@ def main() -> None:
         dataset=args.dataset,
         n_formulas=max(budgets),
         depth_max=1,
-        only_temporal=True,
         until_weight=0.0,
         cv=args.cv,
         pool_size=0,

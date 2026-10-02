@@ -8,6 +8,10 @@ from .config import ExperimentConfig
 
 _DEFAULT_DEVICE = "cpu"
 
+# Samples evaluated per forward pass. Until builds (batch, 1, T, T) tensors in
+# torcheck, so evaluating the whole dataset at once runs out of memory on long T.
+_BATCH_SIZE = 128
+
 
 def set_device(device: str) -> None:
     """Set the default torch device used by eval_robustness/extract_features."""
@@ -20,11 +24,18 @@ def _as_signal(X: np.ndarray, device: str | None = None) -> torch.Tensor:
     return torch.from_numpy(X).to(device or _DEFAULT_DEVICE)
 
 
-def eval_robustness(phi, X: np.ndarray, device: str | None = None) -> np.ndarray:
-    signal = _as_signal(X, device)
+def _robustness(phi, signal: torch.Tensor, batch_size: int = _BATCH_SIZE) -> torch.Tensor:
+    """Robustness at t=0 of every sample, evaluated batch_size samples at a time."""
     with torch.no_grad():
-        rho = phi.quantitative(signal, evaluate_at_all_times=False, normalize=False)
-    return rho.detach().cpu().numpy().ravel()
+        return torch.cat([
+            phi.quantitative(signal[i:i + batch_size], evaluate_at_all_times=False, normalize=False)
+            for i in range(0, signal.shape[0], batch_size)
+        ])
+
+
+def eval_robustness(phi, X: np.ndarray, device: str | None = None) -> np.ndarray:
+    rho = _robustness(phi, _as_signal(X, device))
+    return rho.cpu().numpy().ravel()
 
 
 def shift_atom_thresholds(node, delta: float, sign: int = 1) -> None:
@@ -50,15 +61,8 @@ def shift_atom_thresholds(node, delta: float, sign: int = 1) -> None:
 
 def extract_features(X: np.ndarray, formulas: list, device: str | None = None) -> np.ndarray:
     signal = _as_signal(X, device)
-    with torch.no_grad():
-        feats = torch.stack(
-            [
-                phi.quantitative(signal, evaluate_at_all_times=False, normalize=False)
-                for phi in formulas
-            ],
-            dim=1,
-        )
-    return feats.detach().cpu().numpy()
+    feats = torch.stack([_robustness(phi, signal) for phi in formulas], dim=1)
+    return feats.cpu().numpy()
 
 
 def _build_raw_formula_bank(
@@ -66,11 +70,11 @@ def _build_raw_formula_bank(
     X_te: np.ndarray,
     config: ExperimentConfig,
     seed: int,
-) -> tuple[list, np.ndarray, np.ndarray]:
+) -> tuple[list, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     N, V, T = X_tr.shape
 
-    v_min = np.min(X_tr, axis=(0, 2))
-    v_max = np.max(X_tr, axis=(0, 2))
+    v_min = np.nanmin(X_tr, axis=(0, 2))
+    v_max = np.nanmax(X_tr, axis=(0, 2))
 
     generator = F0(
         n_vars=V,
@@ -97,7 +101,7 @@ def _build_raw_formula_bank(
     X_tr_feats = (X_tr_feats - mu) / (sigma + 1e-8)
     X_te_feats = (X_te_feats - mu) / (sigma + 1e-8)
 
-    return formulas, X_tr_feats, X_te_feats
+    return formulas, X_tr_feats, X_te_feats, mu, sigma
 
 
 def build_formula_bank(
@@ -105,13 +109,14 @@ def build_formula_bank(
     X_te: np.ndarray,
     config: ExperimentConfig,
     seed: int,
-) -> tuple[list, np.ndarray, np.ndarray]:
-    """Sample and center STL formulas.
+) -> tuple[list, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Sample STL formulas and compute their standardized robustness features.
 
-    Returns (formulas, X_tr_feats, X_te_feats).
+    Returns (formulas, X_tr_feats, X_te_feats, mu, sigma), where mu and sigma are
+    the per-formula train mean and std used to standardize: raw = feats * (sigma + 1e-8) + mu.
     """
 
+    # F0 seeds random and torch itself; numpy is seeded here for downstream code.
     np.random.seed(seed)
-    torch.manual_seed(seed)
 
     return _build_raw_formula_bank(X_tr, X_te, config, seed)
