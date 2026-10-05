@@ -1,0 +1,9 @@
+Task 5: dataset=HandMovementDirection
+
+=== HandMovementDirection (M=10000, depth_max=3, until_weight=0.0, seed=0) ===
+  train (160, 10, 400)  test (74, 10, 400)  4 classes
+  fit: balanced_accuracy=0.5726
+  before: macro-F1 train=0.8670 test=0.3919
+  after:  macro-F1 train=0.8670 test=0.3919  (changed 0/4 classes, 0 improved / 0 worsened on train)
+
+Wrote /share/ai-lab/adsiega/STLRocket/results/tuning_check/tuning_check_summary.csv (10 datasets)

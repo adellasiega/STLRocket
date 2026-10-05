@@ -1,0 +1,9 @@
+Task 1: dataset=Cricket
+
+=== Cricket (M=10000, depth_max=3, until_weight=0.0, seed=0) ===
+  train (108, 6, 1197)  test (72, 6, 1197)  12 classes
+  fit: balanced_accuracy=0.9028
+  before: macro-F1 train=0.8981 test=0.7594
+  after:  macro-F1 train=0.9083 test=0.7391  (changed 7/12 classes, 2 improved / 0 worsened on train)
+
+Wrote /share/ai-lab/adsiega/STLRocket/results/tuning_check/tuning_check_summary.csv (7 datasets)

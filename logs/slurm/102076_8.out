@@ -1,0 +1,9 @@
+Task 8: dataset=StandWalkJump
+
+=== StandWalkJump (M=10000, depth_max=2, until_weight=0.0, seed=0) ===
+  train (12, 4, 2500)  test (15, 4, 2500)  3 classes
+  fit: balanced_accuracy=0.3333
+  before: macro-F1 train=0.7308 test=0.4191
+  after:  macro-F1 train=0.7500 test=0.4318  (changed 2/2 classes, 1 improved / 0 worsened on train)
+
+Wrote /share/ai-lab/adsiega/STLRocket/results/tuning_check/tuning_check_summary.csv (1 datasets)

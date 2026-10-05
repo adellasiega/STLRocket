@@ -22,7 +22,7 @@
 
 # ============================== configuration ==============================
 PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
-VENV="/share/ai-lab/adsiega/STLRocket/.venv"
+VENV="/share/ai-lab/adsiega/STLRocket/env"
 OUT_DIR="${PROJECT_DIR}/results/ablation/full"
 
 # Swept across array tasks

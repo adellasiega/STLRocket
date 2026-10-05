@@ -1,0 +1,9 @@
+Task 2: dataset=DuckDuckGeese
+
+=== DuckDuckGeese (M=10000, depth_max=1, until_weight=0.0, seed=0) ===
+  train (50, 1345, 270)  test (50, 1345, 270)  5 classes
+  fit: balanced_accuracy=0.5400
+  before: macro-F1 train=0.7924 test=0.3823
+  after:  macro-F1 train=0.8089 test=0.3866  (changed 5/5 classes, 2 improved / 0 worsened on train)
+
+Wrote /share/ai-lab/adsiega/STLRocket/results/tuning_check/tuning_check_summary.csv (6 datasets)
