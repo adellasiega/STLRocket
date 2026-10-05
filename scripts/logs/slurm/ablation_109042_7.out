@@ -4,3 +4,4 @@ EthanolConcentration run=0 depth=1 until=0.0 M=1000 intercept=False -> val=0.529
 EthanolConcentration run=0 depth=1 until=0.0 M=10000 intercept=False -> val=0.36213235294117646 [ok]
 EthanolConcentration run=1 depth=1 until=0.0 M=100 intercept=False -> val=0.5386029411764706 [ok]
 EthanolConcentration run=1 depth=1 until=0.0 M=1000 intercept=False -> val=0.5533088235294118 [ok]
+EthanolConcentration run=1 depth=1 until=0.0 M=10000 intercept=False -> val=0.5248161764705883 [ok]

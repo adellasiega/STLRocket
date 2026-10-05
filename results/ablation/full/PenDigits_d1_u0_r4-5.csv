@@ -1,0 +1,3 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+PenDigits,4,4,0.25,1,100,0.0,False,0.9850348048286192,0.994294995249007,66,0.5539,54.0606,ok
+PenDigits,4,4,0.25,1,1000,0.0,False,0.9855502687461449,0.9948096228624606,536,5.5387,405.0382,ok

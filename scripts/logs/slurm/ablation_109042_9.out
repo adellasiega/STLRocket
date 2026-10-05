@@ -4,3 +4,4 @@ FaceDetection run=0 depth=1 until=0.0 M=1000 intercept=False -> val=0.6714159562
 FaceDetection run=0 depth=1 until=0.0 M=10000 intercept=False -> val=0.7148665639195327 [ok]
 FaceDetection run=1 depth=1 until=0.0 M=100 intercept=False -> val=0.5675402631113209 [ok]
 FaceDetection run=1 depth=1 until=0.0 M=1000 intercept=False -> val=0.6802299643088903 [ok]
+FaceDetection run=1 depth=1 until=0.0 M=10000 intercept=False -> val=0.7013044953100112 [ok]
