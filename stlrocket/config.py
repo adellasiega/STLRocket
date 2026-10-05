@@ -13,6 +13,11 @@ class ExperimentConfig:
 
     # Classifier
     cv: int
+    cut_point: float      # glmnet: pick the sparsest lambda within cut_point SEs of the best CV score
+    fit_intercept: bool
+
+    # Explanations
+    explain: bool
 
     # Explanation
     pool_size: int 
@@ -26,9 +31,6 @@ class ExperimentConfig:
     # Experiment loop
     n_run: int 
     base_seed: int  # run i uses seed=base_seed+i
-
-    # Explanations
-    explain: bool
 
     # Output
     output_dir: str 

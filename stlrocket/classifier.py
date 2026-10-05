@@ -38,8 +38,8 @@ def train_classifier(
     model = LogitNet(
         alpha=1.0,          # LASSO
         standardize=False,  # Features are already standardized in features.build_formula_bank
-        fit_intercept=False,
-        cut_point=1,
+        fit_intercept=config.fit_intercept,
+        cut_point=config.cut_point,
         n_splits=n_splits,  # Cross validation for lambda hyperparameter
         # glmnet parallelises the lambda-path scoring one thread PER FOLD, so
         # more threads than folds are simply idle.

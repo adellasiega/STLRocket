@@ -87,15 +87,8 @@ def _build_raw_formula_bank(
     )
 
     formulas = generator.sample(config.n_formulas)
-
     X_tr_feats = extract_features(X_tr, formulas)
     X_te_feats = extract_features(X_te, formulas)
-
-    # Standardize features (eq. 3). Formulas are left untouched -- reported/
-    # reparametrized formulas (explanations.py::reparametrize_formula) always
-    # recompute their own threshold shift from raw robustness medians, so a
-    # constant additive/multiplicative pre-shift of the base formula has no
-    # effect on that downstream result.
     mu = X_tr_feats.mean(axis=0)
     sigma = X_tr_feats.std(axis=0)
     X_tr_feats = (X_tr_feats - mu) / (sigma + 1e-8)
@@ -118,5 +111,7 @@ def build_formula_bank(
 
     # F0 seeds random and torch itself; numpy is seeded here for downstream code.
     np.random.seed(seed)
+    # Also the default for later eval_robustness calls (explanations, simplification).
+    set_device(config.device)
 
     return _build_raw_formula_bank(X_tr, X_te, config, seed)
