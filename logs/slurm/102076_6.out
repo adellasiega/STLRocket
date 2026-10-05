@@ -1,9 +1,0 @@
-Task 6: dataset=Heartbeat
-
-=== Heartbeat (M=10000, depth_max=3, until_weight=0.0, seed=0) ===
-  train (204, 61, 405)  test (205, 61, 405)  2 classes
-  fit: balanced_accuracy=0.6677
-  before: macro-F1 train=0.6844 test=0.6000
-  after:  macro-F1 train=0.7590 test=0.6821  (changed 1/2 classes, 1 improved / 0 worsened on train)
-
-Wrote /share/ai-lab/adsiega/STLRocket/results/tuning_check/tuning_check_summary.csv (9 datasets)

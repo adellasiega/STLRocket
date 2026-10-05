@@ -1,0 +1,4 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+EigenWorms,0,0,0.25,1,100,0.0,False,0.5038095238095238,0.9492109038737446,50,3.1066,0.5943,ok
+EigenWorms,0,0,0.25,1,1000,0.0,False,0.41380952380952385,0.9137195121951219,52,31.0659,1.0426,ok
+EigenWorms,0,0,0.25,1,10000,0.0,False,0.48047619047619056,0.7892064893499614,25,310.6594,3.4716,ok

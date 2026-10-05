@@ -1,9 +1,0 @@
-Task 4: dataset=Epilepsy
-
-=== Epilepsy (M=10000, depth_max=2, until_weight=0.0, seed=0) ===
-  train (137, 3, 206)  test (138, 3, 206)  4 classes
-  fit: balanced_accuracy=0.9718
-  before: macro-F1 train=0.9138 test=0.8532
-  after:  macro-F1 train=0.9281 test=0.8636  (changed 4/4 classes, 4 improved / 0 worsened on train)
-
-Wrote /share/ai-lab/adsiega/STLRocket/results/tuning_check/tuning_check_summary.csv (4 datasets)

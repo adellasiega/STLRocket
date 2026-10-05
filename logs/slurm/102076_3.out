@@ -1,9 +1,0 @@
-Task 3: dataset=ERing
-
-=== ERing (M=10000, depth_max=3, until_weight=0.0, seed=0) ===
-  train (30, 4, 65)  test (270, 4, 65)  6 classes
-  fit: balanced_accuracy=0.9074
-  before: macro-F1 train=0.9697 test=0.7042
-  after:  macro-F1 train=0.9697 test=0.7042  (changed 0/6 classes, 0 improved / 0 worsened on train)
-
-Wrote /share/ai-lab/adsiega/STLRocket/results/tuning_check/tuning_check_summary.csv (3 datasets)

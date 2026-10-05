@@ -1,9 +1,0 @@
-Task 0: dataset=BasicMotions
-
-=== BasicMotions (M=10000, depth_max=2, until_weight=0.0, seed=0) ===
-  train (40, 6, 100)  test (40, 6, 100)  4 classes
-  fit: balanced_accuracy=0.9750
-  before: macro-F1 train=0.9167 test=0.8287
-  after:  macro-F1 train=1.0000 test=0.8929  (changed 4/4 classes, 1 improved / 0 worsened on train)
-
-Wrote /share/ai-lab/adsiega/STLRocket/results/tuning_check/tuning_check_summary.csv (2 datasets)

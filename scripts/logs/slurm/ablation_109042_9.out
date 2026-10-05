@@ -1,0 +1,6 @@
+Task 9: python -u scripts/run_ablation.py --datasets FaceDetection --runs 0 1 --depths 1 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/FaceDetection_d1_u0_r0-1.csv
+FaceDetection run=0 depth=1 until=0.0 M=100 intercept=False -> val=0.5560060984602678 [ok]
+FaceDetection run=0 depth=1 until=0.0 M=1000 intercept=False -> val=0.6714159562857649 [ok]
+FaceDetection run=0 depth=1 until=0.0 M=10000 intercept=False -> val=0.7148665639195327 [ok]
+FaceDetection run=1 depth=1 until=0.0 M=100 intercept=False -> val=0.5675402631113209 [ok]
+FaceDetection run=1 depth=1 until=0.0 M=1000 intercept=False -> val=0.6802299643088903 [ok]

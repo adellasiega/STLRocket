@@ -1,9 +1,0 @@
-Task 9: dataset=UWaveGestureLibrary
-
-=== UWaveGestureLibrary (M=10000, depth_max=3, until_weight=0.0, seed=0) ===
-  train (120, 3, 315)  test (320, 3, 315)  8 classes
-  fit: balanced_accuracy=0.8500
-  before: macro-F1 train=0.8660 test=0.7031
-  after:  macro-F1 train=0.8892 test=0.7431  (changed 5/8 classes, 5 improved / 0 worsened on train)
-
-Wrote /share/ai-lab/adsiega/STLRocket/results/tuning_check/tuning_check_summary.csv (8 datasets)

@@ -1,0 +1,7 @@
+Task 29: python -u scripts/run_ablation.py --datasets Cricket --runs 2 3 --depths 1 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/Cricket_d1_u0_r2-3.csv
+Cricket run=2 depth=1 until=0.0 M=100 intercept=False -> val=0.8194444444444445 [ok]
+Cricket run=2 depth=1 until=0.0 M=1000 intercept=False -> val=0.875 [ok]
+Cricket run=2 depth=1 until=0.0 M=10000 intercept=False -> val=0.8194444444444445 [ok]
+Cricket run=3 depth=1 until=0.0 M=100 intercept=False -> val=0.7083333333333335 [ok]
+Cricket run=3 depth=1 until=0.0 M=1000 intercept=False -> val=0.8472222222222222 [ok]
+Cricket run=3 depth=1 until=0.0 M=10000 intercept=False -> val=0.861111111111111 [ok]

@@ -1,9 +1,0 @@
-Task 7: dataset=RacketSports
-
-=== RacketSports (M=10000, depth_max=2, until_weight=0.0, seed=0) ===
-  train (151, 6, 30)  test (152, 6, 30)  4 classes
-  fit: balanced_accuracy=0.8271
-  before: macro-F1 train=0.8727 test=0.6956
-  after:  macro-F1 train=0.8727 test=0.6956  (changed 0/4 classes, 0 improved / 0 worsened on train)
-
-Wrote /share/ai-lab/adsiega/STLRocket/results/tuning_check/tuning_check_summary.csv (5 datasets)
