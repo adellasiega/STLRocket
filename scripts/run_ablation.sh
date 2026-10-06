@@ -34,7 +34,7 @@ DATASETS=(
     SelfRegulationSCP1 SelfRegulationSCP2 StandWalkJump UWaveGestureLibrary
 )
 DEPTHS=(1 2 3)
-UNTIL_WEIGHTS=(0 1)
+UNTIL_WEIGHTS=(0)
 N_RUNS=10
 RUNS_PER_TASK=2   # runs done sequentially in one task; raise it if the array exceeds the limit
 
