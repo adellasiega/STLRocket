@@ -1,0 +1,5 @@
+Task 1: python -u scripts/run_ablation.py --datasets ERing --runs 0 1 --depths 3 --sg_windows none 0.05 --until_weights 0 --n_formulas 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/sg/ERing_d3_r0-1.csv
+ERing run=0 depth=3 until=0.0 corr=None sg=None M=10000 intercept=False -> val=0.5833333333333334 [ok]
+ERing run=0 depth=3 until=0.0 corr=None sg=0.05 M=10000 intercept=False -> val=0.16666666666666666 [ok]
+ERing run=1 depth=3 until=0.0 corr=None sg=None M=10000 intercept=False -> val=0.75 [ok]
+ERing run=1 depth=3 until=0.0 corr=None sg=0.05 M=10000 intercept=False -> val=0.16666666666666666 [ok]

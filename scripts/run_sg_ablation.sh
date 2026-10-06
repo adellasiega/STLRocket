@@ -4,7 +4,7 @@
 #SBATCH --error=logs/slurm/sg_%A_%a.err
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
 #SBATCH --mem=64G --time=1-00:00:00
-#SBATCH --partition=turing-wide
+#SBATCH --partition=Main
 
 # Savitzky-Golay derivative ablation (scripts/run_ablation.py --sg_windows): raw channels vs
 # raw + SG first derivative, at fixed M on
