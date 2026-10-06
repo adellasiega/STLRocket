@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+ERing,6,6,0.25,2,10000,0.0,,10000,False,0.75,1.0,26,2.4227,0.9799,ok
+ERing,6,6,0.25,2,10000,0.0,0.99,63925,False,1.0,1.0,27,17.6758,0.8003,ok
+ERing,6,6,0.25,2,10000,0.0,0.95,205599,False,0.3333333333333333,0.3333333333333333,2,56.2623,0.7407,ok
+ERing,7,7,0.25,2,10000,0.0,,10000,False,0.75,1.0,21,2.3431,0.968,ok
+ERing,7,7,0.25,2,10000,0.0,0.99,67730,False,0.8333333333333334,1.0,35,18.5191,0.8104,ok
+ERing,7,7,0.25,2,10000,0.0,0.95,210000,False,0.75,1.0,30,57.3273,0.6954,ok

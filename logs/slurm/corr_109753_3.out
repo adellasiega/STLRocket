@@ -1,0 +1,7 @@
+Task 3: python -u scripts/run_ablation.py --datasets BasicMotions --runs 0 1 --depths 2 --corr_thresholds none 0.99 0.95 --until_weights 0 --n_formulas 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/corr/BasicMotions_d2_r0-1.csv
+BasicMotions run=0 depth=2 until=0.0 corr=None M=10000 intercept=False -> val=1.0 [ok]
+BasicMotions run=0 depth=2 until=0.0 corr=0.99 M=10000 intercept=False -> val=1.0 [ok]
+BasicMotions run=0 depth=2 until=0.0 corr=0.95 M=10000 intercept=False -> val=1.0 [ok]
+BasicMotions run=1 depth=2 until=0.0 corr=None M=10000 intercept=False -> val=1.0 [ok]
+BasicMotions run=1 depth=2 until=0.0 corr=0.99 M=10000 intercept=False -> val=1.0 [ok]
+BasicMotions run=1 depth=2 until=0.0 corr=0.95 M=10000 intercept=False -> val=1.0 [ok]

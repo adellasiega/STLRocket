@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+AtrialFibrillation,8,8,0.25,2,10000,0.0,,10000,False,0.3333333333333333,0.3333333333333333,0,3.2502,0.4097,ok
+AtrialFibrillation,8,8,0.25,2,10000,0.0,0.99,71503,False,0.3333333333333333,0.3333333333333333,0,26.5829,0.4098,ok
+AtrialFibrillation,8,8,0.25,2,10000,0.0,0.95,210000,False,0.3333333333333333,0.3333333333333333,0,58.2075,0.3013,ok
+AtrialFibrillation,9,9,0.25,2,10000,0.0,,10000,False,0.3333333333333333,0.3333333333333333,0,2.5898,0.3706,ok
+AtrialFibrillation,9,9,0.25,2,10000,0.0,0.99,78267,False,0.3333333333333333,0.3333333333333333,0,24.4494,0.3851,ok
+AtrialFibrillation,9,9,0.25,2,10000,0.0,0.95,210000,False,0.3333333333333333,0.3333333333333333,0,58.3276,0.2795,ok

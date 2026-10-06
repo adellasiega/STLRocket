@@ -4,7 +4,7 @@
 #SBATCH --error=logs/slurm/corr_%A_%a.err
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
 #SBATCH --mem=64G --time=1-00:00:00
-#SBATCH --partition=Main
+#SBATCH --partition=turing-wide
 
 # Correlation-filter ablation (scripts/run_ablation.py --corr_thresholds) at fixed M on
 # the N_DATASETS fastest datasets of the previous ablation (scripts/fastest_datasets.py).

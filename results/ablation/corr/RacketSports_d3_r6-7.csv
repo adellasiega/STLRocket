@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+RacketSports,6,6,0.25,3,10000,0.0,,10000,False,0.8108585858585858,0.8725754310344828,27,3.0383,1.9591,ok
+RacketSports,6,6,0.25,3,10000,0.0,0.99,32917,False,0.8813131313131313,0.9757543103448276,41,11.1091,1.5612,ok
+RacketSports,6,6,0.25,3,10000,0.0,0.95,59870,False,0.8250631313131312,0.9350754310344828,32,20.6596,1.5564,ok
+RacketSports,7,7,0.25,3,10000,0.0,,10000,False,0.9272727272727272,1.0,76,2.9633,1.8244,ok
+RacketSports,7,7,0.25,3,10000,0.0,0.99,32895,False,0.9522727272727273,1.0,69,11.1658,1.6358,ok
+RacketSports,7,7,0.25,3,10000,0.0,0.95,59485,False,0.8818181818181818,1.0,70,19.3555,1.6025,ok

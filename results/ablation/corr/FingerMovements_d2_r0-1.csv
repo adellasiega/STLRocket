@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+FingerMovements,0,0,0.25,2,10000,0.0,,10000,False,0.5560897435897436,0.8733798604187437,68,3.6598,1.886,ok
+FingerMovements,0,0,0.25,2,10000,0.0,0.99,45977,False,0.5298076923076923,0.6283292978208233,4,19.6473,1.5409,ok
+FingerMovements,0,0,0.25,2,10000,0.0,0.95,210000,False,0.5801282051282051,0.6664648910411622,8,88.4737,1.4921,ok
+FingerMovements,1,1,0.25,2,10000,0.0,,10000,False,0.594551282051282,0.6117006124483692,7,3.5402,1.9539,ok
+FingerMovements,1,1,0.25,2,10000,0.0,0.99,47305,False,0.5,0.5,0,20.1291,1.6655,ok
+FingerMovements,1,1,0.25,2,10000,0.0,0.95,210000,False,0.5310897435897436,0.5992380002848597,1,86.0163,1.2545,ok

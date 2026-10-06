@@ -1,0 +1,9 @@
+Task 44: python -u scripts/run_ablation.py --datasets StandWalkJump --runs 8 9 --depths 2 --corr_thresholds none 0.99 0.95 --until_weights 0 --n_formulas 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/corr/StandWalkJump_d2_r8-9.csv
+StandWalkJump run=8 depth=2 until=0.0 corr=None M=10000 intercept=False -> val=0.3333333333333333 [ok]
+StandWalkJump run=8 depth=2 until=0.0 corr=0.99 M=10000 intercept=False -> val=0.3333333333333333 [ok]
+warning: only 5205 formulas passed the filter, M above that is evaluated on the smaller bank
+StandWalkJump run=8 depth=2 until=0.0 corr=0.95 M=10000 intercept=False -> val=0.3333333333333333 [ok]
+StandWalkJump run=9 depth=2 until=0.0 corr=None M=10000 intercept=False -> val=0.3333333333333333 [ok]
+StandWalkJump run=9 depth=2 until=0.0 corr=0.99 M=10000 intercept=False -> val=0.0 [ok]
+warning: only 4965 formulas passed the filter, M above that is evaluated on the smaller bank
+StandWalkJump run=9 depth=2 until=0.0 corr=0.95 M=10000 intercept=False -> val=0.3333333333333333 [ok]
