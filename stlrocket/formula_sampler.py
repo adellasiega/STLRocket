@@ -34,17 +34,21 @@ class F0:
         """Per-formula depth, uniform in 1..depth_max."""
         return random.randint(1, self.depth_max)
 
-    def _sample_formula(self, remaining_time: int, current_depth: int, target_depth: int, must_reach: bool):
+    def _sample_formula(self, remaining_time: int, current_depth: int, target_depth: int, must_reach: bool,
+                        guarded: bool):
         """
             must_reach: this branch has to grow to exactly target_depth, so that every
             formula has the depth it was assigned. Other branches stop with probability
             growing linearly from 0 to 1 at target_depth.
+            guarded: a temporal operator lies between the root and this node. Atoms are
+            only placed in guarded positions, since an unguarded atom only reads t=0.
         """
         if current_depth >= target_depth:
+            assert guarded, "unguarded branch ran out of depth"
             return self._sample_atomic_predicate()
-        if not must_reach and random.random() < current_depth / target_depth:
+        if guarded and not must_reach and random.random() < current_depth / target_depth:
             return self._sample_atomic_predicate()
-        return self._sample_operator_node(remaining_time, current_depth, target_depth, must_reach)
+        return self._sample_operator_node(remaining_time, current_depth, target_depth, must_reach, guarded)
 
     @staticmethod
     def _sample_interval(remaining_time: int) -> tuple[int, int]:
@@ -73,21 +77,29 @@ class F0:
         current_depth: int,
         target_depth: int,
         must_reach: bool,
-        temporal_only: bool = False,
+        guarded: bool,
         allow_not: bool = True,
     ):
-        if temporal_only:
-            classes = ["Globally", "Eventually", "Until"]
-            weights = [1.0, 1.0, self.until_weight]
-        else:
-            classes = ["And", "Or", "Globally", "Eventually", "Until"]
-            weights = [1.0, 1.0, 1.0, 1.0, self.until_weight]
-            # Not must wrap an operator other than Not: Not(atom) is the atom with lte
-            # flipped and Not(Not(phi)) is phi. So its child must still have room for
-            # its own children (depth current_depth + 2).
-            if allow_not and current_depth + 2 <= target_depth:
-                classes.append("Not")
-                weights.append(1.0)
+        # Room for one more operator below this node (depth current_depth + 2).
+        room = current_depth + 2 <= target_depth
+        classes = ["Globally", "Eventually", "Until"]
+        weights = [1.0, 1.0, self.until_weight]
+        # Unguarded And/Or children must be operators (a temporal one eventually), so
+        # they need room below them.
+        if guarded or room:
+            classes += ["And", "Or"]
+            weights += [1.0, 1.0]
+        # Not must wrap an operator other than Not: Not(atom) is the atom with lte
+        # flipped and Not(Not(phi)) is phi. So its child must still have room for
+        # its own children.
+        # Its weight is 0: robustness is exactly dual (Not G phi = F Not phi,
+        # Not(phi And psi) = Not phi Or Not psi, Not(x > c) = x <= c), and G/F, And/Or
+        # and lte are already sampled symmetrically, so a formula with Not duplicates
+        # a Not-free one while spending a depth level. Only Not Until (release) is
+        # new, which matters only with until_weight > 0.
+        if allow_not and room:
+            classes.append("Not")
+            weights.append(0.0)
         op = random.choices(classes, weights=weights, k=1)[0]
 
         if op in ("Globally", "Eventually", "Until"):
@@ -103,24 +115,26 @@ class F0:
         reach_left = random.random() < 0.5
         d = current_depth + 1
 
+        # Children of a temporal operator are guarded; Boolean operators pass it on.
         def unary(budget):
-            return self._sample_formula(budget, d, target_depth, must_reach)
+            return self._sample_formula(budget, d, target_depth, must_reach, guarded=True)
 
-        def binary(left_budget, right_budget):
-            left = self._sample_formula(left_budget, d, target_depth, must_reach and reach_left)
-            right = self._sample_formula(right_budget, d, target_depth, must_reach and not reach_left)
+        def binary(left_budget, right_budget, child_guarded=True):
+            left = self._sample_formula(left_budget, d, target_depth, must_reach and reach_left, child_guarded)
+            right = self._sample_formula(right_budget, d, target_depth, must_reach and not reach_left, child_guarded)
             return left, right
 
         if op == "And":
-            left, right = binary(remaining_time, remaining_time)
+            left, right = binary(remaining_time, remaining_time, guarded)
             return stl.And(left, right)
 
         elif op == "Or":
-            left, right = binary(remaining_time, remaining_time)
+            left, right = binary(remaining_time, remaining_time, guarded)
             return stl.Or(left, right)
 
         elif op == "Not":
-            return stl.Not(self._sample_operator_node(remaining_time, d, target_depth, must_reach, allow_not=False))
+            return stl.Not(self._sample_operator_node(remaining_time, d, target_depth, must_reach, guarded,
+                                                      allow_not=False))
 
         elif op in ("Globally", "Eventually"):
             OpClass = stl.Globally if op == "Globally" else stl.Eventually
@@ -188,15 +202,16 @@ class F0:
         # t_max is the last valid time index, so the largest bound a formula may
         # reference is t_max itself; the budget is that index, not t_max - 1.
         initial_time = self.t_max
-        # The root is always a temporal operator, so every formula is temporal
-        # by construction (no rejection sampling of purely boolean formulae).
+        # The root starts unguarded, so every root-to-atom path passes through a
+        # temporal operator: the root may be Boolean, e.g. G(a) & F(b), but no atom
+        # is evaluated at t=0 only.
         return [
             self._sample_operator_node(
                 initial_time,
                 current_depth=0,
                 target_depth=self._sample_target_depth(),
                 must_reach=True,
-                temporal_only=True,
+                guarded=False,
             )
             for _ in range(n_formulae)
         ]

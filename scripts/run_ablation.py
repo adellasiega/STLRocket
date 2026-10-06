@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 """
 Validation-only ablation over depth_max, number of formulas M, until_weight,
-correlation-filter threshold, Savitzky-Golay derivative channels and fit_intercept.
-The TEST split is never loaded.
+correlation-filter threshold, threshold calibration and fit_intercept. The TEST split
+is never loaded.
 
 For each dataset and run, the TRAIN split is divided into fit/validation with a
 stratified split seeded by base_seed + run. All configurations in a run share that
 split and the formula seed, so results are paired across configurations.
 
 Features are built once per (dataset, run, depth_max, until_weight, corr_threshold,
-sg_window) at max(M): the sampler draws formulas i.i.d. from one seeded stream, the correlation
-filter is greedy in stream order and standardization is per column, so the first M
-columns are exactly the M-formula bank. The filter only looks at the fit part. fit_intercept does
+calibrate) at max(M): the sampler draws formulas i.i.d. from one seeded stream, the
+correlation filter is greedy in stream order, calibration draws from its own stream in
+formula order and standardization is per column, so the first M columns are exactly the
+M-formula bank. The filter and calibration only look at the fit part. fit_intercept does
 not affect features, so both values reuse the same matrix.
 
 Rows are appended to the CSV as soon as they are computed, so partial results survive.
@@ -35,14 +36,14 @@ from sklearn.model_selection import StratifiedShuffleSplit
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from stlrocket.config import ExperimentConfig
-from stlrocket.data import _fill_missing, add_sg_derivative
+from stlrocket.data import _fill_missing
 from stlrocket.features import build_formula_bank, build_decorrelated_formula_bank
 from stlrocket.classifier import train_classifier, evaluate_classifier
 
 
 ROW_FIELDS = [
     "dataset", "run", "seed", "val_ratio", "depth_max", "n_formulas", "until_weight",
-    "corr_threshold", "n_sampled", "sg_window",
+    "corr_threshold", "n_sampled", "calibrate",
     "fit_intercept", "val_balanced_accuracy", "fit_balanced_accuracy", "n_selected",
     "time_feats_s", "time_fit_s", "status",
 ]
@@ -63,7 +64,7 @@ def load_train(name: str) -> tuple[np.ndarray, np.ndarray]:
 
 
 def make_config(args, dataset: str, n_formulas: int, depth_max: int,
-                until_weight: float, fit_intercept: bool) -> ExperimentConfig:
+                until_weight: float, fit_intercept: bool, calibrate: bool = False) -> ExperimentConfig:
     return ExperimentConfig(
         dataset=dataset,
         n_formulas=n_formulas,
@@ -82,6 +83,7 @@ def make_config(args, dataset: str, n_formulas: int, depth_max: int,
         base_seed=args.base_seed,
         output_dir=str(Path(args.output).parent),
         device=args.device,
+        calibrate_thresholds=calibrate,
     )
 
 
@@ -99,8 +101,6 @@ def split_ok(y_fit: np.ndarray, y_val: np.ndarray, classes: np.ndarray) -> bool:
 
 def run_dataset(args, dataset: str, writer, f) -> None:
     X, y = load_train(dataset)
-    # Per-series filter, so it can be applied before the fit/val split without leakage.
-    X_by_sg = {w: X if w is None else add_sg_derivative(X, w) for w in args.sg_windows}
     classes = np.unique(y)
     M_max = max(args.n_formulas)
 
@@ -118,16 +118,15 @@ def run_dataset(args, dataset: str, writer, f) -> None:
         except ValueError as e:  # too few samples for the requested ratio
             write({**base, "status": f"split_error: {e}"})
             continue
-        y_fit, y_val = y[fit_idx], y[val_idx]
+        X_fit, y_fit, X_val, y_val = X[fit_idx], y[fit_idx], X[val_idx], y[val_idx]
         if not split_ok(y_fit, y_val, classes):
             write({**base, "status": "skipped: too few samples per class"})
             continue
 
         for depth_max in args.depths:
-            for until_weight, corr_threshold, sg_window in itertools.product(
-                    args.until_weights, args.corr_thresholds, args.sg_windows):
-                X_fit, X_val = X_by_sg[sg_window][fit_idx], X_by_sg[sg_window][val_idx]
-                cfg = make_config(args, dataset, M_max, depth_max, until_weight, True)
+            for until_weight, corr_threshold, calibrate in itertools.product(
+                    args.until_weights, args.corr_thresholds, args.calibrate):
+                cfg = make_config(args, dataset, M_max, depth_max, until_weight, True, calibrate)
                 t0 = time.perf_counter()
                 if corr_threshold is None:
                     _, F_fit, F_val, _, _ = build_formula_bank(X_fit, X_val, cfg, seed)
@@ -149,7 +148,7 @@ def run_dataset(args, dataset: str, writer, f) -> None:
                             "until_weight": until_weight,
                             "corr_threshold": corr_threshold,
                             "n_sampled": n_sampled,
-                            "sg_window": sg_window,
+                            "calibrate": calibrate,
                             "fit_intercept": fit_intercept,
                             # Bank built once at M_max; cost is linear in M.
                             "time_feats_s": round(t_feats * M / M_max, 4),
@@ -168,7 +167,7 @@ def run_dataset(args, dataset: str, writer, f) -> None:
                         except Exception as e:
                             row["status"] = f"error: {type(e).__name__}: {e}"
                         write(row)
-                        print(f"{dataset} run={run} depth={depth_max} until={until_weight} corr={corr_threshold} sg={sg_window} "
+                        print(f"{dataset} run={run} depth={depth_max} until={until_weight} corr={corr_threshold} calib={calibrate} "
                               f"M={M} intercept={fit_intercept} -> "
                               f"val={row.get('val_balanced_accuracy')} [{row['status']}]", flush=True)
 
@@ -198,9 +197,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--until_weights", type=float, nargs="+", default=[0.0, 1.0])
     # Correlation-filter thresholds; "none" = no filter.
     p.add_argument("--corr_thresholds", type=float_or_none, nargs="+", default=[None])
-    # Savitzky-Golay first-derivative channels appended to the raw ones, window as a
-    # fraction of T; "none" = raw channels only.
-    p.add_argument("--sg_windows", type=float_or_none, nargs="+", default=[None])
+    # Calibrate atom thresholds of multi-atom formulae on the fit part (features.calibrate_thresholds).
+    p.add_argument("--calibrate", type=str2bool, nargs="+", default=[False])
     p.add_argument("--fit_intercept", type=str2bool, nargs="+", default=[True, False])
     p.add_argument("--cv", type=int, default=5)
     p.add_argument("--cut_point", type=float, default=1.0)

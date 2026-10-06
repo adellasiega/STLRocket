@@ -21,23 +21,6 @@ def _fill_missing(X: np.ndarray) -> np.ndarray:
     return np.nan_to_num(X, nan=0.0)
 
 
-def add_sg_derivative(X: np.ndarray, window_frac: float, polyorder: int = 2) -> np.ndarray:
-    """Append the Savitzky-Golay first derivative of every channel: (N, V, T) -> (N, 2V, T).
-
-    The window is window_frac * T, rounded to an odd length in [polyorder + 1, T].
-    Each series is filtered on its own, so nothing leaks between samples. mode="interp"
-    fits the polynomial to the edge windows instead of padding, since robustness is
-    evaluated at t=0 and the first samples weigh a lot.
-    """
-    from scipy.signal import savgol_filter
-
-    T = X.shape[2]
-    w = int(window_frac * T) | 1
-    w = min(max(w, polyorder + 1 + polyorder % 2), T if T % 2 else T - 1)
-    dX = savgol_filter(X, w, polyorder, deriv=1, axis=-1, mode="interp").astype(X.dtype)
-    return np.concatenate([X, dX], axis=1)
-
-
 def load_dataset(name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Load a dataset from the aeon library.
 

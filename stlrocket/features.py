@@ -65,6 +65,75 @@ def extract_features(X: np.ndarray, formulas: list, device: str | None = None) -
     return feats.cpu().numpy()
 
 
+def _robustness_trace(phi, signal: torch.Tensor, batch_size: int = _BATCH_SIZE) -> torch.Tensor:
+    """(N, T') robustness at every time step where phi is defined."""
+    with torch.no_grad():
+        return torch.cat([
+            phi.quantitative(signal[i:i + batch_size], evaluate_at_all_times=True, normalize=False)[:, 0]
+            for i in range(0, signal.shape[0], batch_size)
+        ])
+
+
+def _children(node) -> list:
+    if isinstance(node, Atom):
+        return []
+    if isinstance(node, (Not, Globally, Eventually)):
+        return [node.child]
+    return [node.left_child, node.right_child]
+
+
+def _atoms(node) -> list:
+    return [node] if isinstance(node, Atom) else [a for c in _children(node) for a in _atoms(c)]
+
+
+def calibrate_thresholds(formulas: list, X: np.ndarray, rng: np.random.Generator) -> None:
+    """Reset in place the atom thresholds of every multi-atom formula from the data X.
+
+    Each atom belongs to a largest single-atom subformula psi (e.g. G[0,50](x > c)) that
+    sits directly under a binary node. Robustness is linear in the threshold,
+    rho_psi(c) = rho_psi(0) + k*c with k = +-1, so psi computes a statistic of X (here the
+    window minimum of x) and compares it to c. c is set to a random quantile u of that
+    statistic over X, so psi is true on a fraction 1-u of the points where its parent reads
+    it: t=0 if no temporal operator is above, every time step otherwise. A threshold drawn
+    from the raw values of x instead ignores the operators (G compares c to window minima),
+    which leaves many subformulae always true or false and their binary parent decided by
+    one child. Thresholds stay in the units of x. Single-atom formulae are skipped: their
+    threshold only shifts the feature by a constant, which standardization removes.
+
+    Use the fit/train split only. rng is separate from the sampler's stream so that a
+    formula's thresholds depend only on its position in the list.
+    """
+    signal = _as_signal(X)
+    for phi in formulas:
+        if len(_atoms(phi)) > 1:
+            _calibrate_node(phi, signal, rng, read_at_all_times=False)
+
+
+def _calibrate_node(node, signal: torch.Tensor, rng: np.random.Generator, read_at_all_times: bool) -> None:
+    # node has at least two atoms. Its children are read at every time step if node is
+    # temporal (Until) or a temporal operator is above it, at t=0 only otherwise.
+    all_times = read_at_all_times or isinstance(node, (Globally, Eventually, Until))
+    for child in _children(node):
+        atoms = _atoms(child)
+        if len(atoms) > 1:
+            _calibrate_node(child, signal, rng, all_times)
+            continue
+        # A single-atom subformula is a chain of unary operators down to the atom.
+        # rho(c) = rho(0) + k*c: k = +1 for x <= c, -1 for x >= c, flipped by each Not.
+        atom = atoms[0]
+        n_not, n = 0, child
+        while not isinstance(n, Atom):
+            n_not += isinstance(n, Not)
+            n = n.child
+        k = (1 if atom.lte else -1) * (-1) ** n_not
+        atom.threshold = 0.0
+        rho = _robustness_trace(child, signal)
+        if not all_times:
+            rho = rho[:, :1]
+        q = float(np.quantile(rho.cpu().numpy(), rng.random()))
+        atom.threshold = -k * q  # psi true iff rho(0) > q
+
+
 def _make_generator(X_tr: np.ndarray, config: ExperimentConfig, seed: int) -> F0:
     N, V, T = X_tr.shape
     return F0(
@@ -93,6 +162,8 @@ def _build_raw_formula_bank(
     seed: int,
 ) -> tuple[list, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     formulas = _make_generator(X_tr, config, seed).sample(config.n_formulas)
+    if config.calibrate_thresholds:
+        calibrate_thresholds(formulas, X_tr, np.random.default_rng(seed))
     return formulas, *_standardize(extract_features(X_tr, formulas), extract_features(X_te, formulas))
 
 
@@ -141,7 +212,15 @@ def build_decorrelated_formula_bank(
 
     M = config.n_formulas
     generator = _make_generator(X_tr, config, seed)
-    formulas = generator.sample(M)
+    rng = np.random.default_rng(seed)
+
+    def sample(n):
+        new = generator.sample(n)
+        if config.calibrate_thresholds:
+            calibrate_thresholds(new, X_tr, rng)
+        return new
+
+    formulas = sample(M)
     F_tr, F_te = extract_features(X_tr, formulas), extract_features(X_te, formulas)
     keep = correlation_filter(F_tr, threshold)
     for _ in range(max_rounds):
@@ -149,7 +228,7 @@ def build_decorrelated_formula_bank(
             break
         # Draw enough to fill the gap at the acceptance rate seen so far, plus 20%.
         n_old = len(formulas)
-        new = generator.sample(int(min(M, max(1000, 1.2 * (M - len(keep)) * n_old / max(len(keep), 1)))))
+        new = sample(int(min(M, max(1000, 1.2 * (M - len(keep)) * n_old / max(len(keep), 1)))))
         formulas += new
         F_tr = np.hstack([F_tr, extract_features(X_tr, new)])
         F_te = np.hstack([F_te, extract_features(X_te, new)])

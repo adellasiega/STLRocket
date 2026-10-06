@@ -37,3 +37,7 @@ class ExperimentConfig:
 
     # Hardware
     device: str
+
+    # Set atom thresholds of multi-atom formulae from the train data
+    # (features.calibrate_thresholds) instead of uniformly in [min, max]
+    calibrate_thresholds: bool = False
