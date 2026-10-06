@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+Heartbeat,2,2,0.25,3,10000,0.0,,10000,False,False,0.7442084942084942,0.8054968287526427,7,10.2121,1.2196,ok
+Heartbeat,2,2,0.25,3,10000,0.0,,10000,True,False,0.6949806949806949,0.7408033826638478,3,22.7899,1.096,ok
+Heartbeat,3,3,0.25,3,10000,0.0,,10000,False,False,0.5,0.5,0,9.9991,1.0891,ok
+Heartbeat,3,3,0.25,3,10000,0.0,,10000,True,False,0.7133204633204633,0.7473572938689218,3,22.7827,1.0241,ok

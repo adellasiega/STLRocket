@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+PEMS-SF,2,2,0.25,3,10000,0.0,,10000,False,False,0.7261904761904762,0.9196925154934055,82,8.6834,7.4478,ok
+PEMS-SF,2,2,0.25,3,10000,0.0,,10000,True,False,0.6688311688311688,0.9015175591927539,92,17.0814,7.6252,ok
+PEMS-SF,3,3,0.25,3,10000,0.0,,10000,False,False,0.6298701298701299,0.9670765135865247,92,8.7467,7.4355,ok
+PEMS-SF,3,3,0.25,3,10000,0.0,,10000,True,False,0.5173160173160173,0.8499400053557451,52,18.1374,6.3606,ok

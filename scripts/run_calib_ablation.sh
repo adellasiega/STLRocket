@@ -4,7 +4,7 @@
 #SBATCH --error=logs/slurm/calib_%A_%a.err
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
 #SBATCH --mem=64G --time=1-00:00:00
-#SBATCH --partition=turing-wide
+#SBATCH --partition=Main
 
 # Threshold-calibration ablation (scripts/run_ablation.py --calibrate): atom thresholds
 # uniform in [min, max] vs calibrated on the fit part (features.calibrate_thresholds),

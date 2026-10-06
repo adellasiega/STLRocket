@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+NATOPS,8,8,0.25,3,10000,0.0,,10000,False,False,0.8898809523809524,0.9776021080368906,56,7.0909,5.9614,ok
+NATOPS,8,8,0.25,3,10000,0.0,,10000,True,False,0.8928571428571429,0.9472990777338604,31,12.9673,5.6426,ok
+NATOPS,9,9,0.25,3,10000,0.0,,10000,False,False,0.9761904761904763,0.9710144927536232,56,7.08,6.9969,ok
+NATOPS,9,9,0.25,3,10000,0.0,,10000,True,False,0.9285714285714285,0.9637681159420289,49,13.6784,6.9772,ok

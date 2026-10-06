@@ -1,0 +1,35 @@
+{
+  "datasets": [
+    "RacketSports"
+  ],
+  "n_runs": 5,
+  "runs": [
+    6,
+    7
+  ],
+  "val_ratio": 0.25,
+  "depths": [
+    3
+  ],
+  "n_formulas": [
+    10000
+  ],
+  "until_weights": [
+    0.0
+  ],
+  "corr_thresholds": [
+    null
+  ],
+  "calibrate": [
+    false,
+    true
+  ],
+  "fit_intercept": [
+    false
+  ],
+  "cv": 3,
+  "cut_point": 1.0,
+  "base_seed": 0,
+  "device": "cpu",
+  "output": "/share/ai-lab/adsiega/STLRocket/results/ablation/calib/RacketSports_d3_r6-7.csv"
+}

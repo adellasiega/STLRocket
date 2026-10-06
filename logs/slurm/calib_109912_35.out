@@ -1,0 +1,5 @@
+Task 35: python -u scripts/run_ablation.py --datasets FingerMovements --runs 4 5 --depths 3 --calibrate false true --until_weights 0 --n_formulas 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/calib/FingerMovements_d3_r4-5.csv
+FingerMovements run=4 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.582051282051282 [ok]
+FingerMovements run=4 depth=3 until=0.0 corr=None calib=True M=10000 intercept=False -> val=0.48044871794871796 [ok]
+FingerMovements run=5 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.5698717948717948 [ok]
+FingerMovements run=5 depth=3 until=0.0 corr=None calib=True M=10000 intercept=False -> val=0.5958333333333333 [ok]

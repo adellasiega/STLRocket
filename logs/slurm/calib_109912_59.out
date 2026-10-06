@@ -1,0 +1,5 @@
+Task 59: python -u scripts/run_ablation.py --datasets Libras --runs 6 7 --depths 3 --calibrate false true --until_weights 0 --n_formulas 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/calib/Libras_d3_r6-7.csv
+Libras run=6 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.8000000000000002 [ok]
+Libras run=6 depth=3 until=0.0 corr=None calib=True M=10000 intercept=False -> val=0.8444444444444444 [ok]
+Libras run=7 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.8222222222222223 [ok]
+Libras run=7 depth=3 until=0.0 corr=None calib=True M=10000 intercept=False -> val=0.8444444444444443 [ok]

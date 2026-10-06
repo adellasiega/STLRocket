@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+ArticularyWordRecognition,2,2,0.25,3,10000,0.0,,10000,False,False,0.92,1.0,247,8.4449,39.1456,ok
+ArticularyWordRecognition,2,2,0.25,3,10000,0.0,,10000,True,False,0.92,1.0,199,16.8057,28.9548,ok
+ArticularyWordRecognition,3,3,0.25,3,10000,0.0,,10000,False,False,0.94,1.0,318,8.4283,37.5985,ok
+ArticularyWordRecognition,3,3,0.25,3,10000,0.0,,10000,True,False,0.9266666666666667,1.0,337,16.7485,36.2579,ok

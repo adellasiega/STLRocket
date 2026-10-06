@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+Epilepsy,2,2,0.25,3,10000,0.0,,10000,False,False,0.9722222222222222,1.0,48,5.9893,2.3566,ok
+Epilepsy,2,2,0.25,3,10000,0.0,,10000,True,False,0.9444444444444444,0.9821428571428572,24,12.9978,2.3125,ok
+Epilepsy,3,3,0.25,3,10000,0.0,,10000,False,False,0.9722222222222222,0.9821428571428572,24,6.4209,2.163,ok
+Epilepsy,3,3,0.25,3,10000,0.0,,10000,True,False,0.9722222222222222,1.0,51,12.3716,2.2067,ok
