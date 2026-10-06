@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 """
-Validation-only ablation over depth_max, number of formulas M, until_weight and
-fit_intercept. The TEST split is never loaded.
+Validation-only ablation over depth_max, number of formulas M, until_weight,
+correlation-filter threshold and fit_intercept. The TEST split is never loaded.
 
 For each dataset and run, the TRAIN split is divided into fit/validation with a
 stratified split seeded by base_seed + run. All configurations in a run share that
 split and the formula seed, so results are paired across configurations.
 
-Features are built once per (dataset, run, depth_max, until_weight) at max(M): the
-sampler draws formulas i.i.d. from one seeded stream and standardization is per
-column, so the first M columns are exactly the M-formula bank. fit_intercept does
+Features are built once per (dataset, run, depth_max, until_weight, corr_threshold)
+at max(M): the sampler draws formulas i.i.d. from one seeded stream, the correlation
+filter is greedy in stream order and standardization is per column, so the first M
+columns are exactly the M-formula bank. The filter only looks at the fit part. fit_intercept does
 not affect features, so both values reuse the same matrix.
 
 Rows are appended to the CSV as soon as they are computed, so partial results survive.
@@ -19,6 +20,7 @@ from __future__ import annotations
 import argparse
 import csv
 import dataclasses
+import itertools
 import json
 import sys
 import time
@@ -33,12 +35,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from stlrocket.config import ExperimentConfig
 from stlrocket.data import _fill_missing
-from stlrocket.features import build_formula_bank
+from stlrocket.features import build_formula_bank, build_decorrelated_formula_bank
 from stlrocket.classifier import train_classifier, evaluate_classifier
 
 
 ROW_FIELDS = [
     "dataset", "run", "seed", "val_ratio", "depth_max", "n_formulas", "until_weight",
+    "corr_threshold", "n_sampled",
     "fit_intercept", "val_balanced_accuracy", "fit_balanced_accuracy", "n_selected",
     "time_feats_s", "time_fit_s", "status",
 ]
@@ -118,11 +121,19 @@ def run_dataset(args, dataset: str, writer, f) -> None:
             continue
 
         for depth_max in args.depths:
-            for until_weight in args.until_weights:
+            for until_weight, corr_threshold in itertools.product(args.until_weights, args.corr_thresholds):
                 cfg = make_config(args, dataset, M_max, depth_max, until_weight, True)
                 t0 = time.perf_counter()
-                _, F_fit, F_val, _, _ = build_formula_bank(X_fit, X_val, cfg, seed)
+                if corr_threshold is None:
+                    _, F_fit, F_val, _, _ = build_formula_bank(X_fit, X_val, cfg, seed)
+                    n_sampled = M_max
+                else:
+                    _, F_fit, F_val, _, _, n_sampled = build_decorrelated_formula_bank(
+                        X_fit, X_val, cfg, seed, corr_threshold)
                 t_feats = time.perf_counter() - t0
+                if F_fit.shape[1] < M_max:
+                    print(f"warning: only {F_fit.shape[1]} formulas passed the filter, "
+                          f"M above that is evaluated on the smaller bank", flush=True)
 
                 for M in args.n_formulas:
                     for fit_intercept in args.fit_intercept:
@@ -131,6 +142,8 @@ def run_dataset(args, dataset: str, writer, f) -> None:
                             "depth_max": depth_max,
                             "n_formulas": M,
                             "until_weight": until_weight,
+                            "corr_threshold": corr_threshold,
+                            "n_sampled": n_sampled,
                             "fit_intercept": fit_intercept,
                             # Bank built once at M_max; cost is linear in M.
                             "time_feats_s": round(t_feats * M / M_max, 4),
@@ -149,7 +162,7 @@ def run_dataset(args, dataset: str, writer, f) -> None:
                         except Exception as e:
                             row["status"] = f"error: {type(e).__name__}: {e}"
                         write(row)
-                        print(f"{dataset} run={run} depth={depth_max} until={until_weight} "
+                        print(f"{dataset} run={run} depth={depth_max} until={until_weight} corr={corr_threshold} "
                               f"M={M} intercept={fit_intercept} -> "
                               f"val={row.get('val_balanced_accuracy')} [{row['status']}]", flush=True)
 
@@ -160,6 +173,10 @@ def str2bool(s: str) -> bool:
     if s.lower() in ("false", "0", "no"):
         return False
     raise argparse.ArgumentTypeError(f"expected true/false, got {s!r}")
+
+
+def threshold_or_none(s: str) -> float | None:
+    return None if s.lower() == "none" else float(s)
 
 
 def parse_args() -> argparse.Namespace:
@@ -173,6 +190,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--depths", type=int, nargs="+", default=[1, 2, 3, 4])
     p.add_argument("--n_formulas", type=int, nargs="+", default=[100, 1000, 10000])
     p.add_argument("--until_weights", type=float, nargs="+", default=[0.0, 1.0])
+    # Correlation-filter thresholds; "none" = no filter.
+    p.add_argument("--corr_thresholds", type=threshold_or_none, nargs="+", default=[None])
     p.add_argument("--fit_intercept", type=str2bool, nargs="+", default=[True, False])
     p.add_argument("--cv", type=int, default=5)
     p.add_argument("--cut_point", type=float, default=1.0)

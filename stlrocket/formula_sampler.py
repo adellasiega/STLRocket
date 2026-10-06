@@ -31,9 +31,8 @@ class F0:
             torch.manual_seed(seed)
 
     def _sample_target_depth(self) -> int:
-        """Per-formula depth in 1..depth_max, with P(d) proportional to 1/d (shallow formulae favoured)."""
-        depths = list(range(1, self.depth_max + 1))
-        return random.choices(depths, weights=[1.0 / d for d in depths], k=1)[0]
+        """Per-formula depth, uniform in 1..depth_max."""
+        return random.randint(1, self.depth_max)
 
     def _sample_formula(self, remaining_time: int, current_depth: int, target_depth: int, must_reach: bool):
         """
