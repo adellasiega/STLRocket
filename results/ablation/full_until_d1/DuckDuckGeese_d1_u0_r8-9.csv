@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+DuckDuckGeese,8,8,0.25,1,100,0.0,False,0.2,0.2,0,0.0324,0.5254,ok
+DuckDuckGeese,8,8,0.25,1,1000,0.0,False,0.4333333333333333,0.7892857142857143,7,0.3244,0.6067,ok
+DuckDuckGeese,8,8,0.25,1,10000,0.0,False,0.6,1.0,47,3.2435,1.1933,ok
+DuckDuckGeese,9,9,0.25,1,100,0.0,False,0.4333333333333333,0.41785714285714287,3,0.0312,0.5034,ok
+DuckDuckGeese,9,9,0.25,1,1000,0.0,False,0.4333333333333333,0.42142857142857143,2,0.3118,0.551,ok
+DuckDuckGeese,9,9,0.25,1,10000,0.0,False,0.5,0.9142857142857143,23,3.1182,1.1787,ok

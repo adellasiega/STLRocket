@@ -1,0 +1,7 @@
+Task 130: python -u scripts/run_ablation.py --datasets ArticularyWordRecognition --runs 0 1 --depths 2 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/ArticularyWordRecognition_d2_u0_r0-1.csv
+ArticularyWordRecognition run=0 depth=2 until=0.0 M=100 intercept=False -> val=0.9866666666666666 [ok]
+ArticularyWordRecognition run=0 depth=2 until=0.0 M=1000 intercept=False -> val=0.9866666666666666 [ok]
+ArticularyWordRecognition run=0 depth=2 until=0.0 M=10000 intercept=False -> val=0.9866666666666666 [ok]
+ArticularyWordRecognition run=1 depth=2 until=0.0 M=100 intercept=False -> val=0.9266666666666665 [ok]
+ArticularyWordRecognition run=1 depth=2 until=0.0 M=1000 intercept=False -> val=0.9533333333333333 [ok]
+ArticularyWordRecognition run=1 depth=2 until=0.0 M=10000 intercept=False -> val=0.96 [ok]

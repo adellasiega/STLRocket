@@ -2,3 +2,6 @@ Task 189: python -u scripts/run_ablation.py --datasets EthanolConcentration --ru
 EthanolConcentration run=4 depth=1 until=1.0 M=100 intercept=False -> val=0.333639705882353 [ok]
 EthanolConcentration run=4 depth=1 until=1.0 M=1000 intercept=False -> val=0.3943014705882353 [ok]
 EthanolConcentration run=4 depth=1 until=1.0 M=10000 intercept=False -> val=0.3621323529411765 [ok]
+EthanolConcentration run=5 depth=1 until=1.0 M=100 intercept=False -> val=0.5294117647058824 [ok]
+EthanolConcentration run=5 depth=1 until=1.0 M=1000 intercept=False -> val=0.5579044117647058 [ok]
+EthanolConcentration run=5 depth=1 until=1.0 M=10000 intercept=False -> val=0.45128676470588236 [ok]

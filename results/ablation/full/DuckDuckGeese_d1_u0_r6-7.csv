@@ -1,7 +1,7 @@
 dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
-DuckDuckGeese,6,6,0.25,1,100,0.0,False,0.2,0.4714285714285714,3,0.0328,0.5171,ok
-DuckDuckGeese,6,6,0.25,1,1000,0.0,False,0.2,0.2,0,0.3275,0.6353,ok
-DuckDuckGeese,6,6,0.25,1,10000,0.0,False,0.3,0.5178571428571429,4,3.2751,1.1975,ok
-DuckDuckGeese,7,7,0.25,1,100,0.0,False,0.3666666666666666,0.9464285714285715,30,0.0313,0.4974,ok
-DuckDuckGeese,7,7,0.25,1,1000,0.0,False,0.5,0.8642857142857142,12,0.3129,0.6263,ok
-DuckDuckGeese,7,7,0.25,1,10000,0.0,False,0.5666666666666667,0.8392857142857142,8,3.1288,1.254,ok
+DuckDuckGeese,6,6,0.25,1,100,0.0,False,0.2,0.4714285714285714,3,0.032,0.5024,ok
+DuckDuckGeese,6,6,0.25,1,1000,0.0,False,0.2,0.2,0,0.3202,0.5825,ok
+DuckDuckGeese,6,6,0.25,1,10000,0.0,False,0.3,0.5178571428571429,4,3.2017,1.1076,ok
+DuckDuckGeese,7,7,0.25,1,100,0.0,False,0.3666666666666666,0.9464285714285715,30,0.0321,0.4775,ok
+DuckDuckGeese,7,7,0.25,1,1000,0.0,False,0.5,0.8642857142857142,12,0.3208,0.5389,ok
+DuckDuckGeese,7,7,0.25,1,10000,0.0,False,0.5666666666666667,0.8392857142857142,8,3.2079,1.1834,ok

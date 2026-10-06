@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+LSST,0,0,0.25,2,100,0.0,False,0.3503848550375694,0.4432582427599217,79,0.2492,104.0554,ok
+LSST,0,0,0.25,2,1000,0.0,False,0.2551977987224667,0.3223809854524905,29,2.4924,273.5538,ok
+LSST,0,0,0.25,2,10000,0.0,False,0.3902662743401291,0.48694769061835164,184,24.9243,2487.0996,ok
+LSST,1,1,0.25,2,100,0.0,False,0.197445299133105,0.285290269137194,27,0.2577,66.6645,ok

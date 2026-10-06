@@ -1,7 +1,7 @@
 dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
-ArticularyWordRecognition,0,0,0.25,1,100,0.0,False,0.9666666666666666,1.0,88,0.0494,1.8285,ok
-ArticularyWordRecognition,0,0,0.25,1,1000,0.0,False,0.9866666666666666,1.0,310,0.4942,8.9148,ok
-ArticularyWordRecognition,0,0,0.25,1,10000,0.0,False,0.9866666666666666,1.0,547,4.9415,65.0926,ok
-ArticularyWordRecognition,1,1,0.25,1,100,0.0,False,0.9466666666666668,1.0,94,0.0482,1.9021,ok
-ArticularyWordRecognition,1,1,0.25,1,1000,0.0,False,0.9266666666666665,1.0,279,0.4822,8.8752,ok
-ArticularyWordRecognition,1,1,0.25,1,10000,0.0,False,0.9533333333333333,1.0,513,4.8216,65.3403,ok
+ArticularyWordRecognition,0,0,0.25,1,100,0.0,False,0.9666666666666666,1.0,88,0.0493,1.8439,ok
+ArticularyWordRecognition,0,0,0.25,1,1000,0.0,False,0.9866666666666666,1.0,310,0.493,9.1456,ok
+ArticularyWordRecognition,0,0,0.25,1,10000,0.0,False,0.9866666666666666,1.0,547,4.9296,68.4445,ok
+ArticularyWordRecognition,1,1,0.25,1,100,0.0,False,0.9466666666666668,1.0,94,0.0508,1.944,ok
+ArticularyWordRecognition,1,1,0.25,1,1000,0.0,False,0.9266666666666665,1.0,279,0.5083,8.8904,ok
+ArticularyWordRecognition,1,1,0.25,1,10000,0.0,False,0.9533333333333333,1.0,513,5.0831,74.7023,ok

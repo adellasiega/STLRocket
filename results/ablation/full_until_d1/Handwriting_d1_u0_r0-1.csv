@@ -1,0 +1,3 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+Handwriting,0,0,0.25,,,,,,,,,,skipped: too few samples per class
+Handwriting,1,1,0.25,,,,,,,,,,skipped: too few samples per class

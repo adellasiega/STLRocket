@@ -1,7 +1,7 @@
 dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
-BasicMotions,2,2,0.25,1,100,0.0,False,0.75,0.75,4,0.0288,0.4452,ok
-BasicMotions,2,2,0.25,1,1000,0.0,False,0.875,0.9375,15,0.2885,0.7151,ok
-BasicMotions,2,2,0.25,1,10000,0.0,False,0.75,0.78125,11,2.885,2.2648,ok
-BasicMotions,3,3,0.25,1,100,0.0,False,0.875,1.0,12,0.0288,0.4312,ok
-BasicMotions,3,3,0.25,1,1000,0.0,False,0.875,0.96875,19,0.2883,0.6492,ok
-BasicMotions,3,3,0.25,1,10000,0.0,False,0.875,0.96875,35,2.8829,2.4595,ok
+BasicMotions,2,2,0.25,1,100,0.0,False,0.75,0.75,4,0.0294,0.4373,ok
+BasicMotions,2,2,0.25,1,1000,0.0,False,0.875,0.9375,15,0.2939,0.6174,ok
+BasicMotions,2,2,0.25,1,10000,0.0,False,0.75,0.78125,11,2.9392,2.3077,ok
+BasicMotions,3,3,0.25,1,100,0.0,False,0.875,1.0,12,0.0295,0.4213,ok
+BasicMotions,3,3,0.25,1,1000,0.0,False,0.875,0.96875,19,0.2945,0.7018,ok
+BasicMotions,3,3,0.25,1,10000,0.0,False,0.875,0.96875,35,2.9453,2.3928,ok

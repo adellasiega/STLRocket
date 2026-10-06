@@ -20,3 +20,22 @@
   warnings.warn("Model did not converge for smaller values of lambda, "
 /share/ai-lab/adsiega/STLRocket/env/lib64/python3.9/site-packages/glmnet/errors.py:66: RuntimeWarning: Model did not converge for smaller values of lambda, returning solution for the largest 84 values.
   warnings.warn("Model did not converge for smaller values of lambda, "
+/share/ai-lab/adsiega/STLRocket/env/lib64/python3.9/site-packages/glmnet/errors.py:66: RuntimeWarning: Model did not converge for smaller values of lambda, returning solution for the largest 88 values.
+  warnings.warn("Model did not converge for smaller values of lambda, "
+/share/ai-lab/adsiega/STLRocket/env/lib64/python3.9/site-packages/glmnet/errors.py:66: RuntimeWarning: Model did not converge for smaller values of lambda, returning solution for the largest 80 values.
+  warnings.warn("Model did not converge for smaller values of lambda, "
+/share/ai-lab/adsiega/STLRocket/env/lib64/python3.9/site-packages/glmnet/errors.py:66: RuntimeWarning: Model did not converge for smaller values of lambda, returning solution for the largest 75 values.
+  warnings.warn("Model did not converge for smaller values of lambda, "
+/share/ai-lab/adsiega/STLRocket/env/lib64/python3.9/site-packages/glmnet/errors.py:66: RuntimeWarning: Model did not converge for smaller values of lambda, returning solution for the largest 85 values.
+  warnings.warn("Model did not converge for smaller values of lambda, "
+/share/ai-lab/adsiega/STLRocket/env/lib64/python3.9/site-packages/glmnet/errors.py:66: RuntimeWarning: Model did not converge for smaller values of lambda, returning solution for the largest 83 values.
+  warnings.warn("Model did not converge for smaller values of lambda, "
+/share/ai-lab/adsiega/STLRocket/env/lib64/python3.9/site-packages/glmnet/errors.py:66: RuntimeWarning: Model did not converge for smaller values of lambda, returning solution for the largest 61 values.
+  warnings.warn("Model did not converge for smaller values of lambda, "
+/share/ai-lab/adsiega/STLRocket/env/lib64/python3.9/site-packages/glmnet/errors.py:66: RuntimeWarning: Model did not converge for smaller values of lambda, returning solution for the largest 43 values.
+  warnings.warn("Model did not converge for smaller values of lambda, "
+/share/ai-lab/adsiega/STLRocket/env/lib64/python3.9/site-packages/glmnet/errors.py:66: RuntimeWarning: Model did not converge for smaller values of lambda, returning solution for the largest 66 values.
+  warnings.warn("Model did not converge for smaller values of lambda, "
+/share/ai-lab/adsiega/STLRocket/env/lib64/python3.9/site-packages/glmnet/errors.py:66: RuntimeWarning: Model did not converge for smaller values of lambda, returning solution for the largest 81 values.
+  warnings.warn("Model did not converge for smaller values of lambda, "
+slurmstepd: error: *** JOB 109290 ON babbage CANCELLED AT 2026-10-06T10:40:52 ***

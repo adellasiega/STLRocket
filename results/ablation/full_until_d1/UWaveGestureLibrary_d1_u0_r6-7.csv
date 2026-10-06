@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+UWaveGestureLibrary,6,6,0.25,1,100,0.0,False,0.78125,0.9147727272727273,32,0.0375,0.6594,ok
+UWaveGestureLibrary,6,6,0.25,1,1000,0.0,False,0.8645833333333333,0.946969696969697,48,0.375,1.5932,ok
+UWaveGestureLibrary,6,6,0.25,1,10000,0.0,False,0.8229166666666666,0.9573863636363636,80,3.7505,9.464,ok
+UWaveGestureLibrary,7,7,0.25,1,100,0.0,False,0.7604166666666666,0.9015151515151515,36,0.0366,0.6357,ok
+UWaveGestureLibrary,7,7,0.25,1,1000,0.0,False,0.8541666666666666,0.9119318181818181,52,0.3656,1.809,ok
+UWaveGestureLibrary,7,7,0.25,1,10000,0.0,False,0.8541666666666666,0.9232954545454546,70,3.6562,11.6825,ok

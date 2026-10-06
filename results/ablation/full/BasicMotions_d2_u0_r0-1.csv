@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+BasicMotions,0,0,0.25,2,100,0.0,False,1.0,0.9375,12,0.0329,0.4504,ok
+BasicMotions,0,0,0.25,2,1000,0.0,False,1.0,0.96875,6,0.3292,0.5805,ok
+BasicMotions,0,0,0.25,2,10000,0.0,False,1.0,1.0,20,3.2924,1.4699,ok
+BasicMotions,1,1,0.25,2,100,0.0,False,0.75,0.75,2,0.0333,0.4735,ok
+BasicMotions,1,1,0.25,2,1000,0.0,False,0.875,0.875,6,0.333,0.5095,ok
+BasicMotions,1,1,0.25,2,10000,0.0,False,1.0,1.0,6,3.3295,1.5013,ok
