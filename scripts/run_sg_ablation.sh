@@ -24,8 +24,8 @@ VENV="/share/ai-lab/adsiega/STLRocket/env"
 OUT_DIR="${PROJECT_DIR}/results/ablation/sg"
 PREV_RESULTS="${PROJECT_DIR}/results/ablation/full"
 
-N_DATASETS=22                         # all but the 3 slowest (PenDigits, LSST, PhonemeSpectra)
-DEPTHS=(2 3)
+N_DATASETS=10                         # all but the 3 slowest (PenDigits, LSST, PhonemeSpectra)
+DEPTHS=(3)
 SG_WINDOWS=(none 0.05)               # window as a fraction of T; none = raw only
 N_FORMULAS=10000
 N_RUNS=10
