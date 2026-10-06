@@ -1,0 +1,6 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+PhonemeSpectra,8,8,0.25,3,100,0.0,False,0.11322011322011324,0.22292175417175414,99,0.3773,97.9764,ok
+PhonemeSpectra,8,8,0.25,3,1000,0.0,False,0.12859362859362858,0.2766521672771673,432,3.773,765.2788,ok
+PhonemeSpectra,8,8,0.25,3,10000,0.0,False,0.12665112665112663,0.510537494912495,1789,37.7297,4289.3348,ok
+PhonemeSpectra,9,9,0.25,3,100,0.0,False,0.09956709956709955,0.15466015466015465,67,0.3542,93.6127,ok
+PhonemeSpectra,9,9,0.25,3,1000,0.0,False,0.13786213786213786,0.2327597171347171,320,3.5422,787.3779,ok

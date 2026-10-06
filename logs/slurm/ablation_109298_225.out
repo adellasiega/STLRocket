@@ -1,0 +1,7 @@
+Task 225: python -u scripts/run_ablation.py --datasets NATOPS --runs 6 7 --depths 2 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/NATOPS_d2_u0_r6-7.csv
+NATOPS run=6 depth=2 until=0.0 M=100 intercept=False -> val=0.9345238095238094 [ok]
+NATOPS run=6 depth=2 until=0.0 M=1000 intercept=False -> val=0.8720238095238096 [ok]
+NATOPS run=6 depth=2 until=0.0 M=10000 intercept=False -> val=0.9136904761904762 [ok]
+NATOPS run=7 depth=2 until=0.0 M=100 intercept=False -> val=0.9375 [ok]
+NATOPS run=7 depth=2 until=0.0 M=1000 intercept=False -> val=0.9791666666666666 [ok]
+NATOPS run=7 depth=2 until=0.0 M=10000 intercept=False -> val=0.9553571428571429 [ok]

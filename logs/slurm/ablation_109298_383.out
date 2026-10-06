@@ -1,0 +1,7 @@
+Task 383: python -u scripts/run_ablation.py --datasets PEMS-SF --runs 8 9 --depths 3 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/PEMS-SF_d3_u0_r8-9.csv
+PEMS-SF run=8 depth=3 until=0.0 M=100 intercept=False -> val=0.8075396825396826 [ok]
+PEMS-SF run=8 depth=3 until=0.0 M=1000 intercept=False -> val=0.7498196248196247 [ok]
+PEMS-SF run=8 depth=3 until=0.0 M=10000 intercept=False -> val=0.8335137085137087 [ok]
+PEMS-SF run=9 depth=3 until=0.0 M=100 intercept=False -> val=0.7777777777777777 [ok]
+PEMS-SF run=9 depth=3 until=0.0 M=1000 intercept=False -> val=0.8248556998556998 [ok]
+PEMS-SF run=9 depth=3 until=0.0 M=10000 intercept=False -> val=0.7380952380952381 [ok]

@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+StandWalkJump,8,8,0.25,2,100,0.0,False,0.3333333333333333,1.0,5,0.032,0.1621,ok
+StandWalkJump,8,8,0.25,2,1000,0.0,False,0.3333333333333333,0.3333333333333333,0,0.3202,0.1968,ok
+StandWalkJump,8,8,0.25,2,10000,0.0,False,0.3333333333333333,0.3333333333333333,0,3.2016,0.3859,ok
+StandWalkJump,9,9,0.25,2,100,0.0,False,0.0,0.6666666666666666,1,0.0323,0.1562,ok
+StandWalkJump,9,9,0.25,2,1000,0.0,False,0.3333333333333333,0.3333333333333333,0,0.3226,0.1762,ok
+StandWalkJump,9,9,0.25,2,10000,0.0,False,0.3333333333333333,0.3333333333333333,0,3.2258,0.3332,ok

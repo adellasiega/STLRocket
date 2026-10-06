@@ -1,0 +1,7 @@
+Task 176: python -u scripts/run_ablation.py --datasets PhonemeSpectra --runs 2 3 --depths 2 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/PhonemeSpectra_d2_u0_r2-3.csv
+PhonemeSpectra run=2 depth=2 until=0.0 M=100 intercept=False -> val=0.10334110334110334 [ok]
+PhonemeSpectra run=2 depth=2 until=0.0 M=1000 intercept=False -> val=0.11954711954711954 [ok]
+PhonemeSpectra run=2 depth=2 until=0.0 M=10000 intercept=False -> val=0.11627261627261624 [ok]
+PhonemeSpectra run=3 depth=2 until=0.0 M=100 intercept=False -> val=0.11116661116661117 [ok]
+PhonemeSpectra run=3 depth=2 until=0.0 M=1000 intercept=False -> val=0.1273171273171273 [ok]
+PhonemeSpectra run=3 depth=2 until=0.0 M=10000 intercept=False -> val=0.13625263625263626 [ok]

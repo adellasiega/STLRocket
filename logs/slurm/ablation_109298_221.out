@@ -1,0 +1,7 @@
+Task 221: python -u scripts/run_ablation.py --datasets Heartbeat --runs 6 7 --depths 2 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/Heartbeat_d2_u0_r6-7.csv
+Heartbeat run=6 depth=2 until=0.0 M=100 intercept=False -> val=0.7442084942084942 [ok]
+Heartbeat run=6 depth=2 until=0.0 M=1000 intercept=False -> val=0.6187258687258688 [ok]
+Heartbeat run=6 depth=2 until=0.0 M=10000 intercept=False -> val=0.7442084942084942 [ok]
+Heartbeat run=7 depth=2 until=0.0 M=100 intercept=False -> val=0.6766409266409266 [ok]
+Heartbeat run=7 depth=2 until=0.0 M=1000 intercept=False -> val=0.7171814671814671 [ok]
+Heartbeat run=7 depth=2 until=0.0 M=10000 intercept=False -> val=0.5656370656370656 [ok]

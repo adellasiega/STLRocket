@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+SelfRegulationSCP1,4,4,0.25,2,100,0.0,False,0.7896613190730838,0.8454455445544555,15,0.0798,0.7243,ok
+SelfRegulationSCP1,4,4,0.25,2,1000,0.0,False,0.804367201426025,0.8255940594059406,8,0.798,0.5718,ok
+SelfRegulationSCP1,4,4,0.25,2,10000,0.0,False,0.804367201426025,0.8007425742574257,15,7.9797,1.77,ok
+SelfRegulationSCP1,5,5,0.25,2,100,0.0,False,0.7281639928698752,0.7657425742574258,8,0.0758,1.1557,ok
+SelfRegulationSCP1,5,5,0.25,2,1000,0.0,False,0.803475935828877,0.8652475247524752,21,0.7583,0.7356,ok
+SelfRegulationSCP1,5,5,0.25,2,10000,0.0,False,0.7740641711229946,0.9151485148514851,24,7.5834,2.3135,ok

@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+Cricket,2,2,0.25,2,100,0.0,False,0.7777777777777778,1.0,46,0.1027,0.4884,ok
+Cricket,2,2,0.25,2,1000,0.0,False,0.861111111111111,1.0,63,1.027,1.1197,ok
+Cricket,2,2,0.25,2,10000,0.0,False,0.9722222222222222,1.0,143,10.2705,6.4748,ok
+Cricket,3,3,0.25,2,100,0.0,False,0.8333333333333334,1.0,59,0.0585,0.4235,ok
+Cricket,3,3,0.25,2,1000,0.0,False,0.861111111111111,1.0,112,0.5849,1.0859,ok
+Cricket,3,3,0.25,2,10000,0.0,False,0.8333333333333331,0.9880952380952381,56,5.8486,6.0414,ok

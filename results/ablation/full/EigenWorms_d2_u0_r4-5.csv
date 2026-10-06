@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+EigenWorms,4,4,0.25,2,100,0.0,False,0.5142857142857142,0.8393858293786558,36,1.5862,0.3342,ok
+EigenWorms,4,4,0.25,2,1000,0.0,False,0.5814285714285715,1.0,116,15.8619,0.559,ok
+EigenWorms,4,4,0.25,2,10000,0.0,False,0.5404761904761906,1.0,101,158.6193,1.8413,ok
+EigenWorms,5,5,0.25,2,100,0.0,False,0.510952380952381,0.6060022195244577,14,1.6555,0.3402,ok
+EigenWorms,5,5,0.25,2,1000,0.0,False,0.3695238095238095,0.9102968767244233,34,16.5546,0.5332,ok
+EigenWorms,5,5,0.25,2,10000,0.0,False,0.4523809523809524,0.9179340028694405,52,165.5462,1.6958,ok

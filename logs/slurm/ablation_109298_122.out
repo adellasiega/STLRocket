@@ -4,3 +4,4 @@ PenDigits run=8 depth=1 until=0.0 M=1000 intercept=False -> val=0.99132214292008
 PenDigits run=8 depth=1 until=0.0 M=10000 intercept=False -> val=0.9896554762534144 [ok]
 PenDigits run=9 depth=1 until=0.0 M=100 intercept=False -> val=0.9876870208828971 [ok]
 PenDigits run=9 depth=1 until=0.0 M=1000 intercept=False -> val=0.9903793285752049 [ok]
+PenDigits run=9 depth=1 until=0.0 M=10000 intercept=False -> val=0.9903793285752049 [ok]

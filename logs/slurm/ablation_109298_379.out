@@ -1,0 +1,7 @@
+Task 379: python -u scripts/run_ablation.py --datasets LSST --runs 8 9 --depths 3 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/LSST_d3_u0_r8-9.csv
+LSST run=8 depth=3 until=0.0 M=100 intercept=False -> val=0.3279679822823736 [ok]
+LSST run=8 depth=3 until=0.0 M=1000 intercept=False -> val=0.3740642476136334 [ok]
+LSST run=8 depth=3 until=0.0 M=10000 intercept=False -> val=0.33531740696801116 [ok]
+LSST run=9 depth=3 until=0.0 M=100 intercept=False -> val=0.3117598133057289 [ok]
+LSST run=9 depth=3 until=0.0 M=1000 intercept=False -> val=0.3070168762294 [ok]
+LSST run=9 depth=3 until=0.0 M=10000 intercept=False -> val=0.3045379971238855 [ok]

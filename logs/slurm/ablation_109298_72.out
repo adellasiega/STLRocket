@@ -4,3 +4,4 @@ PhonemeSpectra run=4 depth=1 until=0.0 M=1000 intercept=False -> val=0.115495615
 PhonemeSpectra run=4 depth=1 until=0.0 M=10000 intercept=False -> val=0.10267510267510267 [ok]
 PhonemeSpectra run=5 depth=1 until=0.0 M=100 intercept=False -> val=0.08674658674658674 [ok]
 PhonemeSpectra run=5 depth=1 until=0.0 M=1000 intercept=False -> val=0.0985125985125985 [ok]
+PhonemeSpectra run=5 depth=1 until=0.0 M=10000 intercept=False -> val=0.11055611055611053 [ok]

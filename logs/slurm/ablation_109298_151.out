@@ -1,0 +1,7 @@
+Task 151: python -u scripts/run_ablation.py --datasets RacketSports --runs 0 1 --depths 2 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/RacketSports_d2_u0_r0-1.csv
+RacketSports run=0 depth=2 until=0.0 M=100 intercept=False -> val=0.7613636363636364 [ok]
+RacketSports run=0 depth=2 until=0.0 M=1000 intercept=False -> val=0.7757575757575758 [ok]
+RacketSports run=0 depth=2 until=0.0 M=10000 intercept=False -> val=0.5707070707070707 [ok]
+RacketSports run=1 depth=2 until=0.0 M=100 intercept=False -> val=0.7454545454545455 [ok]
+RacketSports run=1 depth=2 until=0.0 M=1000 intercept=False -> val=0.8113636363636363 [ok]
+RacketSports run=1 depth=2 until=0.0 M=10000 intercept=False -> val=0.8545454545454545 [ok]

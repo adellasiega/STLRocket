@@ -4,3 +4,4 @@ LSST run=6 depth=1 until=0.0 M=1000 intercept=False -> val=0.31500037359857097 [
 LSST run=6 depth=1 until=0.0 M=10000 intercept=False -> val=0.3055792831041258 [ok]
 LSST run=7 depth=1 until=0.0 M=100 intercept=False -> val=0.3996046617721044 [ok]
 LSST run=7 depth=1 until=0.0 M=1000 intercept=False -> val=0.36422109319796586 [ok]
+LSST run=7 depth=1 until=0.0 M=10000 intercept=False -> val=0.21340556726804608 [ok]

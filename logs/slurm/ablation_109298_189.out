@@ -1,0 +1,7 @@
+Task 189: python -u scripts/run_ablation.py --datasets EthanolConcentration --runs 4 5 --depths 2 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/EthanolConcentration_d2_u0_r4-5.csv
+EthanolConcentration run=4 depth=2 until=0.0 M=100 intercept=False -> val=0.4834558823529412 [ok]
+EthanolConcentration run=4 depth=2 until=0.0 M=1000 intercept=False -> val=0.4365808823529411 [ok]
+EthanolConcentration run=4 depth=2 until=0.0 M=10000 intercept=False -> val=0.3933823529411765 [ok]
+EthanolConcentration run=5 depth=2 until=0.0 M=100 intercept=False -> val=0.5891544117647058 [ok]
+EthanolConcentration run=5 depth=2 until=0.0 M=1000 intercept=False -> val=0.5588235294117647 [ok]
+EthanolConcentration run=5 depth=2 until=0.0 M=10000 intercept=False -> val=0.5294117647058824 [ok]

@@ -1,0 +1,1 @@
+Task 246: python -u scripts/run_ablation.py --datasets Handwriting --runs 8 9 --depths 2 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/Handwriting_d2_u0_r8-9.csv

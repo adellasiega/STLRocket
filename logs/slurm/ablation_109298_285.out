@@ -1,0 +1,7 @@
+Task 285: python -u scripts/run_ablation.py --datasets UWaveGestureLibrary --runs 0 1 --depths 3 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/UWaveGestureLibrary_d3_u0_r0-1.csv
+UWaveGestureLibrary run=0 depth=3 until=0.0 M=100 intercept=False -> val=0.90625 [ok]
+UWaveGestureLibrary run=0 depth=3 until=0.0 M=1000 intercept=False -> val=0.84375 [ok]
+UWaveGestureLibrary run=0 depth=3 until=0.0 M=10000 intercept=False -> val=0.96875 [ok]
+UWaveGestureLibrary run=1 depth=3 until=0.0 M=100 intercept=False -> val=0.7916666666666666 [ok]
+UWaveGestureLibrary run=1 depth=3 until=0.0 M=1000 intercept=False -> val=0.75 [ok]
+UWaveGestureLibrary run=1 depth=3 until=0.0 M=10000 intercept=False -> val=0.6666666666666666 [ok]

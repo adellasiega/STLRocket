@@ -1,0 +1,7 @@
+Task 317: python -u scripts/run_ablation.py --datasets EigenWorms --runs 4 5 --depths 3 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/EigenWorms_d3_u0_r4-5.csv
+EigenWorms run=4 depth=3 until=0.0 M=100 intercept=False -> val=0.4576190476190476 [ok]
+EigenWorms run=4 depth=3 until=0.0 M=1000 intercept=False -> val=0.42857142857142855 [ok]
+EigenWorms run=4 depth=3 until=0.0 M=10000 intercept=False -> val=0.44761904761904764 [ok]
+EigenWorms run=5 depth=3 until=0.0 M=100 intercept=False -> val=0.47000000000000003 [ok]
+EigenWorms run=5 depth=3 until=0.0 M=1000 intercept=False -> val=0.31714285714285717 [ok]
+EigenWorms run=5 depth=3 until=0.0 M=10000 intercept=False -> val=0.49333333333333335 [ok]

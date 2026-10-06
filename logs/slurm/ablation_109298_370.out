@@ -1,0 +1,7 @@
+Task 370: python -u scripts/run_ablation.py --datasets Epilepsy --runs 8 9 --depths 3 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/Epilepsy_d3_u0_r8-9.csv
+Epilepsy run=8 depth=3 until=0.0 M=100 intercept=False -> val=0.861111111111111 [ok]
+Epilepsy run=8 depth=3 until=0.0 M=1000 intercept=False -> val=0.8611111111111112 [ok]
+Epilepsy run=8 depth=3 until=0.0 M=10000 intercept=False -> val=0.9409722222222222 [ok]
+Epilepsy run=9 depth=3 until=0.0 M=100 intercept=False -> val=0.8333333333333334 [ok]
+Epilepsy run=9 depth=3 until=0.0 M=1000 intercept=False -> val=0.9444444444444444 [ok]
+Epilepsy run=9 depth=3 until=0.0 M=10000 intercept=False -> val=0.8576388888888888 [ok]

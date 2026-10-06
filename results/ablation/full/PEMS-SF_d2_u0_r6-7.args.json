@@ -1,0 +1,30 @@
+{
+  "datasets": [
+    "PEMS-SF"
+  ],
+  "n_runs": 5,
+  "runs": [
+    6,
+    7
+  ],
+  "val_ratio": 0.25,
+  "depths": [
+    2
+  ],
+  "n_formulas": [
+    100,
+    1000,
+    10000
+  ],
+  "until_weights": [
+    0.0
+  ],
+  "fit_intercept": [
+    false
+  ],
+  "cv": 3,
+  "cut_point": 1.0,
+  "base_seed": 0,
+  "device": "cpu",
+  "output": "/share/ai-lab/adsiega/STLRocket/results/ablation/full/PEMS-SF_d2_u0_r6-7.csv"
+}
