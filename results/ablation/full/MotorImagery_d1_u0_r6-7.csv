@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+MotorImagery,6,6,0.25,1,100,0.0,False,0.5142857142857142,0.5865384615384615,12,0.4235,2.5025,ok
+MotorImagery,6,6,0.25,1,1000,0.0,False,0.45714285714285713,0.5576923076923077,1,4.2348,1.3581,ok
+MotorImagery,6,6,0.25,1,10000,0.0,False,0.5,0.5,0,42.3478,2.3648,ok
+MotorImagery,7,7,0.25,1,100,0.0,False,0.5,0.5,0,0.3466,2.0691,ok
+MotorImagery,7,7,0.25,1,1000,0.0,False,0.5142857142857142,0.5961538461538463,2,3.4658,1.4261,ok
+MotorImagery,7,7,0.25,1,10000,0.0,False,0.5,0.5,0,34.6583,2.4625,ok

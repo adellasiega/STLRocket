@@ -1,0 +1,7 @@
+Task 166: python -u scripts/run_ablation.py --datasets FingerMovements --runs 2 3 --depths 1 --until_weights 1 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/FingerMovements_d1_u1_r2-3.csv
+FingerMovements run=2 depth=1 until=1.0 M=100 intercept=False -> val=0.5451923076923078 [ok]
+FingerMovements run=2 depth=1 until=1.0 M=1000 intercept=False -> val=0.5 [ok]
+FingerMovements run=2 depth=1 until=1.0 M=10000 intercept=False -> val=0.5 [ok]
+FingerMovements run=3 depth=1 until=1.0 M=100 intercept=False -> val=0.5445512820512821 [ok]
+FingerMovements run=3 depth=1 until=1.0 M=1000 intercept=False -> val=0.5445512820512821 [ok]
+FingerMovements run=3 depth=1 until=1.0 M=10000 intercept=False -> val=0.558974358974359 [ok]

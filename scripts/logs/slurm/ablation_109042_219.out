@@ -1,0 +1,7 @@
+Task 219: python -u scripts/run_ablation.py --datasets HandMovementDirection --runs 6 7 --depths 1 --until_weights 1 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/HandMovementDirection_d1_u1_r6-7.csv
+HandMovementDirection run=6 depth=1 until=1.0 M=100 intercept=False -> val=0.30000000000000004 [ok]
+HandMovementDirection run=6 depth=1 until=1.0 M=1000 intercept=False -> val=0.35000000000000003 [ok]
+HandMovementDirection run=6 depth=1 until=1.0 M=10000 intercept=False -> val=0.27499999999999997 [ok]
+HandMovementDirection run=7 depth=1 until=1.0 M=100 intercept=False -> val=0.275 [ok]
+HandMovementDirection run=7 depth=1 until=1.0 M=1000 intercept=False -> val=0.375 [ok]
+HandMovementDirection run=7 depth=1 until=1.0 M=10000 intercept=False -> val=0.375 [ok]

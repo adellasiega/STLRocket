@@ -1,0 +1,7 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+FaceDetection,0,0,0.25,1,100,1.0,False,0.5,0.5,0,4.8173,1.4838,ok
+FaceDetection,0,0,0.25,1,1000,1.0,False,0.6592116615538905,0.7280970551958064,230,48.1732,77.2584,ok
+FaceDetection,0,0,0.25,1,10000,1.0,False,0.7080703203350835,0.7971491174116427,380,481.732,74.6271,ok
+FaceDetection,1,1,0.25,1,100,1.0,False,0.5593770279039585,0.5687126445830955,18,5.1124,1.3894,ok
+FaceDetection,1,1,0.25,1,1000,1.0,False,0.6591701817001947,0.7224351057269012,207,51.1238,62.3402,ok
+FaceDetection,1,1,0.25,1,10000,1.0,False,0.6958632602796295,0.7473387853379784,193,511.2376,78.8605,ok

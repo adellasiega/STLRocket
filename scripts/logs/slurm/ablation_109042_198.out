@@ -1,0 +1,1 @@
+Task 198: python -u scripts/run_ablation.py --datasets MotorImagery --runs 4 5 --depths 1 --until_weights 1 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/MotorImagery_d1_u1_r4-5.csv

@@ -1,3 +1,7 @@
 Task 70: python -u scripts/run_ablation.py --datasets PenDigits --runs 4 5 --depths 1 --until_weights 0 --n_formulas 100 1000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/PenDigits_d1_u0_r4-5.csv
 PenDigits run=4 depth=1 until=0.0 M=100 intercept=False -> val=0.9850348048286192 [ok]
 PenDigits run=4 depth=1 until=0.0 M=1000 intercept=False -> val=0.9855502687461449 [ok]
+PenDigits run=4 depth=1 until=0.0 M=10000 intercept=False -> val=0.9861058243017006 [ok]
+PenDigits run=5 depth=1 until=0.0 M=100 intercept=False -> val=0.9765679795576702 [ok]
+PenDigits run=5 depth=1 until=0.0 M=1000 intercept=False -> val=0.9898264164243546 [ok]
+PenDigits run=5 depth=1 until=0.0 M=10000 intercept=False -> val=0.989270860868799 [ok]

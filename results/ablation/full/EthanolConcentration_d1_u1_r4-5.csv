@@ -1,0 +1,4 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+EthanolConcentration,4,4,0.25,1,100,1.0,False,0.333639705882353,0.5491071428571428,41,99.0076,4.7106,ok
+EthanolConcentration,4,4,0.25,1,1000,1.0,False,0.3943014705882353,0.6265943877551021,54,990.0765,15.9397,ok
+EthanolConcentration,4,4,0.25,1,10000,1.0,False,0.3621323529411765,0.8160076530612245,122,9900.7645,91.9515,ok
