@@ -38,6 +38,9 @@ class ExperimentConfig:
     # Hardware
     device: str
 
-    # Set atom thresholds of multi-atom formulae from the train data
-    # (features.calibrate_thresholds) instead of uniformly in [min, max]
+    # Set formula thresholds (atoms, SCL p) from the train data
+    # (features.calibrate_thresholds) instead of uniformly at sampling
     calibrate_thresholds: bool = False
+
+    # Weight of the SCL Fraction operator in the sampler, relative to G and F (1 each); 0 = off
+    scl_weight: float = 0.0
