@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,calibrate,scl_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+SelfRegulationSCP1,2,2,0.25,3,10000,0.0,,10000,True,0.0,False,0.7156862745098038,0.895148514851485,25,35.4773,1.9511,ok
+SelfRegulationSCP1,2,2,0.25,3,10000,0.0,,10000,True,1.0,False,0.6697860962566844,0.7803465346534654,2,53.6352,1.5783,ok
+SelfRegulationSCP1,3,3,0.25,3,10000,0.0,,10000,True,0.0,False,0.7308377896613191,0.8254455445544555,12,35.4373,2.2278,ok
+SelfRegulationSCP1,3,3,0.25,3,10000,0.0,,10000,True,1.0,False,0.8502673796791445,0.9152475247524752,44,50.0035,1.6967,ok

@@ -1,0 +1,5 @@
+Task 58: python -u scripts/run_ablation.py --datasets ArticularyWordRecognition --runs 6 7 --depths 3 --scl_weights 0 1 --calibrate true --until_weights 0 --n_formulas 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/scl/ArticularyWordRecognition_d3_r6-7.csv
+ArticularyWordRecognition run=6 depth=3 until=0.0 corr=None calib=True scl=0.0 M=10000 intercept=False -> val=0.9866666666666666 [ok]
+ArticularyWordRecognition run=6 depth=3 until=0.0 corr=None calib=True scl=1.0 M=10000 intercept=False -> val=0.82 [ok]
+ArticularyWordRecognition run=7 depth=3 until=0.0 corr=None calib=True scl=0.0 M=10000 intercept=False -> val=0.9866666666666666 [ok]
+ArticularyWordRecognition run=7 depth=3 until=0.0 corr=None calib=True scl=1.0 M=10000 intercept=False -> val=0.9333333333333332 [ok]

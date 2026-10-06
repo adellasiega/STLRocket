@@ -1,0 +1,5 @@
+Task 25: python -u scripts/run_ablation.py --datasets SelfRegulationSCP1 --runs 2 3 --depths 3 --scl_weights 0 1 --calibrate true --until_weights 0 --n_formulas 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/scl/SelfRegulationSCP1_d3_r2-3.csv
+SelfRegulationSCP1 run=2 depth=3 until=0.0 corr=None calib=True scl=0.0 M=10000 intercept=False -> val=0.7156862745098038 [ok]
+SelfRegulationSCP1 run=2 depth=3 until=0.0 corr=None calib=True scl=1.0 M=10000 intercept=False -> val=0.6697860962566844 [ok]
+SelfRegulationSCP1 run=3 depth=3 until=0.0 corr=None calib=True scl=0.0 M=10000 intercept=False -> val=0.7308377896613191 [ok]
+SelfRegulationSCP1 run=3 depth=3 until=0.0 corr=None calib=True scl=1.0 M=10000 intercept=False -> val=0.8502673796791445 [ok]

@@ -1,0 +1,5 @@
+Task 48: python -u scripts/run_ablation.py --datasets RacketSports --runs 6 7 --depths 3 --scl_weights 0 1 --calibrate true --until_weights 0 --n_formulas 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/scl/RacketSports_d3_r6-7.csv
+RacketSports run=6 depth=3 until=0.0 corr=None calib=True scl=0.0 M=10000 intercept=False -> val=0.884090909090909 [ok]
+RacketSports run=6 depth=3 until=0.0 corr=None calib=True scl=1.0 M=10000 intercept=False -> val=0.9295454545454546 [ok]
+RacketSports run=7 depth=3 until=0.0 corr=None calib=True scl=0.0 M=10000 intercept=False -> val=0.8790404040404041 [ok]
+RacketSports run=7 depth=3 until=0.0 corr=None calib=True scl=1.0 M=10000 intercept=False -> val=0.8795454545454545 [ok]

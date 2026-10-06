@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,calibrate,scl_weight,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,time_feats_s,time_fit_s,status
+Libras,8,8,0.25,3,10000,0.0,,10000,True,0.0,False,0.7555555555555556,0.9703703703703704,104,12.3505,15.5922,ok
+Libras,8,8,0.25,3,10000,0.0,,10000,True,1.0,False,0.5777777777777776,0.9777777777777779,138,15.018,9.5696,ok
+Libras,9,9,0.25,3,10000,0.0,,10000,True,0.0,False,0.7555555555555554,0.9555555555555556,126,12.51,16.5959,ok
+Libras,9,9,0.25,3,10000,0.0,,10000,True,1.0,False,0.6888888888888888,0.9925925925925926,148,14.7095,9.4796,ok
