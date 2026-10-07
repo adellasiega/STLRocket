@@ -3,11 +3,9 @@ Random STL formula grammar sampler.
 """
 
 import random
-from functools import partial
 from typing import Optional
 import torch
 from torcheck import stl
-from .scl import Fraction
 
 
 class F0:
@@ -20,7 +18,6 @@ class F0:
         depth_max: int,
         until_weight: float,
         seed: Optional[int],
-        scl_weight: float = 0.0,  # weight of the SCL Fraction operator, relative to G and F (1 each)
     ):
         self.n_vars = n_vars
         self.v_min = v_min
@@ -28,7 +25,6 @@ class F0:
         self.t_max = t_max
         self.depth_max = depth_max
         self.until_weight = until_weight
-        self.scl_weight = scl_weight
 
         if seed is not None:
             random.seed(seed)
@@ -104,14 +100,17 @@ class F0:
         if allow_not and room:
             classes.append("Not")
             weights.append(0.0)
-        # Appended last: with scl_weight = 0 the draws are those of the sampler without it.
-        classes.append("Fraction")
-        weights.append(self.scl_weight)
         op = random.choices(classes, weights=weights, k=1)[0]
 
-        if op in ("Globally", "Eventually", "Until", "Fraction"):
-            # Bounded windows are favoured (3:1:1) since unbound and right_unbound
-            # ones always extend to the end of the trace.
+        if op in ("Globally", "Eventually", "Until"):
+            # Bounded windows (width log-uniform, see _sample_interval) are the main
+            # mechanism, so every time scale is represented. Unbound and right_unbound
+            # windows always extend to the end of the trace: read at t=0 they equal
+            # bounded windows ending at the last sample (rarely drawn exactly), and nested
+            # they express "until the end", which no fixed-width window can. They get
+            # 40% (3:1:1), which adds weight on the longest time scale: at the root about
+            # a third of windows fall in the top doubling of width, vs 10-15% if all
+            # were log-uniform. The 3 is a chosen prior.
             variants, variant_weights = ["unbound"], [1.0]
             if remaining_time > 0:
                 variants += ["bounded", "right_unbound"]
@@ -143,11 +142,8 @@ class F0:
             return stl.Not(self._sample_operator_node(remaining_time, d, target_depth, must_reach, guarded,
                                                       allow_not=False))
 
-        elif op in ("Globally", "Eventually", "Fraction"):
-            if op == "Fraction":
-                OpClass = partial(Fraction, p=random.random())
-            else:
-                OpClass = stl.Globally if op == "Globally" else stl.Eventually
+        elif op in ("Globally", "Eventually"):
+            OpClass = stl.Globally if op == "Globally" else stl.Eventually
             if variant == "unbound":
                 child = unary(remaining_time)
                 return OpClass(child, unbound=True)
@@ -184,7 +180,7 @@ class F0:
             return 0
         if isinstance(formula, stl.Not):
             return 1 + F0.formula_depth(formula.child)
-        if isinstance(formula, (stl.Globally, stl.Eventually, Fraction)):
+        if isinstance(formula, (stl.Globally, stl.Eventually)):
             return 1 + F0.formula_depth(formula.child)
         if isinstance(formula, (stl.And, stl.Or, stl.Until)):
             return 1 + max(F0.formula_depth(formula.left_child), F0.formula_depth(formula.right_child))
@@ -199,7 +195,7 @@ class F0:
             return 1
         if isinstance(formula, stl.Not):
             return 1 + F0.formula_size(formula.child)
-        if isinstance(formula, (stl.Globally, stl.Eventually, Fraction)):
+        if isinstance(formula, (stl.Globally, stl.Eventually)):
             return 1 + F0.formula_size(formula.child)
         if isinstance(formula, (stl.And, stl.Or, stl.Until)):
             return 1 + F0.formula_size(formula.left_child) + F0.formula_size(formula.right_child)

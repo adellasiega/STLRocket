@@ -13,7 +13,6 @@ import copy
 import numpy as np
 from torcheck.stl import Atom, Not, And, Or
 from .features import eval_robustness
-from .scl import Fraction
 
 
 def positive_mask(phi, X: np.ndarray) -> np.ndarray:
@@ -131,8 +130,7 @@ def simplify_data_aware(phi, X: np.ndarray, agreement: float):
 
 
 def round_thresholds(phi, X: np.ndarray, decimals: int, agreement: float):
-    """Round atom thresholds (and SCL fractions p, to 2 decimals) where it doesn't
-    change behavior on X."""
+    """Round atom thresholds where it doesn't change behavior on X."""
     phi = copy.deepcopy(phi)
     ref_mask = positive_mask(phi, X)
 
@@ -143,11 +141,6 @@ def round_thresholds(phi, X: np.ndarray, decimals: int, agreement: float):
             if (positive_mask(phi, X) == ref_mask).mean() < agreement:
                 node.threshold = old        # revert
             return
-        if isinstance(node, Fraction):
-            old = node.p
-            node.p = round(float(old), 2)
-            if (positive_mask(phi, X) == ref_mask).mean() < agreement:
-                node.p = old                # revert
         for attr in ("child", "left_child", "right_child"):
             child = getattr(node, attr, None)
             if child is not None:

@@ -2,7 +2,6 @@ from __future__ import annotations
 import numpy as np
 import torch
 from .formula_sampler import F0
-from .scl import Fraction
 from torcheck.stl import Atom, Not, And, Or, Globally, Eventually, Until
 from .config import ExperimentConfig
 
@@ -46,9 +45,6 @@ def shift_atom_thresholds(node, delta: float, sign: int = 1) -> None:
             node.threshold += effective_delta   # rho = threshold - x
         else:
             node.threshold -= effective_delta   # rho = x - threshold
-    elif isinstance(node, Fraction):
-        # rho = frac - p. The child is not shifted: frac is not affine in its thresholds.
-        node.p -= delta * sign
     elif isinstance(node, Not):
         shift_atom_thresholds(node.child, delta, sign=-sign)
     elif isinstance(node, (And, Or)):
@@ -81,7 +77,7 @@ def _robustness_trace(phi, signal: torch.Tensor, batch_size: int = _BATCH_SIZE) 
 def _children(node) -> list:
     if isinstance(node, Atom):
         return []
-    if isinstance(node, (Not, Globally, Eventually, Fraction)):
+    if isinstance(node, (Not, Globally, Eventually)):
         return [node.child]
     return [node.left_child, node.right_child]
 
@@ -90,84 +86,52 @@ def _atoms(node) -> list:
     return [node] if isinstance(node, Atom) else [a for c in _children(node) for a in _atoms(c)]
 
 
-def _carriers(node) -> list:
-    """Nodes holding a parameter that robustness is affine in: atoms (threshold) and SCL
-    Fraction nodes (p). The interior of a Fraction is not looked into."""
-    if isinstance(node, (Atom, Fraction)):
-        return [node]
-    return [c for child in _children(node) for c in _carriers(child)]
-
-
 def calibrate_thresholds(formulas: list, X: np.ndarray, rng: np.random.Generator) -> None:
-    """Reset in place the thresholds of every formula from the data X.
+    """Reset in place the atom thresholds of every multi-atom formula from the data X.
 
-    Parameters are carried by atoms (threshold c) and SCL Fraction nodes (p). Each carrier
-    ends a largest single-carrier subformula psi (e.g. G[0,50](x > c)) that sits directly
-    under a binary node, under a Fraction or at the root. Robustness is linear in the
-    parameter along psi, rho_psi(c) = rho_psi(0) + k*c with k = +-1, so psi computes a
-    statistic of X (here the window minimum of x) and compares it to c. c is set to a
-    random quantile u of that statistic over X, so psi is true on a fraction 1-u of the
-    points where its parent reads it: t=0 if no temporal operator is above, every time
-    step otherwise. A threshold drawn from the raw values of x instead ignores the
-    operators (G compares c to window minima), which leaves many subformulae always true
-    or false and their binary parent decided by one child. Thresholds stay in the units
-    of x. The parameter of a psi that is the whole formula is skipped: it only shifts the
-    feature by a constant, which standardization removes. The interior of a Fraction is
-    always calibrated, since the fraction depends on its thresholds non-linearly.
+    Each atom belongs to a largest single-atom subformula psi (e.g. G[0,50](x > c)) that
+    sits directly under a binary node. Robustness is linear in the threshold,
+    rho_psi(c) = rho_psi(0) + k*c with k = +-1, so psi computes a statistic of X (here the
+    window minimum of x) and compares it to c. c is set to a random quantile u of that
+    statistic over X, so psi is true on a fraction 1-u of the points where its parent reads
+    it: t=0 if no temporal operator is above, every time step otherwise. A threshold drawn
+    from the raw values of x instead ignores the operators (G compares c to window minima),
+    which leaves many subformulae always true or false and their binary parent decided by
+    one child. Thresholds stay in the units of x. Single-atom formulae are skipped: their
+    threshold only shifts the feature by a constant, which standardization removes.
 
     Use the fit/train split only. rng is separate from the sampler's stream so that a
     formula's thresholds depend only on its position in the list.
     """
     signal = _as_signal(X)
     for phi in formulas:
-        _calibrate_region(phi, signal, rng, read_at_all_times=False, root=True)
+        if len(_atoms(phi)) > 1:
+            _calibrate_node(phi, signal, rng, read_at_all_times=False)
 
 
-def _calibrate_region(node, signal: torch.Tensor, rng: np.random.Generator, read_at_all_times: bool,
-                      root: bool = False) -> None:
-    carriers = _carriers(node)
-    if len(carriers) == 1:
-        _calibrate_piece(node, carriers[0], signal, rng, read_at_all_times, root)
-        return
-    # The children of a node with several carriers are read at every time step if the
-    # node is temporal (Until) or a temporal operator is above it, at t=0 only otherwise.
+def _calibrate_node(node, signal: torch.Tensor, rng: np.random.Generator, read_at_all_times: bool) -> None:
+    # node has at least two atoms. Its children are read at every time step if node is
+    # temporal (Until) or a temporal operator is above it, at t=0 only otherwise.
     all_times = read_at_all_times or isinstance(node, (Globally, Eventually, Until))
     for child in _children(node):
-        _calibrate_region(child, signal, rng, all_times)
-
-
-def _calibrate_piece(piece, carrier, signal: torch.Tensor, rng: np.random.Generator, read_at_all_times: bool,
-                     root: bool) -> None:
-    # piece is a chain of unary operators down to its only carrier.
-    if isinstance(carrier, Fraction):
-        # The Fraction reads its child at every time step.
-        _calibrate_region(carrier.child, signal, rng, read_at_all_times=True)
-    if root:
-        return
-    # rho(c) = rho(0) + k*c: k = +1 for x <= c, -1 for x >= c and for Fraction
-    # (frac - p), flipped by each Not on the chain.
-    n_not, n = 0, piece
-    while n is not carrier:
-        n_not += isinstance(n, Not)
-        n = n.child
-    k = (1 if isinstance(carrier, Atom) and carrier.lte else -1) * (-1) ** n_not
-    attr = "threshold" if isinstance(carrier, Atom) else "p"
-    setattr(carrier, attr, 0.0)
-    rho = _robustness_trace(piece, signal)
-    if not read_at_all_times:
-        rho = rho[:, :1]
-    rho = rho.cpu().numpy()
-    u = rng.random()
-    q = float(np.quantile(rho, u))
-    if isinstance(carrier, Fraction):
-        # Fractions take few distinct values, so q usually falls on a tie, and
-        # "rho(0) > q" would make the whole tied group false (e.g. every series with
-        # fraction 0). Cut halfway to the next distinct value below q (group true) or
-        # above it (group false), whichever true share is closer to the target 1-u.
-        lo, hi = rho[rho < q], rho[rho > q]
-        cuts = [(q + lo.max()) / 2 if lo.size else q - 0.5, (q + hi.min()) / 2 if hi.size else q + 0.5]
-        q = min(cuts, key=lambda c: abs((rho > c).mean() - (1 - u)))
-    setattr(carrier, attr, -k * q)  # psi true iff rho(0) > q
+        atoms = _atoms(child)
+        if len(atoms) > 1:
+            _calibrate_node(child, signal, rng, all_times)
+            continue
+        # A single-atom subformula is a chain of unary operators down to the atom.
+        # rho(c) = rho(0) + k*c: k = +1 for x <= c, -1 for x >= c, flipped by each Not.
+        atom = atoms[0]
+        n_not, n = 0, child
+        while not isinstance(n, Atom):
+            n_not += isinstance(n, Not)
+            n = n.child
+        k = (1 if atom.lte else -1) * (-1) ** n_not
+        atom.threshold = 0.0
+        rho = _robustness_trace(child, signal)
+        if not all_times:
+            rho = rho[:, :1]
+        q = float(np.quantile(rho.cpu().numpy(), rng.random()))
+        atom.threshold = -k * q  # psi true iff rho(0) > q
 
 
 def _make_generator(X_tr: np.ndarray, config: ExperimentConfig, seed: int) -> F0:
@@ -180,7 +144,6 @@ def _make_generator(X_tr: np.ndarray, config: ExperimentConfig, seed: int) -> F0
         depth_max=config.depth_max,
         seed=seed,
         until_weight=config.until_weight,
-        scl_weight=config.scl_weight,
     )
 
 
@@ -190,8 +153,8 @@ def _standardize(X_tr_feats: np.ndarray, X_te_feats: np.ndarray):
     X_tr_feats = (X_tr_feats - mu) / (sigma + 1e-8)
     X_te_feats = (X_te_feats - mu) / (sigma + 1e-8)
     # A column constant on train (up to float rounding) carries no information, but
-    # dividing by sigma + 1e-8 blows any test value that differs up to ~1e8 (e.g. an SCL
-    # fraction that is 0 on every train series). Set such columns to 0 on both sides.
+    # dividing by sigma + 1e-8 blows any test value that differs up to ~1e8. Set such
+    # columns to 0 on both sides.
     constant = sigma <= 1e-6 * np.maximum(np.abs(mu), 1.0)
     X_tr_feats[:, constant] = 0.0
     X_te_feats[:, constant] = 0.0
