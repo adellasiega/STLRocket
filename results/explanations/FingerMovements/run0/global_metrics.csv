@@ -1,0 +1,9 @@
+class,k,version,evaluated_on,n_rules,size,tp,support,precision,coverage
+left,0,raw,train,1,4,170,171,0.9941520467836257,0.9883720930232558
+left,0,raw,test,1,4,57,57,1.0,1.0
+right,1,raw,train,1,5,140,140,1.0,0.9722222222222222
+right,1,raw,test,1,5,42,42,1.0,0.9767441860465116
+left,0,simplified,train,1,4,170,171,0.9941520467836257,0.9883720930232558
+left,0,simplified,test,1,4,57,57,1.0,1.0
+right,1,simplified,train,1,5,140,140,1.0,0.9722222222222222
+right,1,simplified,test,1,5,42,42,1.0,0.9767441860465116

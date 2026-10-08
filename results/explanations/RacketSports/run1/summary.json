@@ -1,0 +1,57 @@
+{
+  "dataset": "RacketSports",
+  "run": 1,
+  "seed": 1,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 151,
+  "n_test": 152,
+  "n_classes": 4,
+  "n_selected": 64,
+  "balanced_accuracy": {
+    "train": 0.9761478831246273,
+    "test": 0.8123338870431894
+  },
+  "times_s": {
+    "features_s": 7.131663263775408,
+    "model_s": 3.5690492657013237,
+    "rules_train_s": 51.89561596373096,
+    "rules_train_eval_s": 0.7981841117143631,
+    "rules_test_s": 51.011165112722665,
+    "rules_test_eval_s": 0.9217200637795031,
+    "global_s": 0.17537031276151538
+  },
+  "rules_train": {
+    "found": 151,
+    "of": 151,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 0.8687240902809765,
+    "mean_coverage_train": 0.4099760259628425,
+    "mean_coverage_test": 0.32753759680132877,
+    "mean_lcb_train": 0.8957932268216355,
+    "mean_length": 1.4701986754966887,
+    "mean_size": 5.894039735099338
+  },
+  "rules_test": {
+    "found": 152,
+    "of": 152,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 0.8819875776397516,
+    "mean_coverage_train": 0.4368925949959326,
+    "mean_coverage_test": 0.3741835400245027,
+    "mean_lcb_train": 0.9043231425917192,
+    "mean_length": 1.5460526315789473,
+    "mean_size": 6.296052631578948
+  },
+  "global": {
+    "train": {
+      "macro_precision": 1.0,
+      "macro_coverage": 0.949213049822806
+    },
+    "test": {
+      "macro_precision": 0.7371489621489622,
+      "macro_coverage": 0.8162927758515994
+    },
+    "mean_rules": 4.0
+  }
+}

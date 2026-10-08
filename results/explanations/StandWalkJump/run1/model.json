@@ -1,0 +1,23 @@
+{
+ "classes": [
+  "jumping",
+  "standing",
+  "walking"
+ ],
+ "balanced_accuracy": {
+  "train": 0.3333333333333333,
+  "test": 0.3333333333333333
+ },
+ "accuracy": {
+  "train": 0.3333333333333333,
+  "test": 0.3333333333333333
+ },
+ "lambda": 0.4027352705597878,
+ "n_selected": 0,
+ "selected": [],
+ "weights": [
+  [],
+  [],
+  []
+ ]
+}

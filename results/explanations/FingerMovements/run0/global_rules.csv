@@ -1,0 +1,5 @@
+class,k,version,n,size,rule
+left,0,raw,0,4,"eventually[19,49] ( ( x_10 >= 4.9 ) and ( x_17 <= 66.188 ) )"
+right,1,raw,0,5,"not ( eventually[19,49] ( ( x_10 >= 4.638 ) and ( x_17 <= 66.45 ) ) )"
+left,0,simplified,0,4,"eventually[19,49] ( ( x_10 >= 4.9 ) and ( x_17 <= 66.19 ) )"
+right,1,simplified,0,5,"not ( eventually[19,49] ( ( x_10 >= 4.64 ) and ( x_17 <= 66.45 ) ) )"

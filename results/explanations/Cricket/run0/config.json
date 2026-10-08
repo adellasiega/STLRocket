@@ -1,0 +1,33 @@
+{
+  "dataset": "Cricket",
+  "run": 0,
+  "seed": 0,
+  "experiment": {
+    "dataset": "Cricket",
+    "n_formulas": 10000,
+    "depth_max": 2,
+    "until_weight": 0.0,
+    "cv": 3,
+    "cut_point": 1.0,
+    "fit_intercept": false,
+    "explain": false,
+    "pool_size": 0,
+    "precision_threshold": 0.0,
+    "simplify_agreement": 0.0,
+    "simplify_min_gain": 0.0,
+    "simplify_decimals": 0,
+    "n_run": 1,
+    "base_seed": 0,
+    "output_dir": "/share/ai-lab/adsiega/STLRocket/results/explanations/Cricket/run0",
+    "device": "cpu",
+    "calibrate_thresholds": false
+  },
+  "rules": {
+    "n_min": 5,
+    "n_max": 3,
+    "beam_width": 5,
+    "confidence": 0.9,
+    "min_new_share": 0.05,
+    "decimals": 2
+  }
+}

@@ -1,0 +1,17 @@
+class,k,version,n,size,rule
+abnormal,0,raw,0,15,"( ( ( eventually[150,194] ( x_21 >= 0.7538 ) ) or ( always ( x_52 <= 0.5871 ) ) ) and ( not ( eventually ( ( x_27 <= 0.2661 ) and ( x_40 >= 0.0907 ) ) ) ) ) and ( not ( eventually[225,229] ( x_0 >= 0.0084 ) ) )"
+abnormal,0,raw,1,8,"( not ( eventually[334,351] ( eventually[46,inf] ( x_1 <= 0.002 ) ) ) ) and ( not ( eventually[258,275] ( x_1 <= 0.0015 ) ) )"
+abnormal,0,raw,2,11,"( ( eventually[150,194] ( x_21 >= 0.7538 ) ) or ( always ( x_52 <= 0.5871 ) ) ) and ( ( always[324,326] ( x_57 <= 0.2575 ) ) or ( eventually[182,245] ( x_39 <= -10.3274 ) ) )"
+abnormal,0,raw,3,5,not ( eventually ( ( x_27 <= 0.3052 ) and ( x_40 >= 0.0516 ) ) )
+normal,1,raw,0,10,"( not ( ( eventually[150,194] ( x_21 >= 0.5179 ) ) or ( always ( x_52 <= 0.823 ) ) ) ) and ( eventually[334,351] ( eventually[46,inf] ( x_1 <= 0.0011 ) ) )"
+normal,1,raw,1,13,"( not ( ( eventually[150,194] ( x_21 >= 0.6286 ) ) or ( always ( x_52 <= 0.7123 ) ) ) ) and ( not ( ( always[121,191] ( x_56 <= 24.2817 ) ) and ( always[207,208] ( x_0 >= 0.0019 ) ) ) )"
+normal,1,raw,2,18,"( ( ( eventually[130,168] ( x_16 <= 0.6224 ) ) and ( always[291,297] ( x_57 >= 0.1931 ) ) ) and ( not ( ( always[121,191] ( x_56 <= 24.2797 ) ) and ( always[207,208] ( x_0 >= 0.0039 ) ) ) ) ) and ( ( always ( x_17 >= -0.0221 ) ) and ( eventually ( x_6 >= 0.0374 ) ) )"
+normal,1,raw,3,9,"( not ( ( eventually[150,194] ( x_21 >= 0.0352 ) ) or ( always ( x_52 <= 1.3057 ) ) ) ) and ( eventually[258,275] ( x_1 <= 0.0015 ) )"
+abnormal,0,simplified,0,10,"( ( always ( x_52 <= 0.5871 ) ) and ( not ( eventually ( x_40 >= 0.09 ) ) ) ) and ( not ( eventually[225,229] ( x_0 >= 0.0084 ) ) )"
+abnormal,0,simplified,1,8,"( not ( eventually[334,351] ( eventually[46,inf] ( x_1 <= 0.002 ) ) ) ) and ( not ( eventually[258,275] ( x_1 <= 0.0015 ) ) )"
+abnormal,0,simplified,2,5,"( always ( x_52 <= 0.5871 ) ) and ( always[324,326] ( x_57 <= 0.26 ) )"
+abnormal,0,simplified,3,3,not ( eventually ( x_40 >= 0.0516 ) )
+normal,1,simplified,0,7,"( not ( always ( x_52 <= 0.82 ) ) ) and ( eventually[334,351] ( eventually[46,inf] ( x_1 <= 0.0011 ) ) )"
+normal,1,simplified,1,7,"( not ( always ( x_52 <= 0.7123 ) ) ) and ( not ( always[207,208] ( x_0 >= 0.0019 ) ) )"
+normal,1,simplified,2,9,"( ( always[291,297] ( x_57 >= 0.1931 ) ) and ( not ( always[207,208] ( x_0 >= 0.0039 ) ) ) ) and ( eventually ( x_6 >= 0.0374 ) )"
+normal,1,simplified,3,9,"( not ( ( eventually[150,194] ( x_21 >= 0.04 ) ) or ( always ( x_52 <= 1.3057 ) ) ) ) and ( eventually[258,275] ( x_1 <= 0.0015 ) )"

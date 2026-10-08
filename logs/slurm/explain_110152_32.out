@@ -1,0 +1,6 @@
+Task 32: python -u scripts/run_explanations.py --datasets Epilepsy --runs 1 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:18:41] Epilepsy run 1: 137 train / 138 test series, shape (3, 206)
+[03:18:52] model: 58 of 10000 formulae selected, balanced accuracy train 1.000 / test 0.979
+[03:19:39] train rules: 137 in 46 s (+ 1 s to simplify and score)
+[03:20:27] test rules: 138 in 46 s (+ 1 s to simplify and score)
+[03:20:27] Epilepsy run 1 done: test rules pooled precision 0.927, global macro precision 0.870 on test

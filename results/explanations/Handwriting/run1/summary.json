@@ -1,0 +1,57 @@
+{
+  "dataset": "Handwriting",
+  "run": 1,
+  "seed": 1,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 150,
+  "n_test": 850,
+  "n_classes": 26,
+  "n_selected": 301,
+  "balanced_accuracy": {
+    "train": 0.9595376845376845,
+    "test": 0.24515309089240875
+  },
+  "times_s": {
+    "features_s": 18.957849994767457,
+    "model_s": 30.239354494027793,
+    "rules_train_s": 131.03915810398757,
+    "rules_train_eval_s": 1.7406194172799587,
+    "rules_test_s": 715.3408433659934,
+    "rules_test_eval_s": 9.48241867730394,
+    "global_s": 0.8395509961992502
+  },
+  "rules_train": {
+    "found": 150,
+    "of": 150,
+    "pooled_prec_train": 0.6955380577427821,
+    "pooled_prec_test": 0.2929936305732484,
+    "mean_coverage_train": 0.6738253968253968,
+    "mean_coverage_test": 0.2572820512845418,
+    "mean_lcb_train": 0.4406675802382014,
+    "mean_length": 1.9733333333333334,
+    "mean_size": 7.366666666666666
+  },
+  "rules_test": {
+    "found": 850,
+    "of": 850,
+    "pooled_prec_train": 0.7325898953117888,
+    "pooled_prec_test": 0.32303710094909405,
+    "mean_coverage_train": 0.6398085901027077,
+    "mean_coverage_test": 0.24475945686707906,
+    "mean_lcb_train": 0.47298541873315747,
+    "mean_length": 1.9811764705882353,
+    "mean_size": 7.18
+  },
+  "global": {
+    "train": {
+      "macro_precision": 0.6718364968364969,
+      "macro_coverage": 1.0
+    },
+    "test": {
+      "macro_precision": 0.2391039127123865,
+      "macro_coverage": 0.35264899869496935
+    },
+    "mean_rules": 1.7692307692307692
+  }
+}

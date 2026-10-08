@@ -1,0 +1,6 @@
+Task 26: python -u scripts/run_explanations.py --datasets ArticularyWordRecognition --runs 1 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:14:09] ArticularyWordRecognition run 1: 275 train / 300 test series, shape (9, 144)
+[03:15:24] model: 382 of 10000 formulae selected, balanced accuracy train 1.000 / test 0.967
+[03:23:09] train rules: 275 in 462 s (+ 3 s to simplify and score)
+[03:31:44] test rules: 300 in 512 s (+ 3 s to simplify and score)
+[03:31:45] ArticularyWordRecognition run 1 done: test rules pooled precision 0.792, global macro precision 0.787 on test

@@ -1,0 +1,6 @@
+Task 40: python -u scripts/run_explanations.py --datasets Libras --runs 1 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:34:24] Libras run 1: 180 train / 180 test series, shape (2, 45)
+[03:35:07] model: 150 of 10000 formulae selected, balanced accuracy train 0.967 / test 0.778
+[03:36:28] train rules: 180 in 79 s (+ 2 s to simplify and score)
+[03:37:51] test rules: 180 in 81 s (+ 2 s to simplify and score)
+[03:37:51] Libras run 1 done: test rules pooled precision 0.772, global macro precision 0.688 on test

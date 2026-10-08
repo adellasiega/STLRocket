@@ -1,0 +1,57 @@
+{
+  "dataset": "UWaveGestureLibrary",
+  "run": 1,
+  "seed": 1,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 120,
+  "n_test": 320,
+  "n_classes": 8,
+  "n_selected": 57,
+  "balanced_accuracy": {
+    "train": 0.9500000000000001,
+    "test": 0.840625
+  },
+  "times_s": {
+    "features_s": 11.287246315274388,
+    "model_s": 7.202427812851965,
+    "rules_train_s": 27.90092637995258,
+    "rules_train_eval_s": 0.8897501202300191,
+    "rules_test_s": 75.4720667609945,
+    "rules_test_eval_s": 2.4039038801565766,
+    "global_s": 0.1840719087049365
+  },
+  "rules_train": {
+    "found": 120,
+    "of": 120,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 0.7899686520376176,
+    "mean_coverage_train": 0.7674902874902875,
+    "mean_coverage_test": 0.6127594656049863,
+    "mean_lcb_train": 0.8642708504023098,
+    "mean_length": 1.6833333333333333,
+    "mean_size": 6.733333333333333
+  },
+  "rules_test": {
+    "found": 320,
+    "of": 320,
+    "pooled_prec_train": 0.9997321906802357,
+    "pooled_prec_test": 0.790646578782172,
+    "mean_coverage_train": 0.7641044016290727,
+    "mean_coverage_test": 0.582043373503177,
+    "mean_lcb_train": 0.8704006945895582,
+    "mean_length": 1.628125,
+    "mean_size": 6.9125
+  },
+  "global": {
+    "train": {
+      "macro_precision": 1.0,
+      "macro_coverage": 1.0
+    },
+    "test": {
+      "macro_precision": 0.7138465833220544,
+      "macro_coverage": 0.8250124513457011
+    },
+    "mean_rules": 1.875
+  }
+}

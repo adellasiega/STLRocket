@@ -1,0 +1,21 @@
+{
+ "classes": [
+  "finger",
+  "tongue"
+ ],
+ "balanced_accuracy": {
+  "train": 0.5,
+  "test": 0.5
+ },
+ "accuracy": {
+  "train": 0.5,
+  "test": 0.5
+ },
+ "lambda": 0.09198463436051958,
+ "n_selected": 0,
+ "selected": [],
+ "weights": [
+  [],
+  []
+ ]
+}

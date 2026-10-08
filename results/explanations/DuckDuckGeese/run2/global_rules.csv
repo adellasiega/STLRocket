@@ -1,0 +1,5 @@
+class,k,version,n,size,rule
+black-bellied_whistling_duck,0,raw,0,4,"always[176,inf] ( ( x_1240 <= 6.026 ) or ( x_262 >= 16.6607 ) )"
+pink-footed_goose,3,raw,0,5,"not ( always[176,inf] ( ( x_1240 <= 6.1486 ) or ( x_262 >= 16.5381 ) ) )"
+black-bellied_whistling_duck,0,simplified,0,2,"always[176,inf] ( x_1240 <= 6.03 )"
+pink-footed_goose,3,simplified,0,3,"not ( always[176,inf] ( x_1240 <= 6.15 ) )"

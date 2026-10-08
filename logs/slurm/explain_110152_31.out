@@ -1,0 +1,6 @@
+Task 31: python -u scripts/run_explanations.py --datasets EigenWorms --runs 1 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:18:20] EigenWorms run 1: 128 train / 131 test series, shape (6, 17984)
+[03:32:04] model: 57 of 10000 formulae selected, balanced accuracy train 0.962 / test 0.667
+[03:36:33] train rules: 128 in 30 s (+ 239 s to simplify and score)
+[03:40:29] test rules: 131 in 29 s (+ 208 s to simplify and score)
+[03:41:06] EigenWorms run 1 done: test rules pooled precision 0.764, global macro precision 0.625 on test

@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/share/ai-lab/adsiega/STLRocket/scripts/run_explanations.py", line 226, in <module>
+    main()
+  File "/share/ai-lab/adsiega/STLRocket/scripts/run_explanations.py", line 222, in main
+    run(args, dataset, run_id)
+  File "/share/ai-lab/adsiega/STLRocket/scripts/run_explanations.py", line 190, in run
+    simp = gm[gm.version == "simplified"]
+  File "/share/ai-lab/adsiega/STLRocket/env/lib64/python3.9/site-packages/pandas/core/generic.py", line 6299, in __getattr__
+    return object.__getattribute__(self, name)
+AttributeError: 'DataFrame' object has no attribute 'version'

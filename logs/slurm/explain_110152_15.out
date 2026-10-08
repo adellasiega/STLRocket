@@ -1,0 +1,4 @@
+Task 15: python -u scripts/run_explanations.py --datasets LSST --runs 0 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[02:57:02] LSST run 0: 2459 train / 2466 test series, shape (6, 36)
+[03:47:14] model: 44 of 10000 formulae selected, balanced accuracy train 0.379 / test 0.313
+[07:18:16] train rules: 2459 in 12195 s (+ 467 s to simplify and score)

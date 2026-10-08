@@ -1,0 +1,57 @@
+{
+  "dataset": "DuckDuckGeese",
+  "run": 2,
+  "seed": 2,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 50,
+  "n_test": 50,
+  "n_classes": 5,
+  "n_selected": 1,
+  "balanced_accuracy": {
+    "train": 0.4,
+    "test": 0.3
+  },
+  "times_s": {
+    "features_s": 30.889589327853173,
+    "model_s": 1.341558092739433,
+    "rules_train_s": 0.13427854795008898,
+    "rules_train_eval_s": 0.15355852898210287,
+    "rules_test_s": 0.12927529402077198,
+    "rules_test_eval_s": 0.15408613299950957,
+    "global_s": 0.008924364112317562
+  },
+  "rules_train": {
+    "found": 50,
+    "of": 50,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 1.0,
+    "mean_coverage_train": 1.0,
+    "mean_coverage_test": 1.0,
+    "mean_lcb_train": 0.9362459509676135,
+    "mean_length": 1.0,
+    "mean_size": 2.3
+  },
+  "rules_test": {
+    "found": 50,
+    "of": 50,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 1.0,
+    "mean_coverage_train": 1.0,
+    "mean_coverage_test": 1.0,
+    "mean_lcb_train": 0.932555152188269,
+    "mean_length": 1.0,
+    "mean_size": 2.42
+  },
+  "global": {
+    "train": {
+      "macro_precision": 1.0,
+      "macro_coverage": 1.0
+    },
+    "test": {
+      "macro_precision": 1.0,
+      "macro_coverage": 1.0
+    },
+    "mean_rules": 1.0
+  }
+}

@@ -1,0 +1,6 @@
+Task 8: python -u scripts/run_explanations.py --datasets ERing --runs 0 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[02:53:27] ERing run 0: 30 train / 270 test series, shape (4, 65)
+[02:53:36] model: 9 of 10000 formulae selected, balanced accuracy train 0.800 / test 0.730
+[02:53:37] train rules: 30 in 1 s (+ 0 s to simplify and score)
+[02:53:45] test rules: 270 in 7 s (+ 1 s to simplify and score)
+[02:53:45] ERing run 0 done: test rules pooled precision 0.711, global macro precision 0.639 on test

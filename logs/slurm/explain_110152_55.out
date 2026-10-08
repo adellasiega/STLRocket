@@ -1,0 +1,6 @@
+Task 55: python -u scripts/run_explanations.py --datasets Cricket --runs 2 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[04:16:20] Cricket run 2: 108 train / 72 test series, shape (6, 1197)
+[04:16:41] model: 111 of 10000 formulae selected, balanced accuracy train 1.000 / test 0.931
+[04:17:18] train rules: 108 in 36 s (+ 1 s to simplify and score)
+[04:17:44] test rules: 72 in 26 s (+ 1 s to simplify and score)
+[04:17:45] Cricket run 2 done: test rules pooled precision 0.820, global macro precision 0.843 on test

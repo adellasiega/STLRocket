@@ -1,0 +1,57 @@
+{
+  "dataset": "SelfRegulationSCP1",
+  "run": 0,
+  "seed": 0,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 268,
+  "n_test": 293,
+  "n_classes": 2,
+  "n_selected": 36,
+  "balanced_accuracy": {
+    "train": 0.9062378167641325,
+    "test": 0.8840508806262231
+  },
+  "times_s": {
+    "features_s": 27.702560767997056,
+    "model_s": 3.543724828399718,
+    "rules_train_s": 88.18446683231741,
+    "rules_train_eval_s": 5.670268543064594,
+    "rules_test_s": 136.01256473967806,
+    "rules_test_eval_s": 4.362593789119273,
+    "global_s": 0.3354571699164808
+  },
+  "rules_train": {
+    "found": 268,
+    "of": 268,
+    "pooled_prec_train": 0.9981737012987013,
+    "pooled_prec_test": 0.9265489870868381,
+    "mean_coverage_train": 0.2815901775315762,
+    "mean_coverage_test": 0.3883009506331744,
+    "mean_lcb_train": 0.9477254520172599,
+    "mean_length": 1.7649253731343284,
+    "mean_size": 6.384328358208955
+  },
+  "rules_test": {
+    "found": 293,
+    "of": 293,
+    "pooled_prec_train": 0.9983966650633317,
+    "pooled_prec_test": 0.9285162758564636,
+    "mean_coverage_train": 0.33217373933834227,
+    "mean_coverage_test": 0.5200573774546173,
+    "mean_lcb_train": 0.955950506137718,
+    "mean_length": 1.57679180887372,
+    "mean_size": 5.146757679180888
+  },
+  "global": {
+    "train": {
+      "macro_precision": 0.987326563832261,
+      "macro_coverage": 0.8447141560798548
+    },
+    "test": {
+      "macro_precision": 0.8685212608419717,
+      "macro_coverage": 0.8189059142296553
+    },
+    "mean_rules": 4.0
+  }
+}

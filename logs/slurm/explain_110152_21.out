@@ -1,0 +1,6 @@
+Task 21: python -u scripts/run_explanations.py --datasets RacketSports --runs 0 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:08:01] RacketSports run 0: 151 train / 152 test series, shape (6, 30)
+[03:08:12] model: 37 of 10000 formulae selected, balanced accuracy train 0.903 / test 0.757
+[03:08:50] train rules: 151 in 37 s (+ 1 s to simplify and score)
+[03:09:28] test rules: 152 in 37 s (+ 1 s to simplify and score)
+[03:09:28] RacketSports run 0 done: test rules pooled precision 0.871, global macro precision 0.803 on test

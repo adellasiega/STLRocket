@@ -1,0 +1,57 @@
+{
+  "dataset": "AtrialFibrillation",
+  "run": 2,
+  "seed": 2,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 15,
+  "n_test": 15,
+  "n_classes": 3,
+  "n_selected": 17,
+  "balanced_accuracy": {
+    "train": 1.0,
+    "test": 0.4000000000000001
+  },
+  "times_s": {
+    "features_s": 4.741518023889512,
+    "model_s": 0.6062168967910111,
+    "rules_train_s": 0.4129957351833582,
+    "rules_train_eval_s": 0.17591900378465652,
+    "rules_test_s": 0.36240346264094114,
+    "rules_test_eval_s": 0.1678198310546577,
+    "global_s": 0.01881480822339654
+  },
+  "rules_train": {
+    "found": 15,
+    "of": 15,
+    "pooled_prec_train": 0.8,
+    "pooled_prec_test": 0.4230769230769231,
+    "mean_coverage_train": 1.0,
+    "mean_coverage_test": 0.2971428571428571,
+    "mean_lcb_train": 0.5135414727563552,
+    "mean_length": 1.6666666666666667,
+    "mean_size": 5.933333333333334
+  },
+  "rules_test": {
+    "found": 15,
+    "of": 15,
+    "pooled_prec_train": 0.9230769230769231,
+    "pooled_prec_test": 0.43243243243243246,
+    "mean_coverage_train": 0.9600000000000002,
+    "mean_coverage_test": 0.2555555555555556,
+    "mean_lcb_train": 0.6692882948882998,
+    "mean_length": 1.6,
+    "mean_size": 6.0
+  },
+  "global": {
+    "train": {
+      "macro_precision": 0.8333333333333334,
+      "macro_coverage": 1.0
+    },
+    "test": {
+      "macro_precision": 0.4484126984126984,
+      "macro_coverage": 0.4063492063492064
+    },
+    "mean_rules": 1.0
+  }
+}

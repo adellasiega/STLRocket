@@ -1,0 +1,57 @@
+{
+  "dataset": "EthanolConcentration",
+  "run": 0,
+  "seed": 0,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 261,
+  "n_test": 263,
+  "n_classes": 4,
+  "n_selected": 144,
+  "balanced_accuracy": {
+    "train": 0.8125874125874126,
+    "test": 0.41940559440559444
+  },
+  "times_s": {
+    "features_s": 50.534774519037455,
+    "model_s": 93.09162777196616,
+    "rules_train_s": 202.1792778261006,
+    "rules_train_eval_s": 23.18686667783186,
+    "rules_test_s": 205.58879284281284,
+    "rules_test_eval_s": 25.424539728090167,
+    "global_s": 2.6904573291540146
+  },
+  "rules_train": {
+    "found": 261,
+    "of": 261,
+    "pooled_prec_train": 0.9643153526970955,
+    "pooled_prec_test": 0.5161170804001483,
+    "mean_coverage_train": 0.13839053006710555,
+    "mean_coverage_test": 0.08148535160029412,
+    "mean_lcb_train": 0.807048748914257,
+    "mean_length": 2.5593869731800765,
+    "mean_size": 11.39080459770115
+  },
+  "rules_test": {
+    "found": 263,
+    "of": 263,
+    "pooled_prec_train": 0.9669133652590335,
+    "pooled_prec_test": 0.5351307189542484,
+    "mean_coverage_train": 0.1289894540214792,
+    "mean_coverage_test": 0.07591264308589252,
+    "mean_lcb_train": 0.8024345641564222,
+    "mean_length": 2.5209125475285172,
+    "mean_size": 11.038022813688213
+  },
+  "global": {
+    "train": {
+      "macro_precision": 0.8522022241732513,
+      "macro_coverage": 0.7884829570962328
+    },
+    "test": {
+      "macro_precision": 0.4462686567164179,
+      "macro_coverage": 0.4600378787878788
+    },
+    "mean_rules": 5.75
+  }
+}

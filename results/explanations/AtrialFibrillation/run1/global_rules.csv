@@ -1,0 +1,7 @@
+class,k,version,n,size,rule
+n,0,raw,0,2,"eventually[296,307] ( x_1 <= -0.0341 )"
+s,1,raw,0,6,"( not ( always[336,386] ( x_0 <= 0.7769 ) ) ) and ( always[111,141] ( x_0 <= 0.2271 ) )"
+t,2,raw,0,3,"not ( eventually[37,38] ( x_1 <= 0.0409 ) )"
+n,0,simplified,0,2,"eventually[296,307] ( x_1 <= -0.0341 )"
+s,1,simplified,0,6,"( not ( always[336,386] ( x_0 <= 0.78 ) ) ) and ( always[111,141] ( x_0 <= 0.23 ) )"
+t,2,simplified,0,3,"not ( eventually[37,38] ( x_1 <= 0.04 ) )"

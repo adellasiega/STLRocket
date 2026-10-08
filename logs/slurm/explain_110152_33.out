@@ -1,0 +1,6 @@
+Task 33: python -u scripts/run_explanations.py --datasets EthanolConcentration --runs 1 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:20:37] EthanolConcentration run 1: 261 train / 263 test series, shape (3, 1751)
+[03:22:44] model: 170 of 10000 formulae selected, balanced accuracy train 0.854 / test 0.442
+[03:27:15] train rules: 261 in 245 s (+ 26 s to simplify and score)
+[03:31:52] test rules: 263 in 250 s (+ 27 s to simplify and score)
+[03:31:55] EthanolConcentration run 1 done: test rules pooled precision 0.525, global macro precision 0.525 on test

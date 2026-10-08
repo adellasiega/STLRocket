@@ -1,0 +1,9 @@
+class,k,version,n,size,rule
+badminton,0,raw,0,5,"( eventually ( x_0 >= 25.2144 ) ) or ( eventually[94,96] ( x_3 <= -6.6352 ) )"
+running,1,raw,0,5,"( always[64,inf] ( x_0 >= 4.0047 ) ) or ( eventually[60,88] ( x_0 <= -9.971 ) )"
+standing,2,raw,0,4,"always[57,inf] ( ( x_5 <= 0.9242 ) or ( x_5 >= 2.4439 ) )"
+walking,3,raw,0,5,"( eventually[3,76] ( x_1 >= 4.28 ) ) and ( always[39,inf] ( x_5 <= 4.5133 ) )"
+badminton,0,simplified,0,2,eventually ( x_0 >= 25.21 )
+running,1,simplified,0,2,"eventually[60,88] ( x_0 <= -9.97 )"
+standing,2,simplified,0,2,"always[57,inf] ( x_5 <= 0.92 )"
+walking,3,simplified,0,5,"( eventually[3,76] ( x_1 >= 4.28 ) ) and ( always[39,inf] ( x_5 <= 4.51 ) )"

@@ -1,0 +1,6 @@
+Task 51: python -u scripts/run_explanations.py --datasets UWaveGestureLibrary --runs 1 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:56:59] UWaveGestureLibrary run 1: 120 train / 320 test series, shape (3, 315)
+[03:57:17] model: 57 of 10000 formulae selected, balanced accuracy train 0.950 / test 0.841
+[03:57:46] train rules: 120 in 28 s (+ 1 s to simplify and score)
+[03:59:04] test rules: 320 in 75 s (+ 2 s to simplify and score)
+[03:59:04] UWaveGestureLibrary run 1 done: test rules pooled precision 0.791, global macro precision 0.714 on test

@@ -1,0 +1,57 @@
+{
+  "dataset": "HandMovementDirection",
+  "run": 1,
+  "seed": 1,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 160,
+  "n_test": 74,
+  "n_classes": 4,
+  "n_selected": 174,
+  "balanced_accuracy": {
+    "train": 1.0,
+    "test": 0.5726190476190476
+  },
+  "times_s": {
+    "features_s": 9.032849005889148,
+    "model_s": 3.796504319179803,
+    "rules_train_s": 88.64774484792724,
+    "rules_train_eval_s": 1.3925667311996222,
+    "rules_test_s": 39.433262253180146,
+    "rules_test_eval_s": 0.6177651612088084,
+    "global_s": 0.297220136038959
+  },
+  "rules_train": {
+    "found": 160,
+    "of": 160,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 0.4662045060658579,
+    "mean_coverage_train": 0.21714743589743585,
+    "mean_coverage_test": 0.0884560620300752,
+    "mean_lcb_train": 0.8330575979644939,
+    "mean_length": 2.025,
+    "mean_size": 7.05
+  },
+  "rules_test": {
+    "found": 74,
+    "of": 74,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 0.49407114624505927,
+    "mean_coverage_train": 0.2216216216216216,
+    "mean_coverage_test": 0.08936243936243934,
+    "mean_lcb_train": 0.8391061507046191,
+    "mean_length": 2.0,
+    "mean_size": 6.864864864864865
+  },
+  "global": {
+    "train": {
+      "macro_precision": 1.0,
+      "macro_coverage": 0.9312499999999999
+    },
+    "test": {
+      "macro_precision": 0.49187471884840306,
+      "macro_coverage": 0.47288533834586466
+    },
+    "mean_rules": 6.25
+  }
+}

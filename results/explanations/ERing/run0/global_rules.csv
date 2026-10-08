@@ -1,0 +1,13 @@
+class,k,version,n,size,rule
+1,0,raw,0,3,"not ( eventually[17,48] ( x_0 >= 0.2778 ) )"
+2,1,raw,0,4,"always[28,31] ( ( x_3 >= 2.1993 ) or ( x_3 <= 0.2692 ) )"
+3,2,raw,0,2,"eventually[17,48] ( x_0 >= 0.8158 )"
+4,3,raw,0,12,"( not ( ( eventually[6,18] ( x_2 >= 1.222 ) ) or ( eventually[36,37] ( x_0 <= -0.3236 ) ) ) ) and ( not ( always[28,31] ( ( x_3 >= 1.7626 ) or ( x_3 <= 0.706 ) ) ) )"
+5,4,raw,0,17,"( ( ( eventually ( x_0 <= -1.8822 ) ) or ( eventually[22,48] ( x_0 <= -1.1165 ) ) ) and ( not ( always[10,17] ( ( x_0 >= -0.9349 ) and ( x_2 >= -0.6312 ) ) ) ) ) and ( not ( always[28,31] ( ( x_3 >= 2.0085 ) or ( x_3 <= 0.46 ) ) ) )"
+6,5,raw,0,2,"always[0,25] ( x_2 >= -0.5702 )"
+1,0,simplified,0,3,"not ( eventually[17,48] ( x_0 >= 0.28 ) )"
+2,1,simplified,0,4,"always[28,31] ( ( x_3 >= 2.2 ) or ( x_3 <= 0.27 ) )"
+3,2,simplified,0,2,"eventually[17,48] ( x_0 >= 0.8158 )"
+4,3,simplified,0,9,"( not ( eventually[36,37] ( x_0 <= -0.32 ) ) ) and ( not ( always[28,31] ( ( x_3 >= 1.76 ) or ( x_3 <= 0.71 ) ) ) )"
+5,4,simplified,0,12,"( ( eventually[22,48] ( x_0 <= -1.12 ) ) and ( not ( always[10,17] ( ( x_0 >= -0.93 ) and ( x_2 >= -0.63 ) ) ) ) ) and ( not ( always[28,31] ( x_3 <= 0.46 ) ) )"
+6,5,simplified,0,2,"always[0,25] ( x_2 >= -0.57 )"

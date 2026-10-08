@@ -1,0 +1,6 @@
+Task 39: python -u scripts/run_explanations.py --datasets Heartbeat --runs 1 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:32:54] Heartbeat run 1: 204 train / 205 test series, shape (61, 405)
+[03:33:09] model: 28 of 10000 formulae selected, balanced accuracy train 0.818 / test 0.654
+[03:33:59] train rules: 204 in 48 s (+ 2 s to simplify and score)
+[03:34:47] test rules: 205 in 46 s (+ 2 s to simplify and score)
+[03:34:48] Heartbeat run 1 done: test rules pooled precision 0.905, global macro precision 0.861 on test

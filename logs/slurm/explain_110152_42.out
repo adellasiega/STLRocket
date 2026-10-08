@@ -1,0 +1,5 @@
+Task 42: python -u scripts/run_explanations.py --datasets MotorImagery --runs 1 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:38:49] MotorImagery run 1: 278 train / 100 test series, shape (64, 3000)
+[03:39:54] model: 0 of 10000 formulae selected, balanced accuracy train 0.500 / test 0.500
+[03:39:54] train rules: 278 in 0 s (+ 0 s to simplify and score)
+[03:39:54] test rules: 100 in 0 s (+ 0 s to simplify and score)

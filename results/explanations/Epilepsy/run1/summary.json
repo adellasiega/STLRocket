@@ -1,0 +1,57 @@
+{
+  "dataset": "Epilepsy",
+  "run": 1,
+  "seed": 1,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 137,
+  "n_test": 138,
+  "n_classes": 4,
+  "n_selected": 58,
+  "balanced_accuracy": {
+    "train": 1.0,
+    "test": 0.9785373608903021
+  },
+  "times_s": {
+    "features_s": 8.836794394999743,
+    "model_s": 2.686756066046655,
+    "rules_train_s": 45.830792303197086,
+    "rules_train_eval_s": 1.0088333720341325,
+    "rules_test_s": 46.33832367276773,
+    "rules_test_eval_s": 0.9788233283907175,
+    "global_s": 0.1202590437605977
+  },
+  "rules_train": {
+    "found": 137,
+    "of": 137,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 0.9235668789808917,
+    "mean_coverage_train": 0.7063890496057625,
+    "mean_coverage_test": 0.700156532042817,
+    "mean_lcb_train": 0.9328166932454868,
+    "mean_length": 1.3576642335766422,
+    "mean_size": 6.2846715328467155
+  },
+  "rules_test": {
+    "found": 138,
+    "of": 138,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 0.9268568201073143,
+    "mean_coverage_train": 0.7145243709182328,
+    "mean_coverage_test": 0.7030245200222713,
+    "mean_lcb_train": 0.9356586558448426,
+    "mean_length": 1.3405797101449275,
+    "mean_size": 6.086956521739131
+  },
+  "global": {
+    "train": {
+      "macro_precision": 1.0,
+      "macro_coverage": 0.9715929164458577
+    },
+    "test": {
+      "macro_precision": 0.8703088762386675,
+      "macro_coverage": 0.8859961636277426
+    },
+    "mean_rules": 1.75
+  }
+}

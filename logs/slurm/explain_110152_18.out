@@ -1,0 +1,4 @@
+Task 18: python -u scripts/run_explanations.py --datasets PenDigits --runs 0 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:03:30] PenDigits run 0: 7494 train / 3498 test series, shape (2, 8)
+[03:24:09] model: 360 of 10000 formulae selected, balanced accuracy train 0.999 / test 0.973
+[08:35:19] train rules: 7494 in 16727 s (+ 1943 s to simplify and score)

@@ -1,0 +1,57 @@
+{
+  "dataset": "BasicMotions",
+  "run": 1,
+  "seed": 1,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 40,
+  "n_test": 40,
+  "n_classes": 4,
+  "n_selected": 7,
+  "balanced_accuracy": {
+    "train": 1.0,
+    "test": 1.0
+  },
+  "times_s": {
+    "features_s": 4.3099081418477,
+    "model_s": 1.5977879869751632,
+    "rules_train_s": 1.3704284010455012,
+    "rules_train_eval_s": 0.1438741427846253,
+    "rules_test_s": 1.4574066000059247,
+    "rules_test_eval_s": 0.11739729577675462,
+    "global_s": 0.01336983498185873
+  },
+  "rules_train": {
+    "found": 40,
+    "of": 40,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 0.9641873278236914,
+    "mean_coverage_train": 1.0,
+    "mean_coverage_test": 0.875,
+    "mean_lcb_train": 0.8456759411873505,
+    "mean_length": 1.025,
+    "mean_size": 3.25
+  },
+  "rules_test": {
+    "found": 40,
+    "of": 40,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 0.9665653495440729,
+    "mean_coverage_train": 0.9949999999999999,
+    "mean_coverage_test": 0.8833333333333332,
+    "mean_lcb_train": 0.8581998140494299,
+    "mean_length": 1.1,
+    "mean_size": 3.725
+  },
+  "global": {
+    "train": {
+      "macro_precision": 1.0,
+      "macro_coverage": 1.0
+    },
+    "test": {
+      "macro_precision": 0.9415584415584415,
+      "macro_coverage": 0.9
+    },
+    "mean_rules": 1.0
+  }
+}

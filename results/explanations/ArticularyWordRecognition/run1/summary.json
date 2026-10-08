@@ -1,0 +1,57 @@
+{
+  "dataset": "ArticularyWordRecognition",
+  "run": 1,
+  "seed": 1,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 275,
+  "n_test": 300,
+  "n_classes": 25,
+  "n_selected": 382,
+  "balanced_accuracy": {
+    "train": 1.0,
+    "test": 0.9666666666666667
+  },
+  "times_s": {
+    "features_s": 12.376685145311058,
+    "model_s": 62.96032671164721,
+    "rules_train_s": 461.8430987582542,
+    "rules_train_eval_s": 3.223006430082023,
+    "rules_test_s": 511.8464497309178,
+    "rules_test_eval_s": 3.329223093111068,
+    "global_s": 0.5525728757493198
+  },
+  "rules_train": {
+    "found": 275,
+    "of": 275,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 0.8168526356290882,
+    "mean_coverage_train": 0.857090909090909,
+    "mean_coverage_test": 0.6362563497108952,
+    "mean_lcb_train": 0.8356641824598817,
+    "mean_length": 1.6436363636363636,
+    "mean_size": 6.567272727272727
+  },
+  "rules_test": {
+    "found": 300,
+    "of": 300,
+    "pooled_prec_train": 0.999290780141844,
+    "pooled_prec_test": 0.7922966162706984,
+    "mean_coverage_train": 0.8539393939393938,
+    "mean_coverage_test": 0.6567271432271431,
+    "mean_lcb_train": 0.8466898302328592,
+    "mean_length": 1.64,
+    "mean_size": 6.56
+  },
+  "global": {
+    "train": {
+      "macro_precision": 1.0,
+      "macro_coverage": 1.0
+    },
+    "test": {
+      "macro_precision": 0.7866483059424236,
+      "macro_coverage": 0.7331128871128872
+    },
+    "mean_rules": 1.44
+  }
+}

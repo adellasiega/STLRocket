@@ -1,0 +1,57 @@
+{
+  "dataset": "EigenWorms",
+  "run": 1,
+  "seed": 1,
+  "depth": 2,
+  "n_formulas": 10000,
+  "n_train": 128,
+  "n_test": 131,
+  "n_classes": 5,
+  "n_selected": 57,
+  "balanced_accuracy": {
+    "train": 0.9618181818181817,
+    "test": 0.6667835546096416
+  },
+  "times_s": {
+    "features_s": 840.6211155401543,
+    "model_s": 3.6219161790795624,
+    "rules_train_s": 30.180139086209238,
+    "rules_train_eval_s": 238.51596419885755,
+    "rules_test_s": 28.839767273981124,
+    "rules_test_eval_s": 207.76842316286638,
+    "global_s": 36.71722684009001
+  },
+  "rules_train": {
+    "found": 128,
+    "of": 128,
+    "pooled_prec_train": 1.0,
+    "pooled_prec_test": 0.7794811320754716,
+    "mean_coverage_train": 0.44103690227745385,
+    "mean_coverage_test": 0.31704606681034486,
+    "mean_lcb_train": 0.8695131722771674,
+    "mean_length": 1.8984375,
+    "mean_size": 6.453125
+  },
+  "rules_test": {
+    "found": 131,
+    "of": 131,
+    "pooled_prec_train": 0.9987692307692307,
+    "pooled_prec_test": 0.7642971672902191,
+    "mean_coverage_train": 0.45726747806900486,
+    "mean_coverage_test": 0.33900103644968915,
+    "mean_lcb_train": 0.8668123317131465,
+    "mean_length": 1.7709923664122138,
+    "mean_size": 6.0458015267175576
+  },
+  "global": {
+    "train": {
+      "macro_precision": 1.0,
+      "macro_coverage": 0.9379079254079254
+    },
+    "test": {
+      "macro_precision": 0.6245112743819379,
+      "macro_coverage": 0.6516457680250783
+    },
+    "mean_rules": 2.8
+  }
+}

@@ -1,0 +1,6 @@
+Task 10: python -u scripts/run_explanations.py --datasets FingerMovements --runs 0 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[02:54:03] FingerMovements run 0: 316 train / 100 test series, shape (28, 50)
+[02:54:14] model: 2 of 10000 formulae selected, balanced accuracy train 0.610 / test 0.521
+[02:54:19] train rules: 316 in 4 s (+ 1 s to simplify and score)
+[02:54:21] test rules: 100 in 1 s (+ 0 s to simplify and score)
+[02:54:21] FingerMovements run 0 done: test rules pooled precision 1.000, global macro precision 1.000 on test

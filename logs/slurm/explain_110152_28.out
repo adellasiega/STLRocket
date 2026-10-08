@@ -1,0 +1,6 @@
+Task 28: python -u scripts/run_explanations.py --datasets BasicMotions --runs 1 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:16:57] BasicMotions run 1: 40 train / 40 test series, shape (6, 100)
+[03:17:03] model: 7 of 10000 formulae selected, balanced accuracy train 1.000 / test 1.000
+[03:17:04] train rules: 40 in 1 s (+ 0 s to simplify and score)
+[03:17:06] test rules: 40 in 1 s (+ 0 s to simplify and score)
+[03:17:06] BasicMotions run 1 done: test rules pooled precision 0.967, global macro precision 0.942 on test

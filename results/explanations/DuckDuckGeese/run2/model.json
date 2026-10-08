@@ -1,0 +1,39 @@
+{
+ "classes": [
+  "black-bellied_whistling_duck",
+  "canadian_goose",
+  "greylag_goose",
+  "pink-footed_goose",
+  "white-faced_whistling_duck"
+ ],
+ "balanced_accuracy": {
+  "train": 0.4,
+  "test": 0.3
+ },
+ "accuracy": {
+  "train": 0.4,
+  "test": 0.3
+ },
+ "lambda": 0.3025418220717538,
+ "n_selected": 1,
+ "selected": [
+  6373
+ ],
+ "weights": [
+  [
+   0.0
+  ],
+  [
+   0.0
+  ],
+  [
+   0.0
+  ],
+  [
+   -0.3435924786832685
+  ],
+  [
+   0.0
+  ]
+ ]
+}

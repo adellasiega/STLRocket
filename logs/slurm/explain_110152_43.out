@@ -1,0 +1,6 @@
+Task 43: python -u scripts/run_explanations.py --datasets NATOPS --runs 1 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_min 5 --n_max 3 --beam_width 5 --confidence 0.9 --min_new_share 0.05 --decimals 2 --out_dir /share/ai-lab/adsiega/STLRocket/results/explanations
+[03:40:03] NATOPS run 1: 180 train / 180 test series, shape (24, 51)
+[03:40:21] model: 40 of 10000 formulae selected, balanced accuracy train 0.967 / test 0.917
+[03:41:30] train rules: 180 in 68 s (+ 1 s to simplify and score)
+[03:42:38] test rules: 180 in 67 s (+ 1 s to simplify and score)
+[03:42:39] NATOPS run 1 done: test rules pooled precision 0.889, global macro precision 0.807 on test

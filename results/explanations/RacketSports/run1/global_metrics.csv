@@ -1,0 +1,17 @@
+class,k,version,evaluated_on,n_rules,size,tp,support,precision,coverage
+badminton_clear,0,raw,train,4,38,36,36,1.0,0.8780487804878049
+badminton_clear,0,raw,test,4,38,29,42,0.6904761904761905,0.7435897435897436
+badminton_smash,1,raw,train,5,42,38,38,1.0,0.9743589743589743
+badminton_smash,1,raw,test,5,42,28,42,0.6666666666666666,0.8235294117647058
+squash_backhandboast,2,raw,train,4,42,35,35,1.0,1.0
+squash_backhandboast,2,raw,test,4,42,36,43,0.8372093023255814,0.8181818181818182
+squash_forehandboast,3,raw,train,3,30,34,34,1.0,0.9444444444444444
+squash_forehandboast,3,raw,test,3,30,30,39,0.7692307692307693,0.8571428571428571
+badminton_clear,0,simplified,train,4,33,36,36,1.0,0.8780487804878049
+badminton_clear,0,simplified,test,4,33,29,42,0.6904761904761905,0.7435897435897436
+badminton_smash,1,simplified,train,5,39,38,38,1.0,0.9743589743589743
+badminton_smash,1,simplified,test,5,39,28,42,0.6666666666666666,0.8235294117647058
+squash_backhandboast,2,simplified,train,4,40,35,35,1.0,1.0
+squash_backhandboast,2,simplified,test,4,40,37,45,0.8222222222222222,0.8409090909090909
+squash_forehandboast,3,simplified,train,3,25,34,34,1.0,0.9444444444444444
+squash_forehandboast,3,simplified,test,3,25,30,39,0.7692307692307693,0.8571428571428571

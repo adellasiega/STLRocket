@@ -1,0 +1,13 @@
+class,k,version,n,size,rule
+1,0,raw,0,3,"always[4,25] ( always[19,23] ( x_0 <= 0.1659 ) )"
+2,1,raw,0,6,"not ( ( always[0,9] ( x_2 <= -0.4651 ) ) or ( always[4,5] ( x_0 >= 0.8396 ) ) )"
+3,2,raw,0,4,"eventually[27,33] ( ( x_1 >= 1.3339 ) or ( x_1 <= -1.6453 ) )"
+4,3,raw,0,5,"not ( eventually[37,46] ( ( x_1 <= 0.76 ) and ( x_1 >= -0.863 ) ) )"
+5,4,raw,0,6,"not ( ( always[21,51] ( x_0 >= -1.2609 ) ) and ( always[4,inf] ( x_0 >= -1.9285 ) ) )"
+6,5,raw,0,3,"not ( eventually[0,28] ( x_2 <= -0.5702 ) )"
+1,0,simplified,0,3,"always[4,25] ( always[19,23] ( x_0 <= 0.17 ) )"
+2,1,simplified,0,6,"not ( ( always[0,9] ( x_2 <= -0.47 ) ) or ( always[4,5] ( x_0 >= 0.84 ) ) )"
+3,2,simplified,0,4,"eventually[27,33] ( ( x_1 >= 1.33 ) or ( x_1 <= -1.65 ) )"
+4,3,simplified,0,3,"not ( eventually[37,46] ( x_1 <= 0.76 ) )"
+5,4,simplified,0,3,"not ( always[21,51] ( x_0 >= -1.26 ) )"
+6,5,simplified,0,3,"not ( eventually[0,28] ( x_2 <= -0.57 ) )"
