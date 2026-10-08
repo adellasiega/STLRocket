@@ -3,7 +3,12 @@ import copy
 from collections import defaultdict
 import numpy as np
 from torcheck.stl import Not, And, Or
-from torcheck import simplify
+# Not every torcheck build ships simplify; without it conjunction returns the plain
+# And chain, which has the same semantics.
+try:
+    from torcheck import simplify
+except ImportError:
+    simplify = None
 from .features import eval_robustness, shift_atom_thresholds
 from .formula_sampler import F0
 from .evaluation import evaluate_local_explanation
@@ -128,7 +133,7 @@ def conjunction(phis: list):
     out = phis[0]
     for phi in phis[1:]:
         out = And(out, phi)
-    return simplify(out)
+    return out if simplify is None else simplify(out)
 
 
 def disjunction(phis: list):
