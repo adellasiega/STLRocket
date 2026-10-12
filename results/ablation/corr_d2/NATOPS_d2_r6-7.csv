@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,n_bank,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
+NATOPS,6,6,0.25,2,10000,0.0,0.99,24261,10000,False,False,0.875,0.9548748353096178,36,0.8720238095238094,42,17,23,81,0.877,0.0361,0.9077,16.3064,6.0878,ok
+NATOPS,6,6,0.25,2,10000,0.0,0.95,66982,10000,False,False,0.9166666666666666,0.9700263504611332,33,0.9166666666666666,71,20,42,80,0.9077,0.017,0.9246,35.4741,5.1353,ok
+NATOPS,7,7,0.25,2,10000,0.0,0.99,23812,10000,False,False,0.9761904761904763,0.9472990777338604,34,0.9791666666666666,60,17,28,81,0.9038,0.015,0.9167,21.104,6.9952,ok
+NATOPS,7,7,0.25,2,10000,0.0,0.95,65040,10000,False,False,0.9553571428571429,0.9548748353096178,26,0.9583333333333334,71,13,33,80,0.8938,0.0273,0.9167,34.7639,5.1806,ok
