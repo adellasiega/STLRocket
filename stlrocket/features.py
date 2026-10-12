@@ -98,7 +98,7 @@ def calibrate_thresholds(formulas: list, X: np.ndarray, rng: np.random.Generator
     from the raw values of x instead ignores the operators (G compares c to window minima),
     which leaves many subformulae always true or false and their binary parent decided by
     one child. Thresholds stay in the units of x. Single-atom formulae are skipped: their
-    threshold only shifts the feature by a constant, which standardization removes.
+    threshold only shifts the feature by a constant, which centring removes.
 
     Use the fit/train split only. rng is separate from the sampler's stream so that a
     formula's thresholds depend only on its position in the list.
@@ -147,18 +147,30 @@ def _make_generator(X_tr: np.ndarray, config: ExperimentConfig, seed: int) -> F0
     )
 
 
-def _standardize(X_tr_feats: np.ndarray, X_te_feats: np.ndarray):
-    mu = X_tr_feats.mean(axis=0)
+def _center_and_scale(formulas: list, X_tr: np.ndarray, X_te: np.ndarray, F_tr: np.ndarray):
+    """Centre every formula on the train series with the robustness shift property, then
+    scale its robustness to unit train std.
+
+    F_tr: train robustness of formulas as sampled. Each formula is shifted in place by
+    the train mean mu_j of its robustness (phi_j <- phi_j^{-mu_j}), so that the robustness
+    of the stored formula has zero train mean and the sign of a feature is the
+    satisfaction of that formula. Features are recomputed from the shifted formulae
+    rather than as F - mu, so that they are exactly what the stored formulae evaluate to.
+    Returns (X_tr_feats, X_te_feats, sigma) with x_j = rho(phi_j, .) / sigma_j.
+    """
+    for phi, mu in zip(formulas, F_tr.mean(axis=0, dtype=np.float64)):
+        shift_atom_thresholds(phi, -float(mu))
+    X_tr_feats, X_te_feats = extract_features(X_tr, formulas), extract_features(X_te, formulas)
     sigma = X_tr_feats.std(axis=0)
-    X_tr_feats = (X_tr_feats - mu) / (sigma + 1e-8)
-    X_te_feats = (X_te_feats - mu) / (sigma + 1e-8)
-    # A column constant on train (up to float rounding) carries no information, but
-    # dividing by sigma + 1e-8 blows any test value that differs up to ~1e8. Set such
-    # columns to 0 on both sides.
-    constant = sigma <= 1e-6 * np.maximum(np.abs(mu), 1.0)
+    # A column constant on train (up to float rounding) carries no information, and
+    # dividing by its std would blow up any test value that differs. Set such columns
+    # to 0 on both sides, with scale 1.
+    constant = sigma <= 1e-6 * np.maximum(np.abs(F_tr).max(axis=0), 1.0)
+    sigma[constant] = 1.0
+    X_tr_feats, X_te_feats = X_tr_feats / sigma, X_te_feats / sigma
     X_tr_feats[:, constant] = 0.0
     X_te_feats[:, constant] = 0.0
-    return X_tr_feats, X_te_feats, mu, sigma
+    return X_tr_feats, X_te_feats, sigma
 
 
 def _build_raw_formula_bank(
@@ -166,11 +178,11 @@ def _build_raw_formula_bank(
     X_te: np.ndarray,
     config: ExperimentConfig,
     seed: int,
-) -> tuple[list, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[list, np.ndarray, np.ndarray, np.ndarray]:
     formulas = _make_generator(X_tr, config, seed).sample(config.n_formulas)
     if config.calibrate_thresholds:
         calibrate_thresholds(formulas, X_tr, np.random.default_rng(seed))
-    return formulas, *_standardize(extract_features(X_tr, formulas), extract_features(X_te, formulas))
+    return formulas, *_center_and_scale(formulas, X_tr, X_te, extract_features(X_tr, formulas))
 
 
 def correlation_filter(F: np.ndarray, threshold: float, n_keep: int = 0, block: int = 1000) -> np.ndarray:
@@ -204,7 +216,7 @@ def build_decorrelated_formula_bank(
     seed: int,
     threshold: float,
     max_rounds: int = 20,
-) -> tuple[list, np.ndarray, np.ndarray, np.ndarray, np.ndarray, int]:
+) -> tuple[list, np.ndarray, np.ndarray, np.ndarray, int]:
     """Like build_formula_bank, but formulas whose train robustness has |corr| >= threshold
     with an earlier kept formula are dropped and replaced by new samples, until
     config.n_formulas are kept (or max_rounds resampling rounds are spent).
@@ -227,7 +239,7 @@ def build_decorrelated_formula_bank(
         return new
 
     formulas = sample(M)
-    F_tr, F_te = extract_features(X_tr, formulas), extract_features(X_te, formulas)
+    F_tr = extract_features(X_tr, formulas)
     keep = correlation_filter(F_tr, threshold)
     for _ in range(max_rounds):
         if len(keep) >= M:
@@ -237,13 +249,13 @@ def build_decorrelated_formula_bank(
         new = sample(int(min(M, max(1000, 1.2 * (M - len(keep)) * n_old / max(len(keep), 1)))))
         formulas += new
         F_tr = np.hstack([F_tr, extract_features(X_tr, new)])
-        F_te = np.hstack([F_te, extract_features(X_te, new)])
         kept_new = correlation_filter(F_tr[:, np.r_[keep, n_old:len(formulas)]], threshold, n_keep=len(keep))
         keep = np.r_[keep, kept_new[len(keep):] - len(keep) + n_old]
 
     n_sampled = int(keep[M - 1]) + 1 if len(keep) >= M else len(formulas)
     keep = keep[:M]
-    return [formulas[i] for i in keep], *_standardize(F_tr[:, keep], F_te[:, keep]), n_sampled
+    formulas = [formulas[i] for i in keep]
+    return formulas, *_center_and_scale(formulas, X_tr, X_te, F_tr[:, keep]), n_sampled
 
 
 def build_formula_bank(
@@ -251,12 +263,14 @@ def build_formula_bank(
     X_te: np.ndarray,
     config: ExperimentConfig,
     seed: int,
-) -> tuple[list, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[list, np.ndarray, np.ndarray, np.ndarray]:
     """Sample STL formulas and compute their standardized robustness features.
 
-    Returns (formulas, X_tr_feats, X_te_feats, mu, sigma), where mu and sigma are
-    the per-formula train mean and std used to standardize: raw = feats * (sigma + 1e-8) + mu,
-    except for columns constant on train, which are 0.
+    Returns (formulas, X_tr_feats, X_te_feats, sigma). X_tr and X_te are expected
+    standardized per variable (data.standardize_series). The returned formulas are the
+    sampled ones shifted to zero mean train robustness (_center_and_scale), and the
+    features are their robustness divided by its train std, x_j = rho(phi_j, tau) / sigma_j;
+    columns constant on train are 0, with sigma_j = 1.
     """
 
     # F0 seeds random and torch itself; numpy is seeded here for downstream code.

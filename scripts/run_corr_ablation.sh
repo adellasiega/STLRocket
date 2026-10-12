@@ -21,7 +21,7 @@
 PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
 VENV="/share/ai-lab/adsiega/STLRocket/env"
 OUT_DIR="${PROJECT_DIR}/results/ablation/corr"
-PREV_RESULTS="${PROJECT_DIR}/results/ablation/full"
+PREV_RESULTS="${PROJECT_DIR}/results/old_scheme/ablation/full"
 
 N_DATASETS=10
 DEPTHS=(2 3)

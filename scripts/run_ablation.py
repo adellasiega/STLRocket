@@ -11,8 +11,9 @@ split and the formula seed, so results are paired across configurations.
 Features are built once per (dataset, run, depth_max, until_weight, corr_threshold,
 calibrate) at max(M): the sampler draws formulas i.i.d. from one seeded stream, the
 correlation filter is greedy in stream order, calibration draws from its own stream in
-formula order and standardization is per column, so the first M columns are exactly the
-M-formula bank. The filter and calibration only look at the fit part. fit_intercept does
+formula order and features are standardized per column, so the first M columns are exactly the
+M-formula bank. The series are standardized per variable on the fit part, which is also
+all the filter and calibration look at. fit_intercept does
 not affect features, so both values reuse the same matrix.
 
 Rows are appended to the CSV as soon as they are computed, so partial results survive.
@@ -36,15 +37,18 @@ from sklearn.model_selection import StratifiedShuffleSplit
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from stlrocket.config import ExperimentConfig
-from stlrocket.data import _fill_missing
+from stlrocket.data import _fill_missing, standardize_series
 from stlrocket.features import build_formula_bank, build_decorrelated_formula_bank
-from stlrocket.classifier import train_classifier, evaluate_classifier
+from stlrocket.classifier import train_classifier, evaluate_classifier, selection_diagnostics
 
 
 ROW_FIELDS = [
     "dataset", "run", "seed", "val_ratio", "depth_max", "n_formulas", "until_weight",
     "corr_threshold", "n_sampled", "calibrate",
     "fit_intercept", "val_balanced_accuracy", "fit_balanced_accuracy", "n_selected",
+    # Lambda selection: the selected (1-SE) lambda vs the one with the best CV score.
+    "val_balanced_accuracy_cvmax", "n_selected_cvmax", "lambda_index", "lambda_index_cvmax",
+    "n_lambda", "cv_score", "cv_se", "cv_score_cvmax",
     "time_feats_s", "time_fit_s", "status",
 ]
 
@@ -118,7 +122,8 @@ def run_dataset(args, dataset: str, writer, f) -> None:
         except ValueError as e:  # too few samples for the requested ratio
             write({**base, "status": f"split_error: {e}"})
             continue
-        X_fit, y_fit, X_val, y_val = X[fit_idx], y[fit_idx], X[val_idx], y[val_idx]
+        y_fit, y_val = y[fit_idx], y[val_idx]
+        X_fit, X_val = standardize_series(X[fit_idx], X[val_idx])
         if not split_ok(y_fit, y_val, classes):
             write({**base, "status": "skipped: too few samples per class"})
             continue
@@ -129,10 +134,10 @@ def run_dataset(args, dataset: str, writer, f) -> None:
                 cfg = make_config(args, dataset, M_max, depth_max, until_weight, True, calibrate)
                 t0 = time.perf_counter()
                 if corr_threshold is None:
-                    _, F_fit, F_val, _, _ = build_formula_bank(X_fit, X_val, cfg, seed)
+                    _, F_fit, F_val, _ = build_formula_bank(X_fit, X_val, cfg, seed)
                     n_sampled = M_max
                 else:
-                    _, F_fit, F_val, _, _, n_sampled = build_decorrelated_formula_bank(
+                    _, F_fit, F_val, _, n_sampled = build_decorrelated_formula_bank(
                         X_fit, X_val, cfg, seed, corr_threshold)
                 t_feats = time.perf_counter() - t0
                 if F_fit.shape[1] < M_max:
@@ -163,6 +168,16 @@ def run_dataset(args, dataset: str, writer, f) -> None:
                             row["fit_balanced_accuracy"] = evaluate_classifier(
                                 model, F_fit[:, :M], y_fit)["balanced_accuracy"]
                             row["n_selected"] = n_selected(model)
+                            sel = selection_diagnostics(model)
+                            i_1se, i_max = sel["index_1se"], sel["index_cvmax"]
+                            row["val_balanced_accuracy_cvmax"] = evaluate_classifier(
+                                model, F_val[:, :M], y_val, lamb=model.lambda_max_)["balanced_accuracy"]
+                            row["n_selected_cvmax"] = sel["n_selected_path"][i_max]
+                            row["lambda_index"], row["lambda_index_cvmax"] = i_1se, i_max
+                            row["n_lambda"] = sel["n_lambda"]
+                            row["cv_score"] = round(sel["cv_mean_score"][i_1se], 4)
+                            row["cv_se"] = round(sel["cv_standard_error"][i_max], 4)
+                            row["cv_score_cvmax"] = round(sel["cv_mean_score"][i_max], 4)
                             row["status"] = "ok"
                         except Exception as e:
                             row["status"] = f"error: {type(e).__name__}: {e}"

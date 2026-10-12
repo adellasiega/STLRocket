@@ -2,3 +2,5 @@ notes/
 CLAUDE.md
 env/
 .venv/
+paper_drafts/
+*.swp

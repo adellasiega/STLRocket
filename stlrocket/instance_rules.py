@@ -1,12 +1,13 @@
 """Instance rules and global explanations (paper §3.3).
 
 An instance rule L(tau) for the prediction k = f(tau) is a conjunction of literals, one
-per reparametrized formula phi_j. Literal (j, e, s), with direction e = sgn(x_j(tau))
-and cut s in standardized units, holds on tau' iff e * x_j(tau') > s, i.e. iff
-rho(phi_j, tau') lies beyond c = mu_j + e * s * (sigma_j + 1e-8) on the same side as
-tau. By the robustness shift property this is the STL formula phi_j^{-c} (e > 0) or
-Not(phi_j)^{-c} (e < 0), so the whole search runs on the standardized train feature
-matrix and STL is only evaluated to build the final formula (to_stl).
+per reparametrized formula phi_j of the bank (already centred on the train series, see
+features.build_formula_bank). Literal (j, e, s), with x_j = rho(phi_j, .) / sigma_j,
+direction e = sgn(x_j(tau)) and cut s >= 0, holds on tau' iff e * x_j(tau') > s, i.e. iff
+rho(phi_j, tau') lies beyond c = e * s * sigma_j on the same side of 0 as tau. By the
+robustness shift property this is the STL formula phi_j^{-|c|} (e > 0) or
+Not(phi_j)^{-|c|} (e < 0), so the whole search runs on the scaled train feature matrix
+and STL is only evaluated to build the final formula (to_stl).
 
 Rules are consistent: every literal holds on tau (0 <= s < e * x_j(tau)). Counts are
 taken on the train set w.r.t. reference labels, the model's predictions: the support of
@@ -23,8 +24,10 @@ an OR of few, general instance rules of the train series predicted as k
 from __future__ import annotations
 
 import copy
+import multiprocessing
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
-from functools import reduce
+from functools import lru_cache, reduce
 from statistics import NormalDist
 
 import numpy as np
@@ -81,7 +84,7 @@ def candidate_scores(x: np.ndarray, W_full: np.ndarray) -> tuple[int, np.ndarray
 def cuts(u: np.ndarray, u_tau: float) -> np.ndarray:
     """Cut grid of one literal, ascending. u: e * x_j over the (kept) train series,
     u_tau = e * x_j(tau) > 0. A cut s must satisfy 0 <= s < u_tau (consistency, and
-    covered series on the same side of the train mean as tau). The covered set {u > s}
+    covered series on the same side of 0 as tau). The covered set {u > s}
     only changes when s crosses a train value, so each distinct set is represented by
     the midpoint between consecutive distinct train values, plus s = 0. Midpoints also
     keep every train value away from the cut, so feature-space and STL evaluation agree."""
@@ -98,13 +101,18 @@ def covered(literals: list, X_feats: np.ndarray) -> np.ndarray:
     return mask
 
 
+@lru_cache(maxsize=None)
+def _z(confidence: float) -> float:
+    return NormalDist().inv_cdf(confidence)
+
+
 def wilson_lower(tp, n, confidence: float = 0.9):
     """One-sided Wilson lower confidence bound of the precision tp / n (0 where n == 0):
     the smallest precision still plausible after tp hits in n series. It is close to
     tp / n for large n and far below it for small n (5/5: 0.75, 28/30: 0.85 at 0.9).
     Works elementwise on arrays."""
     tp, n = np.asarray(tp, dtype=float), np.asarray(n, dtype=float)
-    z = NormalDist().inv_cdf(confidence)
+    z = _z(confidence)
     z2 = z * z
     with np.errstate(divide="ignore", invalid="ignore"):
         p = tp / n
@@ -164,25 +172,35 @@ def explain_instance(
         for state in beam:
             used = {p for p, _ in state["literals"]}
             mask = state["mask"]
+            pos_mask = pos[mask]
+            U_mask = np.ascontiguousarray(U[mask].T)  # (|J|, n covered): one row per formula
             for p in range(len(J)):
                 if p in used:
                     continue
                 grid = grids[p]
-                n_cov, n_tp = _cut_counts(U[mask, p], pos[mask], grid)
+                n_cov, n_tp = _cut_counts(U_mask[p], pos_mask, grid)
                 # Cuts giving the same covered set (same count, since sets are nested):
                 # keep the middle one, i.e. the widest margin among the covered values.
                 _, first, size = np.unique(-n_cov, return_index=True, return_counts=True)
-                for i in first + size // 2:
-                    n = int(n_cov[i])
-                    if n < cfg.n_min:
-                        continue
-                    tp = int(n_tp[i])
+                idx = first + size // 2
+                idx = idx[n_cov[idx] >= cfg.n_min]
+                if len(idx) == 0:
+                    continue
+                n, tp = n_cov[idx], n_tp[idx]
+                lcb = wilson_lower(tp, n, cfg.confidence)
+                # These extensions share the formula, hence the score: only the beam_width
+                # best by (bound, TP), earlier on ties, can enter the beam or be the best rule.
+                # (Any other one is beaten by beam_width distinct rules of this same set.)
+                if len(idx) > cfg.beam_width:
+                    top = np.sort(np.lexsort((np.arange(len(idx)), -tp, -lcb))[:cfg.beam_width])
+                    idx, n, tp, lcb = idx[top], n[top], tp[top], lcb[top]
+                for i, n_i, tp_i, lcb_i in zip(idx.tolist(), n.tolist(), tp.tolist(), lcb.tolist()):
                     lits = state["literals"] + ((p, float(grid[i])),)
                     key = frozenset(lits)
                     # By the bound, then TP, then the attribution score of the new formula.
-                    sort_key = (float(wilson_lower(tp, n, cfg.confidence)), tp, score[J[p]])
+                    sort_key = (lcb_i, tp_i, score[J[p]])
                     if key not in ext or sort_key > ext[key][0]:
-                        ext[key] = (sort_key, lits, n, tp)
+                        ext[key] = (sort_key, lits, n_i, tp_i)
         if not ext:
             break
         ranked = sorted(ext.values(), key=lambda e: e[0], reverse=True)
@@ -205,7 +223,7 @@ def explain_instance(
 
 def _generalize(lits: list, U, grids, keep, pos, cfg: RuleConfig) -> dict:
     """Greedy generalization pass: repeatedly apply the move (drop a literal, or loosen
-    its cut to any looser cut toward the train mean) that keeps support >= n_min and
+    its cut to any looser cut toward 0) that keeps support >= n_min and
     gives the largest Wilson bound, on equal bound the shorter rule. Stops when no move
     raises the bound or shortens the rule."""
     def value(tp, n, n_lits):
@@ -230,12 +248,13 @@ def _generalize(lits: list, U, grids, keep, pos, cfg: RuleConfig) -> dict:
                 if n >= cfg.n_min and val > best_val:
                     best_move, best_val = (i, None), val
             looser = grids[p][grids[p] < s]
-            if len(looser):        # loosen literal i
+            if len(looser):        # loosen literal i: the first cut with the largest bound
                 n_cov, n_tp = _cut_counts(U[others, p], pos[others], looser)
-                for c, n, tp in zip(looser, n_cov, n_tp):
-                    val = value(int(tp), int(n), len(lits))
-                    if n >= cfg.n_min and val > best_val:
-                        best_move, best_val = (i, float(c)), val
+                lcb = np.where(n_cov >= cfg.n_min, wilson_lower(n_tp, n_cov, cfg.confidence), -np.inf)
+                c = int(np.argmax(lcb))
+                val = (float(lcb[c]), -len(lits))
+                if lcb[c] > -np.inf and val > best_val:
+                    best_move, best_val = (i, float(looser[c])), val
         if best_move is None or best_val <= cur:
             break
         i, c = best_move
@@ -247,11 +266,39 @@ def _generalize(lits: list, U, grids, keep, pos, cfg: RuleConfig) -> dict:
 
 
 def explain_instances(X_feats: np.ndarray, W_full: np.ndarray, X_tr_feats: np.ndarray,
-                      ref_labels: np.ndarray, cfg: RuleConfig, train: bool = False) -> list[dict]:
+                      ref_labels: np.ndarray, cfg: RuleConfig, train: bool = False,
+                      n_jobs: int = 1) -> list[dict]:
     """Instance rules for every row of X_feats. train=True: the rows are the train
-    series themselves, each left out of its own counts."""
-    return [explain_instance(x, W_full, X_tr_feats, ref_labels, cfg, exclude=i if train else None)
-            for i, x in enumerate(X_feats)]
+    series themselves, each left out of its own counts. n_jobs > 1: rows split over that
+    many worker processes (same rules; workers run the functions as defined in this
+    module, so a candidate_scores patched at runtime is not seen by them). Starting the
+    workers takes ~15 s (each imports torch), so small problems stay in this process."""
+    excl = list(range(len(X_feats))) if train else [None] * len(X_feats)
+    if n_jobs <= 1 or len(X_feats) * len(X_tr_feats) < MIN_PARALLEL_WORK:
+        return [explain_instance(x, W_full, X_tr_feats, ref_labels, cfg, exclude=e)
+                for x, e in zip(X_feats, excl)]
+    chunks = [c for c in np.array_split(np.arange(len(X_feats)), 4 * n_jobs) if len(c)]
+    ctx = multiprocessing.get_context("spawn")   # no fork of a process holding torch threads
+    with ProcessPoolExecutor(n_jobs, mp_context=ctx, initializer=_init_worker,
+                             initargs=(W_full, X_tr_feats, ref_labels, cfg)) as ex:
+        parts = ex.map(_explain_chunk, [(X_feats[c], [excl[i] for i in c]) for c in chunks])
+        return [r for part in parts for r in part]
+
+
+# Rows x train series below which explain_instances ignores n_jobs: ~1 min of serial work
+MIN_PARALLEL_WORK = 200_000
+_WORKER: dict = {}
+
+
+def _init_worker(W_full, X_tr_feats, ref_labels, cfg) -> None:
+    _WORKER.update(W_full=W_full, X_tr_feats=X_tr_feats, ref_labels=ref_labels, cfg=cfg)
+
+
+def _explain_chunk(args) -> list[dict]:
+    X, excl = args
+    w = _WORKER
+    return [explain_instance(x, w["W_full"], w["X_tr_feats"], w["ref_labels"], w["cfg"], exclude=e)
+            for x, e in zip(X, excl)]
 
 
 def rule_metrics(satisfied: np.ndarray, k: int, labels: np.ndarray, exclude: int | None = None) -> dict:
@@ -267,10 +314,10 @@ def rule_metrics(satisfied: np.ndarray, k: int, labels: np.ndarray, exclude: int
                 coverage=tp / pos.sum() if pos.any() else np.nan)
 
 
-def to_stl(literals: list, formulas: list, mu: np.ndarray, sigma: np.ndarray):
+def to_stl(literals: list, formulas: list, sigma: np.ndarray):
     """STL formula of a rule (eq. 22): literal (j, e, s) is phi_j^{-c} (e > 0) or
-    Not(phi_j)^{-c} (e < 0) with c = e * mu_j + s * (sigma_j + 1e-8), the cut on
-    e * rho(phi_j, .). mu, sigma: the raw train statistics from build_formula_bank."""
+    Not(phi_j)^{-c} (e < 0) with c = s * sigma_j, the cut on e * rho(phi_j, .).
+    sigma: the feature scales from build_formula_bank."""
     if not literals:
         return None
     parts = []
@@ -278,7 +325,7 @@ def to_stl(literals: list, formulas: list, mu: np.ndarray, sigma: np.ndarray):
         phi = copy.deepcopy(formulas[j])
         if e < 0:
             phi = Not(phi)
-        shift_atom_thresholds(phi, -(e * mu[j] + s * (sigma[j] + 1e-8)))
+        shift_atom_thresholds(phi, -s * sigma[j])
         parts.append(phi)
     return reduce(And, parts)
 
@@ -293,11 +340,11 @@ def simplify_rule(phi, X_tr: np.ndarray, cfg: RuleConfig):
     return round_thresholds(phi, X_tr, decimals=cfg.decimals, agreement=1.0)
 
 
-def rule_formula(literals: list, formulas: list, mu: np.ndarray, sigma: np.ndarray, X_tr: np.ndarray,
+def rule_formula(literals: list, formulas: list, sigma: np.ndarray, X_tr: np.ndarray,
                  cfg: RuleConfig, simplify: bool = True):
     """STL formula of an instance rule (to_stl), simplified (simplify_rule) unless simplify
     is False. None for the empty rule."""
-    phi = to_stl(literals, formulas, mu, sigma)
+    phi = to_stl(literals, formulas, sigma)
     return simplify_rule(phi, X_tr, cfg) if simplify and phi is not None else phi
 
 
@@ -350,7 +397,7 @@ def select_disjuncts(rules: list, X_tr_feats: np.ndarray, pos: np.ndarray, min_n
 
 
 def global_explanations(train_rules: list[dict], X_tr_feats: np.ndarray, X_tr: np.ndarray,
-                        ref_labels: np.ndarray, formulas: list, mu: np.ndarray, sigma: np.ndarray,
+                        ref_labels: np.ndarray, formulas: list, sigma: np.ndarray,
                         cfg: RuleConfig, simplify: bool = True) -> dict[int, list]:
     """Global explanation per class: {k: [STL formula, ...]}, the OR of the listed rules.
 
@@ -358,6 +405,6 @@ def global_explanations(train_rules: list[dict], X_tr_feats: np.ndarray, X_tr: n
     False; rules that become identical are kept once."""
     out = {}
     for k, R in global_rules(train_rules, X_tr_feats, ref_labels, cfg).items():
-        phis = [rule_formula(lits, formulas, mu, sigma, X_tr, cfg, simplify) for lits in R]
+        phis = [rule_formula(lits, formulas, sigma, X_tr, cfg, simplify) for lits in R]
         out[k] = list({str(phi): phi for phi in phis}.values())
     return out

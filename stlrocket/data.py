@@ -21,11 +21,27 @@ def _fill_missing(X: np.ndarray) -> np.ndarray:
     return np.nan_to_num(X, nan=0.0)
 
 
-def load_dataset(name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def standardize_series(X_tr: np.ndarray, X_te: np.ndarray, return_stats: bool = False):
+    """Standardize each variable with its mean and std over all train series and time
+    steps, so that atom thresholds and robustness are in standard deviations of the
+    variable. A variable constant on train is only centred.
+
+    Returns (X_tr, X_te), plus the per-variable (mean, std) used if return_stats: a
+    threshold c on variable v is mean[v] + c * std[v] in the original units."""
+    m = X_tr.mean(axis=(0, 2), dtype=np.float64, keepdims=True)
+    s = X_tr.std(axis=(0, 2), dtype=np.float64, keepdims=True)
+    s[s == 0] = 1.0
+    out = ((X_tr - m) / s).astype(np.float32), ((X_te - m) / s).astype(np.float32)
+    return (*out, m.ravel(), s.ravel()) if return_stats else out
+
+
+def load_dataset(name: str, return_stats: bool = False):
     """Load a dataset from the aeon library.
 
     Returns X_tr, y_tr, X_te, y_te where X arrays have shape (N, V, T).
-    Missing values are filled per series (forward fill, then back fill).
+    Missing values are filled per series (forward fill, then back fill), then every
+    variable is standardized on the train split (standardize_series). With return_stats,
+    also returns the per-variable train (mean, std) of the original series.
     """
     from aeon.datasets import load_classification
 
@@ -36,4 +52,5 @@ def load_dataset(name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndar
 
     X_tr = _fill_missing(X_tr.astype(np.float32))
     X_te = _fill_missing(X_te.astype(np.float32))
-    return X_tr, y_tr, X_te, y_te
+    X_tr, X_te, m, s = standardize_series(X_tr, X_te, return_stats=True)
+    return (X_tr, y_tr, X_te, y_te, m, s) if return_stats else (X_tr, y_tr, X_te, y_te)

@@ -8,12 +8,18 @@ base_seed + run.
 Everything is written to OUT_DIR/<dataset>/run<r>/:
   config.json         all settings (ExperimentConfig, RuleConfig, seed)
   model.json          classes, balanced accuracy on train and test, lambda, selected
-                      formulae (indices into the bank) and their logit weights
-  formulas.txt.gz     the formula bank, one STL formula per line (row j = formula j)
+                      formulae (indices into the bank) and their logit weights;
+                      "selection": the CV curve over the lambda path, and the model size
+                      and balanced accuracy at the best-CV lambda next to the selected
+                      1-SE one (classifier.selection_diagnostics)
+  series_stats.npz    mean, std: per-variable train statistics of the original series.
+                      Thresholds are in standardized units: c on variable v is
+                      mean[v] + c * std[v] in the original units
+  formulas.txt.gz     the formula bank (centred formulae), one STL formula per line (row j = formula j)
   formulas.pkl.gz     the same bank as torcheck objects (pickle), to rebuild rules
-  bank_stats.npz      mu, sigma: train mean and std of each formula's robustness; with
-                      formulas.pkl.gz they rebuild every rule exactly from its literals
-                      (instance_rules.rule_formula)
+  bank_stats.npz      sigma: train std of each formula's robustness, the feature scale;
+                      with formulas.pkl.gz it rebuilds every rule exactly from its
+                      literals (instance_rules.rule_formula)
   rules_train.csv     one row per series: its instance rule as literals (formula index,
   rules_test.csv      direction, cut), its simplified STL formula, and the formula's
                       metrics on train and test (the explained series itself left out)
@@ -31,6 +37,7 @@ import argparse
 import dataclasses
 import gzip
 import json
+import os
 import pickle
 import sys
 import time
@@ -45,7 +52,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from stlrocket.config import ExperimentConfig
 from stlrocket.data import load_dataset
 from stlrocket.features import build_formula_bank, eval_robustness
-from stlrocket.classifier import train_classifier
+from stlrocket.classifier import train_classifier, evaluate_classifier, selection_diagnostics
 from stlrocket.formula_sampler import F0
 from stlrocket import instance_rules as ir
 
@@ -80,7 +87,7 @@ def run(args, dataset: str, run_id: int) -> None:
     times = {}
 
     t = time.perf_counter()
-    X_tr, y_tr_raw, X_te, y_te_raw = load_dataset(dataset)
+    X_tr, y_tr_raw, X_te, y_te_raw, series_mean, series_std = load_dataset(dataset, return_stats=True)
     cfg = ExperimentConfig(
         dataset=dataset, n_formulas=args.n_formulas, depth_max=args.depth, until_weight=0.0,
         cv=args.cv, cut_point=args.cut_point, fit_intercept=False, n_run=1, base_seed=args.base_seed,
@@ -97,7 +104,7 @@ def run(args, dataset: str, run_id: int) -> None:
     log(f"{dataset} run {run_id}: {len(X_tr)} train / {len(X_te)} test series, shape {X_tr.shape[1:]}")
 
     # Formula bank and model
-    formulas, F_tr, F_te, mu, sigma = build_formula_bank(X_tr, X_te, cfg, seed)
+    formulas, F_tr, F_te, sigma = build_formula_bank(X_tr, X_te, cfg, seed)
     times["features_s"] = time.perf_counter() - t
     t = time.perf_counter()
     model = train_classifier(F_tr, y_tr_raw, cfg, seed=seed)
@@ -116,12 +123,18 @@ def run(args, dataset: str, run_id: int) -> None:
         f.writelines(f"{phi}\n" for phi in formulas)
     with gzip.open(out / "formulas.pkl.gz", "wb") as f:
         pickle.dump(formulas, f)
-    np.savez(out / "bank_stats.npz", mu=mu, sigma=sigma)
+    np.savez(out / "bank_stats.npz", sigma=sigma)
+    np.savez(out / "series_stats.npz", mean=series_mean, std=series_std)
+    selection = selection_diagnostics(model)
+    selection["at_cvmax"] = {
+        "lambda": float(model.lambda_max_), "n_selected": selection["n_selected_path"][selection["index_cvmax"]],
+        "balanced_accuracy": {s: evaluate_classifier(model, F[s], y, lamb=model.lambda_max_)["balanced_accuracy"]
+                              for s, y in (("train", y_tr_raw), ("test", y_te_raw))}}
     (out / "model.json").write_text(json.dumps(
         {"classes": [str(c) for c in classes], "balanced_accuracy": bacc,
          "accuracy": {s: float((pred[s] == true[s]).mean()) for s in SPLITS},
          "lambda": float(np.atleast_1d(model.lambda_best_)[0]), "n_selected": int(len(selected)),
-         "selected": selected.tolist(), "weights": W[:, selected].tolist()}, indent=1))
+         "selected": selected.tolist(), "weights": W[:, selected].tolist(), "selection": selection}, indent=1))
     log(f"model: {len(selected)} of {len(formulas)} formulae selected, balanced accuracy "
         f"train {bacc['train']:.3f} / test {bacc['test']:.3f}")
 
@@ -129,7 +142,8 @@ def run(args, dataset: str, run_id: int) -> None:
     rule_tables = {}
     for own in SPLITS:
         t = time.perf_counter()
-        rules = ir.explain_instances(F[own], W, F_tr, pred["train"], rcfg, train=own == "train")
+        rules = ir.explain_instances(F[own], W, F_tr, pred["train"], rcfg, train=own == "train",
+                                     n_jobs=args.n_jobs)
         times[f"rules_{own}_s"] = time.perf_counter() - t
         if own == "train":
             train_rules = rules
@@ -140,9 +154,9 @@ def run(args, dataset: str, run_id: int) -> None:
                    "k": r["k"], "n_literals": len(r["literals"]), "literals": json.dumps(r["literals"]),
                    "lcb_train": r["lcb"], "size_raw": 0, "size": 0,
                    **{c: np.nan for s in SPLITS for c in metric_cols(s, dict.fromkeys(METRICS))}, "rule": ""}
-            phi = ir.rule_formula(r["literals"], formulas, mu, sigma, X_tr, rcfg)
+            phi = ir.rule_formula(r["literals"], formulas, sigma, X_tr, rcfg)
             if phi is not None:
-                row["size_raw"] = F0.formula_size(ir.to_stl(r["literals"], formulas, mu, sigma))
+                row["size_raw"] = F0.formula_size(ir.to_stl(r["literals"], formulas, sigma))
                 row["size"] = F0.formula_size(phi)
                 for s in SPLITS:
                     m = ir.rule_metrics(eval_robustness(phi, Xs[s]) > 0, r["k"], pred[s],
@@ -158,7 +172,7 @@ def run(args, dataset: str, run_id: int) -> None:
 
     # Global explanations, raw and simplified
     t = time.perf_counter()
-    args_g = (train_rules, F_tr, X_tr, pred["train"], formulas, mu, sigma, rcfg)
+    args_g = (train_rules, F_tr, X_tr, pred["train"], formulas, sigma, rcfg)
     G = {"raw": ir.global_explanations(*args_g, simplify=False), "simplified": ir.global_explanations(*args_g)}
     rule_rows, metric_rows = [], []
     for version, Gv in G.items():
@@ -172,7 +186,8 @@ def run(args, dataset: str, run_id: int) -> None:
                                     "n_rules": len(phis), "size": sum(F0.formula_size(p) for p in phis), **m})
     times["global_s"] = time.perf_counter() - t
     pd.DataFrame(rule_rows).to_csv(out / "global_rules.csv", index=False)
-    gm = pd.DataFrame(metric_rows)
+    # Explicit columns: an empty model (no formula selected) has no global rules
+    gm = pd.DataFrame(metric_rows, columns=["class", "k", "version", "evaluated_on", "n_rules", "size", *METRICS])
     gm.to_csv(out / "global_metrics.csv", index=False)
 
     # Summary (written last: marks the run as complete)
@@ -215,6 +230,8 @@ def main():
     p.add_argument("--decimals", type=int, default=defaults.decimals, help="simplification: threshold rounding")
     p.add_argument("--base_seed", type=int, default=0)
     p.add_argument("--device", default="cpu")
+    p.add_argument("--n_jobs", type=int, default=int(os.environ.get("SLURM_CPUS_PER_TASK", 1)),
+                   help="processes for the instance rules (default: the SLURM allocation, else 1)")
     p.add_argument("--out_dir", default="results/explanations")
     args = p.parse_args()
     for dataset in args.datasets:

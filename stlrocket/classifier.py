@@ -60,8 +60,27 @@ def evaluate_classifier(
     model: LogitNet,
     X_te_feats: np.ndarray,
     y_te: np.ndarray,
+    lamb: float | None = None,
 ) -> dict:
-    y_pred = model.predict(X_te_feats)
+    """Balanced accuracy at lamb (default: the selected lambda_best_)."""
+    y_pred = np.asarray(model.predict(X_te_feats, lamb=lamb)).reshape(len(X_te_feats), -1)[:, 0]
     return {
         "balanced_accuracy": float(balanced_accuracy_score(y_te, y_pred)),
+    }
+
+
+def selection_diagnostics(model: LogitNet) -> dict:
+    """Cross-validation curve over the lambda path and the two candidate lambdas:
+    index_1se is the selected one (lambda_best_, sparsest within cut_point SEs of the
+    best CV score), index_cvmax the one with the best CV score (lambda_max_).
+    n_selected_path counts the formulae with a nonzero weight for at least one class."""
+    return {
+        "n_splits": int(model.n_splits),
+        "n_lambda": int(model.n_lambda_),
+        "index_1se": int(np.atleast_1d(model.lambda_best_inx_)[0]),
+        "index_cvmax": int(model.lambda_max_inx_),
+        "lambda_path": model.lambda_path_.tolist(),
+        "cv_mean_score": model.cv_mean_score_.tolist(),
+        "cv_standard_error": model.cv_standard_error_.tolist(),
+        "n_selected_path": np.any(model.coef_path_ != 0, axis=0).sum(axis=0).tolist(),
     }
