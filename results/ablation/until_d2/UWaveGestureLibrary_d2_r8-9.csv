@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
+UWaveGestureLibrary,8,8,0.25,2,10000,0.0,,10000,False,False,0.84375,0.9554924242424243,50,0.84375,129,14,54,75,0.8368,0.0443,0.8785,7.4673,5.3367,ok
+UWaveGestureLibrary,8,8,0.25,2,10000,1.0,,10000,False,False,0.875,1.0,72,0.90625,103,17,33,74,0.8576,0.0342,0.8889,336.1129,4.148,ok
+UWaveGestureLibrary,9,9,0.25,2,10000,0.0,,10000,False,False,0.875,0.9772727272727273,63,0.875,63,17,17,75,0.8889,0.0125,0.8889,7.3965,5.0614,ok
+UWaveGestureLibrary,9,9,0.25,2,10000,1.0,,10000,False,False,0.9375,0.9772727272727273,79,1.0,83,17,20,75,0.8507,0.018,0.8646,269.5443,4.8581,ok

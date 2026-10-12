@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
+ERing,2,2,0.25,2,10000,0.0,,10000,False,False,0.5,1.0,15,0.6666666666666666,22,7,13,72,0.6667,0.0833,0.75,5.3469,1.2476,ok
+ERing,2,2,0.25,2,10000,1.0,,10000,False,False,0.8333333333333334,1.0,25,0.8333333333333334,36,8,17,71,0.6667,0.0556,0.7222,17.5958,1.1781,ok
+ERing,3,3,0.25,2,10000,0.0,,10000,False,False,1.0,1.0,28,0.9166666666666666,48,12,62,70,0.75,0.0556,0.8056,5.3406,1.1693,ok
+ERing,3,3,0.25,2,10000,1.0,,10000,False,False,0.8333333333333334,1.0,11,0.9166666666666666,41,4,33,70,0.6667,0.1211,0.7778,17.3851,1.136,ok

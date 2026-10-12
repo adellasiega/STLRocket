@@ -1,0 +1,5 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
+FingerMovements,6,6,0.25,2,10000,0.0,,10000,False,False,0.5048076923076923,0.6156530408773679,2,0.6971153846153846,141,1,38,93,0.5278,0.0386,0.5443,10.3181,2.4763,ok
+FingerMovements,6,6,0.25,2,10000,1.0,,10000,False,False,0.5,0.5,0,0.5307692307692308,2,0,1,92,0.509,0.0151,0.5107,59.2772,2.3095,ok
+FingerMovements,7,7,0.25,2,10000,0.0,,10000,False,False,0.5567307692307693,0.6372311636519015,8,0.5567307692307693,8,5,5,92,0.5744,0.0149,0.5744,9.5621,2.6184,ok
+FingerMovements,7,7,0.25,2,10000,1.0,,10000,False,False,0.5435897435897435,0.5863124910981341,2,0.5179487179487179,4,1,2,90,0.5278,0.0262,0.5446,56.6382,2.2133,ok
