@@ -91,7 +91,7 @@ export NUMEXPR_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
 
 source "${VENV}/bin/activate"
 cd "$PROJECT_DIR" || exit 1
-rm -f "$OUT"  # run_ablation.py appends: a resubmitted task must not duplicate rows
+rm -f "$OUT" "${OUT%.csv}.paths.jsonl"  # run_ablation.py appends: a resubmitted task must not duplicate rows
 
 echo "Task ${SLURM_ARRAY_TASK_ID}: ${CMD[*]}"
 "${CMD[@]}"

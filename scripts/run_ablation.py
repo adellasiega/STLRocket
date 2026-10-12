@@ -17,6 +17,13 @@ all the filter and calibration look at. fit_intercept does
 not affect features, so both values reuse the same matrix.
 
 Rows are appended to the CSV as soon as they are computed, so partial results survive.
+
+Next to OUTPUT.csv, OUTPUT.paths.jsonl gets one JSON line per fitted model, with the
+CSV's configuration columns (PATH_KEYS) and, for every lambda of the path: the lambda,
+the CV mean score and its standard error, the number of selected formulas and the
+balanced accuracy on the fit and validation parts. Any cut_point can be evaluated from
+it without refitting: the selected index is the first one with
+cv_mean_score >= cv_mean_score[index_cvmax] - cut_point * cv_standard_error[index_cvmax].
 """
 from __future__ import annotations
 
@@ -39,7 +46,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from stlrocket.config import ExperimentConfig
 from stlrocket.data import _fill_missing, standardize_series
 from stlrocket.features import build_formula_bank, build_decorrelated_formula_bank
-from stlrocket.classifier import train_classifier, evaluate_classifier, selection_diagnostics
+from stlrocket.classifier import (train_classifier, evaluate_classifier, selection_diagnostics,
+                                  path_balanced_accuracy)
 
 
 ROW_FIELDS = [
@@ -51,6 +59,10 @@ ROW_FIELDS = [
     "n_lambda", "cv_score", "cv_se", "cv_score_cvmax",
     "time_feats_s", "time_fit_s", "status",
 ]
+
+# Columns identifying a fitted model, repeated in every line of OUTPUT.paths.jsonl.
+PATH_KEYS = ["dataset", "run", "seed", "val_ratio", "depth_max", "n_formulas", "until_weight",
+             "corr_threshold", "calibrate", "fit_intercept"]
 
 # train_classifier never uses fewer than 3 CV folds, so each class needs at least
 # 3 samples in the fit part.
@@ -103,7 +115,7 @@ def split_ok(y_fit: np.ndarray, y_val: np.ndarray, classes: np.ndarray) -> bool:
     return bool(fit_counts.min() >= MIN_FIT_PER_CLASS and val_counts.min() >= 1)
 
 
-def run_dataset(args, dataset: str, writer, f) -> None:
+def run_dataset(args, dataset: str, writer, f, f_paths) -> None:
     X, y = load_train(dataset)
     classes = np.unique(y)
     M_max = max(args.n_formulas)
@@ -180,6 +192,10 @@ def run_dataset(args, dataset: str, writer, f) -> None:
                             row["cv_score"] = round(sel["cv_mean_score"][i_1se], 4)
                             row["cv_se"] = round(sel["cv_standard_error"][i_max], 4)
                             row["cv_score_cvmax"] = round(sel["cv_mean_score"][i_max], 4)
+                            sel["val_balanced_accuracy_path"] = path_balanced_accuracy(model, F_val[:, :M], y_val)
+                            sel["fit_balanced_accuracy_path"] = path_balanced_accuracy(model, F_fit[:, :M], y_fit)
+                            f_paths.write(json.dumps({**{k: row[k] for k in PATH_KEYS}, **sel}) + "\n")
+                            f_paths.flush()
                             row["status"] = "ok"
                         except Exception as e:
                             row["status"] = f"error: {type(e).__name__}: {e}"
@@ -238,12 +254,12 @@ def main() -> None:
     out.with_suffix(".args.json").write_text(json.dumps(vars(args), indent=2))
 
     new_file = not out.exists()
-    with out.open("a", newline="") as f:
+    with out.open("a", newline="") as f, out.with_suffix(".paths.jsonl").open("a") as f_paths:
         writer = csv.DictWriter(f, fieldnames=ROW_FIELDS)
         if new_file:
             writer.writeheader()
         for dataset in args.datasets:
-            run_dataset(args, dataset, writer, f)
+            run_dataset(args, dataset, writer, f, f_paths)
 
 
 if __name__ == "__main__":

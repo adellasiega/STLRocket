@@ -39,7 +39,7 @@ N_RUNS=10
 RUNS_PER_TASK=2   # runs done sequentially in one task; raise it if the array exceeds the limit
 
 # Swept inside each task (cheap: no extra feature builds)
-N_FORMULAS=(100 1000 10000)
+N_FORMULAS=(100 500 1000 5000 10000)
 
 # Fixed
 FIT_INTERCEPT=false
@@ -100,7 +100,7 @@ export NUMEXPR_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
 
 source "${VENV}/bin/activate"
 cd "$PROJECT_DIR" || exit 1
-rm -f "$OUT"  # run_ablation.py appends: a resubmitted task must not duplicate rows
+rm -f "$OUT" "${OUT%.csv}.paths.jsonl"  # run_ablation.py appends: a resubmitted task must not duplicate rows
 
 echo "Task ${SLURM_ARRAY_TASK_ID}: ${CMD[*]}"
 "${CMD[@]}"

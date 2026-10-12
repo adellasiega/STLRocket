@@ -69,6 +69,12 @@ def evaluate_classifier(
     }
 
 
+def path_balanced_accuracy(model: LogitNet, X_feats: np.ndarray, y: np.ndarray) -> list:
+    """Balanced accuracy at every lambda of the path, in path order."""
+    y_pred = np.asarray(model.predict(X_feats, lamb=model.lambda_path_)).reshape(len(X_feats), -1)
+    return [float(balanced_accuracy_score(y, y_pred[:, i])) for i in range(y_pred.shape[1])]
+
+
 def selection_diagnostics(model: LogitNet) -> dict:
     """Cross-validation curve over the lambda path and the two candidate lambdas:
     index_1se is the selected one (lambda_best_, sparsest within cut_point SEs of the
