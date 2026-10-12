@@ -4,33 +4,41 @@
 #SBATCH --error=logs/slurm/corr_%A_%a.err
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
 #SBATCH --mem=64G --time=1-00:00:00
-#SBATCH --partition=turing-wide
+#SBATCH --partition=Main
 
-# Correlation-filter ablation (scripts/run_ablation.py --corr_thresholds) at fixed M on
-# the N_DATASETS fastest datasets of the previous ablation (scripts/fastest_datasets.py).
+# Correlation-filter ablation (scripts/run_ablation.py --corr_thresholds) at fixed depth
+# and M, on the datasets of the Until ablation (scripts/run_until_ablation.sh).
 #
 # Usage, from PROJECT_DIR:
 #   bash scripts/run_corr_ablation.sh               # submit the array
 #   DRY_RUN=1 bash scripts/run_corr_ablation.sh     # print every task's command, submit nothing
 #
-# Each array task runs one (dataset, depth) for RUNS_PER_TASK consecutive runs and all
-# thresholds. seed = BASE_SEED + run, so thresholds are paired on the same split and
-# formula stream.
+# Each array task runs one dataset for RUNS_PER_TASK consecutive runs and all thresholds.
+# The unfiltered arm is not run here: it is the until_weight=0 arm of the Until ablation
+# (results/ablation/until_d2), which has the same datasets, seeds, depth, M and classifier
+# settings. seed = BASE_SEED + run, so every threshold is paired with it on the same
+# fit/validation split and formula stream (the filtered bank is that stream, filtered).
 
 # ============================== configuration ==============================
 PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
 VENV="/share/ai-lab/adsiega/STLRocket/env"
-OUT_DIR="${PROJECT_DIR}/results/ablation/corr"
-PREV_RESULTS="${PROJECT_DIR}/results/old_scheme/ablation/full"
+OUT_DIR="${PROJECT_DIR}/results/ablation/corr_d2"
 
-N_DATASETS=10
-DEPTHS=(2 3)
-CORR_THRESHOLDS=(none 0.99 0.95)
+# Keep in sync with run_until_ablation.sh
+DATASETS=(
+    ERing RacketSports BasicMotions Libras NATOPS
+    FingerMovements DuckDuckGeese Epilepsy PEMS-SF UWaveGestureLibrary
+)
+CORR_THRESHOLDS=(0.99 0.95)
+# The filter resamples N_FORMULAS at a time until N_FORMULAS are kept, for at most this
+# many rounds. With the default 20 some datasets already ran out at 0.95.
+CORR_MAX_ROUNDS=100
+DEPTH=2
 N_FORMULAS=10000
 N_RUNS=10
 RUNS_PER_TASK=2
 
-# Fixed (as in run_ablation.sh)
+# Fixed (as in run_until_ablation.sh)
 UNTIL_WEIGHT=0
 FIT_INTERCEPT=false
 VAL_RATIO=0.25
@@ -39,32 +47,24 @@ CUT_POINT=1.0
 BASE_SEED=0
 # ===========================================================================
 
-cd "$PROJECT_DIR" || exit 1
-source "${VENV}/bin/activate"
-
-# Selected once at submission and passed to the tasks, so every task sees the same list.
-if [[ -z "$DATASETS_STR" ]]; then
-    DATASETS_STR=$(python scripts/fastest_datasets.py "$PREV_RESULTS"/*.csv --n "$N_DATASETS" --n_formulas "$N_FORMULAS") || exit 1
-fi
-read -r -a DATASETS <<< "$DATASETS_STR"
 N_D=${#DATASETS[@]}
 N_GROUPS=$(( (N_RUNS + RUNS_PER_TASK - 1) / RUNS_PER_TASK ))
-N_TASKS=$(( N_D * N_GROUPS * ${#DEPTHS[@]} ))
+N_TASKS=$(( N_D * N_GROUPS ))
 
 task_command() {  # $1 = task id -> prints the python command
     local id=$1
     local dataset=${DATASETS[$(( id % N_D ))]}
-    local group=$((               (id / N_D) % N_GROUPS ))
-    local depth=${DEPTHS[$((        id / (N_D * N_GROUPS) ))]}
+    local group=$(( id / N_D ))
     local first=$(( group * RUNS_PER_TASK ))
     local last=$(( first + RUNS_PER_TASK - 1 < N_RUNS - 1 ? first + RUNS_PER_TASK - 1 : N_RUNS - 1 ))
     echo python -u scripts/run_ablation.py \
-        --datasets "$dataset" --runs $(seq "$first" "$last") --depths "$depth" \
-        --corr_thresholds "${CORR_THRESHOLDS[@]}" --until_weights "$UNTIL_WEIGHT" \
+        --datasets "$dataset" --runs $(seq "$first" "$last") --depths "$DEPTH" \
+        --corr_thresholds "${CORR_THRESHOLDS[@]}" --corr_max_rounds "$CORR_MAX_ROUNDS" \
+        --until_weights "$UNTIL_WEIGHT" \
         --n_formulas "$N_FORMULAS" --fit_intercept "$FIT_INTERCEPT" \
         --val_ratio "$VAL_RATIO" --cv "$CV" --cut_point "$CUT_POINT" \
         --base_seed "$BASE_SEED" --device cpu \
-        --output "${OUT_DIR}/${dataset}_d${depth}_r${first}-${last}.csv"
+        --output "${OUT_DIR}/${dataset}_d${DEPTH}_r${first}-${last}.csv"
 }
 
 # ---- not inside SLURM: submit (or print) the array ----
@@ -74,8 +74,9 @@ if [[ -z "$SLURM_ARRAY_TASK_ID" ]]; then
         for (( i = 0; i < N_TASKS; i++ )); do echo "$i: $(task_command $i)"; done
         exit 0
     fi
+    cd "$PROJECT_DIR" || exit 1
     mkdir -p logs/slurm "$OUT_DIR"
-    sbatch --array=0-$(( N_TASKS - 1 )) --export=ALL,DATASETS_STR="$DATASETS_STR" "$0"
+    sbatch --array=0-$(( N_TASKS - 1 )) "$0"
     exit $?
 fi
 
@@ -90,6 +91,8 @@ export OPENBLAS_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
 export MKL_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
 export NUMEXPR_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
 
+source "${VENV}/bin/activate"
+cd "$PROJECT_DIR" || exit 1
 rm -f "$OUT"  # run_ablation.py appends: a resubmitted task must not duplicate rows
 
 echo "Task ${SLURM_ARRAY_TASK_ID}: ${CMD[*]}"

@@ -44,7 +44,7 @@ from stlrocket.classifier import train_classifier, evaluate_classifier, selectio
 
 ROW_FIELDS = [
     "dataset", "run", "seed", "val_ratio", "depth_max", "n_formulas", "until_weight",
-    "corr_threshold", "n_sampled", "calibrate",
+    "corr_threshold", "n_sampled", "n_bank", "calibrate",
     "fit_intercept", "val_balanced_accuracy", "fit_balanced_accuracy", "n_selected",
     # Lambda selection: the selected (1-SE) lambda vs the one with the best CV score.
     "val_balanced_accuracy_cvmax", "n_selected_cvmax", "lambda_index", "lambda_index_cvmax",
@@ -138,7 +138,7 @@ def run_dataset(args, dataset: str, writer, f) -> None:
                     n_sampled = M_max
                 else:
                     _, F_fit, F_val, _, n_sampled = build_decorrelated_formula_bank(
-                        X_fit, X_val, cfg, seed, corr_threshold)
+                        X_fit, X_val, cfg, seed, corr_threshold, max_rounds=args.corr_max_rounds)
                 t_feats = time.perf_counter() - t0
                 if F_fit.shape[1] < M_max:
                     print(f"warning: only {F_fit.shape[1]} formulas passed the filter, "
@@ -153,6 +153,8 @@ def run_dataset(args, dataset: str, writer, f) -> None:
                             "until_weight": until_weight,
                             "corr_threshold": corr_threshold,
                             "n_sampled": n_sampled,
+                            # Formulas actually in the bank: below M if the filter ran out of rounds.
+                            "n_bank": min(M, F_fit.shape[1]),
                             "calibrate": calibrate,
                             "fit_intercept": fit_intercept,
                             # Bank built once at M_max; cost is linear in M.
@@ -212,6 +214,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--until_weights", type=float, nargs="+", default=[0.0, 1.0])
     # Correlation-filter thresholds; "none" = no filter.
     p.add_argument("--corr_thresholds", type=float_or_none, nargs="+", default=[None])
+    # Resampling rounds of the filter (max(M) formulas each at most): it stops short of M
+    # kept formulas once they are spent, see n_bank.
+    p.add_argument("--corr_max_rounds", type=int, default=20)
     # Calibrate atom thresholds of multi-atom formulae on the fit part (features.calibrate_thresholds).
     p.add_argument("--calibrate", type=str2bool, nargs="+", default=[False])
     p.add_argument("--fit_intercept", type=str2bool, nargs="+", default=[True, False])
