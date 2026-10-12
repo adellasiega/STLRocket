@@ -2,8 +2,8 @@
 #SBATCH --job-name=stl_ablation
 #SBATCH --output=logs/slurm/ablation_%A_%a.out
 #SBATCH --error=logs/slurm/ablation_%A_%a.err
-#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
-#SBATCH --mem=64G --time=2-00:00:00
+#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=4
+#SBATCH --mem=32G --time=2-00:00:00
 #SBATCH --partition=Main
 
 # Validation-only ablation (scripts/run_ablation.py) as a SLURM array.
