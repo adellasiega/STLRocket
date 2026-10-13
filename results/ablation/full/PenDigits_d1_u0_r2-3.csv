@@ -1,0 +1,4 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,n_bank,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
+PenDigits,2,2,0.25,1,100,0.0,,10000,100,False,False,0.9855075337034099,0.9899028225887324,73,0.9865759097717861,74,78,85,100,0.981,0.0011,0.982,1.035,75.5494,ok
+PenDigits,2,2,0.25,1,500,0.0,,10000,500,False,False,0.9910630892589655,0.9987444790478059,318,0.9916186448145211,321,85,93,100,0.9873,0.0007,0.9878,5.1749,265.0058,ok
+PenDigits,2,2,0.25,1,1000,0.0,,10000,1000,False,False,0.9899519781478544,0.996762462369116,579,0.9899519781478544,598,76,78,100,0.9866,0.0008,0.9873,10.3499,508.5317,ok

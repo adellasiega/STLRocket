@@ -1,0 +1,11 @@
+Task 100: python -u scripts/run_ablation.py --datasets SelfRegulationSCP1 --runs 6 7 --depths 1 --until_weights 0 --n_formulas 100 500 1000 5000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/SelfRegulationSCP1_d1_u0_r6-7.csv
+SelfRegulationSCP1 run=6 depth=1 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.7606951871657754 [ok]
+SelfRegulationSCP1 run=6 depth=1 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.8498217468805704 [ok]
+SelfRegulationSCP1 run=6 depth=1 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.820409982174688 [ok]
+SelfRegulationSCP1 run=6 depth=1 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.8351158645276292 [ok]
+SelfRegulationSCP1 run=6 depth=1 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.8052584670231728 [ok]
+SelfRegulationSCP1 run=7 depth=1 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.7433155080213903 [ok]
+SelfRegulationSCP1 run=7 depth=1 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.7589126559714795 [ok]
+SelfRegulationSCP1 run=7 depth=1 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.8190730837789661 [ok]
+SelfRegulationSCP1 run=7 depth=1 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.8186274509803921 [ok]
+SelfRegulationSCP1 run=7 depth=1 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.8186274509803921 [ok]

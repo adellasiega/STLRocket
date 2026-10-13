@@ -1,0 +1,11 @@
+Task 374: python -u scripts/run_ablation.py --datasets FingerMovements --runs 8 9 --depths 3 --until_weights 0 --n_formulas 100 500 1000 5000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/FingerMovements_d3_u0_r8-9.csv
+FingerMovements run=8 depth=3 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.6208333333333333 [ok]
+FingerMovements run=8 depth=3 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.5057692307692307 [ok]
+FingerMovements run=8 depth=3 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.594551282051282 [ok]
+FingerMovements run=8 depth=3 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.632051282051282 [ok]
+FingerMovements run=8 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.6064102564102564 [ok]
+FingerMovements run=9 depth=3 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.5833333333333333 [ok]
+FingerMovements run=9 depth=3 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.5326923076923077 [ok]
+FingerMovements run=9 depth=3 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.5451923076923078 [ok]
+FingerMovements run=9 depth=3 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.5451923076923078 [ok]
+FingerMovements run=9 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.5326923076923077 [ok]

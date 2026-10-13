@@ -1,0 +1,4 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,n_bank,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
+PhonemeSpectra,0,0,0.25,1,100,0.0,,10000,100,False,False,0.1085026085026085,0.1504502442002442,82,0.09551559551559549,92,27,36,100,0.0893,0.0058,0.0948,0.9423,118.3152,ok
+PhonemeSpectra,0,0,0.25,1,500,0.0,,10000,500,False,False,0.11260961260961264,0.3072153540903541,388,0.11860361860361862,395,34,35,100,0.1054,0.0025,0.1067,4.7113,761.3331,ok
+PhonemeSpectra,0,0,0.25,1,1000,0.0,,10000,1000,False,False,0.11266511266511266,0.31405804843304846,631,0.10778110778110779,673,32,34,100,0.1019,0.0019,0.1034,9.4227,1177.6968,ok

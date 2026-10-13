@@ -1,0 +1,11 @@
+Task 148: python -u scripts/run_ablation.py --datasets PenDigits --runs 0 1 --depths 2 --until_weights 0 --n_formulas 100 500 1000 5000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/PenDigits_d2_u0_r0-1.csv
+PenDigits run=0 depth=2 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.9727191823068111 [ok]
+PenDigits run=0 depth=2 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.9872543836461363 [ok]
+PenDigits run=0 depth=2 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.9873424971363116 [ok]
+PenDigits run=0 depth=2 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.9903846153846153 [ok]
+PenDigits run=0 depth=2 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.991965811965812 [ok]
+PenDigits run=1 depth=2 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.9861912943871707 [ok]
+PenDigits run=1 depth=2 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.9909802625782008 [ok]
+PenDigits run=1 depth=2 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.9910630892589655 [ok]
+PenDigits run=1 depth=2 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.9920059036038417 [ok]
+PenDigits run=1 depth=2 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.9936725702705083 [ok]

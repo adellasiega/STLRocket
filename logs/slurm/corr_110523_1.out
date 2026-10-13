@@ -1,5 +1,0 @@
-Task 1: python -u scripts/run_ablation.py --datasets RacketSports --runs 0 1 --depths 2 --corr_thresholds 0.99 0.95 --corr_max_rounds 100 --until_weights 0 --n_formulas 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/corr_d2/RacketSports_d2_r0-1.csv
-RacketSports run=0 depth=2 until=0.0 corr=0.99 calib=False M=10000 intercept=False -> val=0.8340909090909091 [ok]
-RacketSports run=0 depth=2 until=0.0 corr=0.95 calib=False M=10000 intercept=False -> val=0.8340909090909091 [ok]
-RacketSports run=1 depth=2 until=0.0 corr=0.99 calib=False M=10000 intercept=False -> val=0.7551136363636364 [ok]
-RacketSports run=1 depth=2 until=0.0 corr=0.95 calib=False M=10000 intercept=False -> val=0.7613636363636364 [ok]

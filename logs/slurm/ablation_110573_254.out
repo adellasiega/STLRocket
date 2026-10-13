@@ -1,0 +1,11 @@
+Task 254: python -u scripts/run_ablation.py --datasets PhonemeSpectra --runs 8 9 --depths 2 --until_weights 0 --n_formulas 100 500 1000 5000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/PhonemeSpectra_d2_u0_r8-9.csv
+PhonemeSpectra run=8 depth=2 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.10400710400710399 [ok]
+PhonemeSpectra run=8 depth=2 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.12759462759462759 [ok]
+PhonemeSpectra run=8 depth=2 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.12737262737262733 [ok]
+PhonemeSpectra run=8 depth=2 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.1456321456321456 [ok]
+PhonemeSpectra run=8 depth=2 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.14330114330114327 [ok]
+PhonemeSpectra run=9 depth=2 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.10034410034410032 [ok]
+PhonemeSpectra run=9 depth=2 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.12809412809412807 [ok]
+PhonemeSpectra run=9 depth=2 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.11893661893661897 [ok]
+PhonemeSpectra run=9 depth=2 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.1273726273726274 [ok]
+PhonemeSpectra run=9 depth=2 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.13686313686313686 [ok]

@@ -1,0 +1,11 @@
+Task 108: python -u scripts/run_ablation.py --datasets DuckDuckGeese --runs 8 9 --depths 1 --until_weights 0 --n_formulas 100 500 1000 5000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/DuckDuckGeese_d1_u0_r8-9.csv
+DuckDuckGeese run=8 depth=1 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.6333333333333333 [ok]
+DuckDuckGeese run=8 depth=1 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.4 [ok]
+DuckDuckGeese run=8 depth=1 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.5333333333333333 [ok]
+DuckDuckGeese run=8 depth=1 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.8666666666666666 [ok]
+DuckDuckGeese run=8 depth=1 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.7666666666666666 [ok]
+DuckDuckGeese run=9 depth=1 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.6 [ok]
+DuckDuckGeese run=9 depth=1 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.5333333333333333 [ok]
+DuckDuckGeese run=9 depth=1 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.5333333333333333 [ok]
+DuckDuckGeese run=9 depth=1 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.4666666666666666 [ok]
+DuckDuckGeese run=9 depth=1 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.39999999999999997 [ok]

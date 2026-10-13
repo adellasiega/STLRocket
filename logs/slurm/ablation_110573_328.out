@@ -1,0 +1,11 @@
+Task 328: python -u scripts/run_ablation.py --datasets MotorImagery --runs 4 5 --depths 3 --until_weights 0 --n_formulas 100 500 1000 5000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/MotorImagery_d3_u0_r4-5.csv
+MotorImagery run=4 depth=3 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.5285714285714286 [ok]
+MotorImagery run=4 depth=3 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.5428571428571428 [ok]
+MotorImagery run=4 depth=3 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.5 [ok]
+MotorImagery run=4 depth=3 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.5 [ok]
+MotorImagery run=4 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.5 [ok]
+MotorImagery run=5 depth=3 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.48571428571428565 [ok]
+MotorImagery run=5 depth=3 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.4714285714285714 [ok]
+MotorImagery run=5 depth=3 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.5 [ok]
+MotorImagery run=5 depth=3 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.5 [ok]
+MotorImagery run=5 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.45714285714285713 [ok]

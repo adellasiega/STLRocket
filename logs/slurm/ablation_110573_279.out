@@ -1,0 +1,11 @@
+Task 279: python -u scripts/run_ablation.py --datasets PEMS-SF --runs 0 1 --depths 3 --until_weights 0 --n_formulas 100 500 1000 5000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/PEMS-SF_d3_u0_r0-1.csv
+PEMS-SF run=0 depth=3 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.6592712842712842 [ok]
+PEMS-SF run=0 depth=3 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.7242063492063492 [ok]
+PEMS-SF run=0 depth=3 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.784992784992785 [ok]
+PEMS-SF run=0 depth=3 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.7671356421356421 [ok]
+PEMS-SF run=0 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.6872294372294372 [ok]
+PEMS-SF run=1 depth=3 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.7469336219336219 [ok]
+PEMS-SF run=1 depth=3 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.770021645021645 [ok]
+PEMS-SF run=1 depth=3 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.8199855699855699 [ok]
+PEMS-SF run=1 depth=3 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.7988816738816739 [ok]
+PEMS-SF run=1 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.7359307359307359 [ok]

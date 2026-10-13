@@ -1,0 +1,11 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,n_bank,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
+ArticularyWordRecognition,8,8,0.25,2,100,0.0,,10000,100,False,False,0.96,0.9955555555555555,86,1.0,95,21,51,75,0.8956,0.0192,0.9133,0.1162,1.9152,ok
+ArticularyWordRecognition,8,8,0.25,2,500,0.0,,10000,500,False,False,1.0,1.0,228,1.0,264,38,63,74,0.9156,0.0214,0.9333,0.5811,5.6646,ok
+ArticularyWordRecognition,8,8,0.25,2,1000,0.0,,10000,1000,False,False,1.0,1.0,281,1.0,295,36,44,73,0.9156,0.0111,0.9244,1.1622,9.1042,ok
+ArticularyWordRecognition,8,8,0.25,2,5000,0.0,,10000,5000,False,False,0.9733333333333333,1.0,339,0.9866666666666666,417,42,62,72,0.92,0.0059,0.9244,5.8109,30.7472,ok
+ArticularyWordRecognition,8,8,0.25,2,10000,0.0,,10000,10000,False,False,0.96,0.995,212,0.9866666666666666,380,17,50,72,0.9,0.0269,0.9267,11.6219,58.1027,ok
+ArticularyWordRecognition,9,9,0.25,2,100,0.0,,10000,100,False,False,0.9733333333333333,1.0,92,0.9733333333333333,92,60,60,76,0.94,0.0038,0.94,0.1112,1.783,ok
+ArticularyWordRecognition,9,9,0.25,2,500,0.0,,10000,500,False,False,0.9866666666666666,1.0,254,0.9866666666666666,262,64,71,74,0.9333,0.0097,0.9422,0.556,5.3618,ok
+ArticularyWordRecognition,9,9,0.25,2,1000,0.0,,10000,1000,False,False,0.9733333333333333,1.0,252,0.9733333333333333,290,40,60,74,0.9422,0.0111,0.9511,1.112,8.7122,ok
+ArticularyWordRecognition,9,9,0.25,2,5000,0.0,,10000,5000,False,False,0.9533333333333333,1.0,236,0.9733333333333333,420,28,72,74,0.9022,0.0294,0.9289,5.5601,29.4719,ok
+ArticularyWordRecognition,9,9,0.25,2,10000,0.0,,10000,10000,False,False,0.9733333333333333,1.0,360,0.9733333333333333,395,51,62,74,0.9289,0.0111,0.9378,11.1201,57.1533,ok

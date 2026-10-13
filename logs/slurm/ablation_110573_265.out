@@ -1,0 +1,11 @@
+Task 265: python -u scripts/run_ablation.py --datasets EigenWorms --runs 0 1 --depths 3 --until_weights 0 --n_formulas 100 500 1000 5000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/EigenWorms_d3_u0_r0-1.csv
+EigenWorms run=0 depth=3 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.5280952380952382 [ok]
+EigenWorms run=0 depth=3 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.4871428571428571 [ok]
+EigenWorms run=0 depth=3 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.5919047619047619 [ok]
+EigenWorms run=0 depth=3 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.5419047619047619 [ok]
+EigenWorms run=0 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.5633333333333334 [ok]
+EigenWorms run=1 depth=3 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.5652380952380953 [ok]
+EigenWorms run=1 depth=3 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.48285714285714293 [ok]
+EigenWorms run=1 depth=3 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.4576190476190476 [ok]
+EigenWorms run=1 depth=3 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.5485714285714286 [ok]
+EigenWorms run=1 depth=3 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.540952380952381 [ok]

@@ -1,0 +1,11 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,n_bank,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
+BasicMotions,6,6,0.25,3,100,0.0,,10000,100,False,False,0.875,1.0,11,0.875,11,21,21,81,1.0,0.0,1.0,0.0739,0.4067,ok
+BasicMotions,6,6,0.25,3,500,0.0,,10000,500,False,False,1.0,1.0,16,1.0,16,19,19,78,1.0,0.0,1.0,0.3694,0.4589,ok
+BasicMotions,6,6,0.25,3,1000,0.0,,10000,1000,False,False,1.0,1.0,14,1.0,14,15,15,77,1.0,0.0,1.0,0.7388,0.6377,ok
+BasicMotions,6,6,0.25,3,5000,0.0,,10000,5000,False,False,1.0,1.0,6,1.0,6,3,3,72,0.9722,0.0278,0.9722,3.6939,0.9235,ok
+BasicMotions,6,6,0.25,3,10000,0.0,,10000,10000,False,False,1.0,1.0,25,1.0,25,25,25,72,1.0,0.0,1.0,7.3878,1.6089,ok
+BasicMotions,7,7,0.25,3,100,0.0,,10000,100,False,False,0.9166666666666666,1.0,7,0.9166666666666666,8,14,18,80,0.8889,0.0556,0.9444,0.0728,0.3987,ok
+BasicMotions,7,7,0.25,3,500,0.0,,10000,500,False,False,0.9166666666666666,1.0,11,0.9166666666666666,11,10,10,75,0.9722,0.0278,0.9722,0.3642,0.406,ok
+BasicMotions,7,7,0.25,3,1000,0.0,,10000,1000,False,False,0.9166666666666666,1.0,7,0.9166666666666666,7,10,10,75,0.9722,0.0278,0.9722,0.7284,0.5672,ok
+BasicMotions,7,7,0.25,3,5000,0.0,,10000,5000,False,False,0.9166666666666666,1.0,10,0.9166666666666666,10,5,5,73,0.9722,0.0278,0.9722,3.6418,0.907,ok
+BasicMotions,7,7,0.25,3,10000,0.0,,10000,10000,False,False,1.0,1.0,17,1.0,17,12,12,72,0.9722,0.0278,0.9722,7.2836,1.5858,ok

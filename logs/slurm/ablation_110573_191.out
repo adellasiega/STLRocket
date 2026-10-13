@@ -1,0 +1,11 @@
+Task 191: python -u scripts/run_ablation.py --datasets FaceDetection --runs 4 5 --depths 2 --until_weights 0 --n_formulas 100 500 1000 5000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/FaceDetection_d2_u0_r4-5.csv
+FaceDetection run=4 depth=2 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.5593890109728039 [ok]
+FaceDetection run=4 depth=2 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.6293194354315379 [ok]
+FaceDetection run=4 depth=2 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.6456081130906731 [ok]
+FaceDetection run=4 depth=2 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.694490738009557 [ok]
+FaceDetection run=4 depth=2 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.7080638679133975 [ok]
+FaceDetection run=5 depth=2 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.589256349182939 [ok]
+FaceDetection run=5 depth=2 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.6442706182526104 [ok]
+FaceDetection run=5 depth=2 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.6693834434546635 [ok]
+FaceDetection run=5 depth=2 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.7284415373724265 [ok]
+FaceDetection run=5 depth=2 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.7189481815232139 [ok]

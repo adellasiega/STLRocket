@@ -1,0 +1,2 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,n_bank,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
+PenDigits,4,4,0.25,1,100,0.0,,10000,100,False,False,0.9791373689311834,0.9869359018527316,70,0.9812741210679355,70,70,79,100,0.9767,0.0036,0.9797,1.02,76.2961,ok

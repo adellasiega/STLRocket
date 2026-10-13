@@ -1,0 +1,11 @@
+Task 215: python -u scripts/run_ablation.py --datasets EthanolConcentration --runs 6 7 --depths 2 --until_weights 0 --n_formulas 100 500 1000 5000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/EthanolConcentration_d2_u0_r6-7.csv
+EthanolConcentration run=6 depth=2 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.39522058823529416 [ok]
+EthanolConcentration run=6 depth=2 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.45496323529411764 [ok]
+EthanolConcentration run=6 depth=2 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.5588235294117647 [ok]
+EthanolConcentration run=6 depth=2 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.4678308823529412 [ok]
+EthanolConcentration run=6 depth=2 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.4852941176470589 [ok]
+EthanolConcentration run=7 depth=2 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.5634191176470589 [ok]
+EthanolConcentration run=7 depth=2 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.5183823529411764 [ok]
+EthanolConcentration run=7 depth=2 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.48713235294117646 [ok]
+EthanolConcentration run=7 depth=2 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.3786764705882353 [ok]
+EthanolConcentration run=7 depth=2 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.3318014705882353 [ok]

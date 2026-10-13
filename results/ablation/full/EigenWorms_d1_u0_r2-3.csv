@@ -1,0 +1,2 @@
+dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,n_bank,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
+EigenWorms,2,2,0.25,1,100,0.0,,10000,100,False,False,0.6304761904761904,1.0,52,0.7038095238095238,53,40,56,85,0.5523,0.0256,0.569,11.2243,0.6111,ok
