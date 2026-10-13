@@ -41,22 +41,43 @@ def test_candidates():
             assert abs(s.sum() - (np.log(k) + log_p)) < 1e-3
 
 
+def check_rule(rule, i, F, pred, cfg):
+    """A returned rule is consistent with its series and its counts are the ones of covered()."""
+    assert rule["k"] == pred[i]
+    assert all(s >= 0 and e * F[i, j] > s for j, e, s in rule["literals"])   # consistency
+    assert len({j for j, _, _ in rule["literals"]}) == len(rule["literals"]) <= cfg.n_max
+    m = ir.rule_metrics(ir.covered(rule["literals"], F), rule["k"], pred, exclude=i)
+    assert (m["tp"], m["support"]) == (rule["tp"], rule["support"]) and m["support"] >= 1
+    assert np.isclose(rule["lcb"], ir.wilson_lower(m["tp"], m["support"], cfg.confidence))
+
+
 def test_rules():
     rng = np.random.default_rng(1)
     F, W, pred = random_model(rng)
     for method, i in itertools.product(ir.CANDIDATE_METHODS, range(40)):
-        r = {g: ir.explain_instance(F[i], W, F, pred, ir.RuleConfig(candidates=method, generalize=g), exclude=i)
-             for g in (True, False)}
-        assert r[True]["lcb"] >= r[False]["lcb"]            # the greedy pass never lowers the bound
-        for rule in r.values():
-            if not rule["literals"]:
-                continue
-            assert rule["k"] == pred[i]
-            assert all(s >= 0 and e * F[i, j] > s for j, e, s in rule["literals"])   # consistency
-            assert len({j for j, _, _ in rule["literals"]}) == len(rule["literals"]) <= 3
-            m = ir.rule_metrics(ir.covered(rule["literals"], F), rule["k"], pred, exclude=i)
-            assert (m["tp"], m["support"]) == (rule["tp"], rule["support"]) and m["support"] >= 1
-            assert np.isclose(rule["lcb"], ir.wilson_lower(m["tp"], m["support"]))
+        cfg = ir.RuleConfig(candidates=method)
+        rule = ir.explain_instance(F[i], W, F, pred, cfg, exclude=i)
+        if rule["literals"]:
+            check_rule(rule, i, F, pred, cfg)
+
+
+def test_ordered_rules():
+    """Attribution-ordered constructions: literals follow the ranking of the candidates."""
+    rng = np.random.default_rng(3)
+    F, W, pred = random_model(rng)
+    for method, conf, i in itertools.product(("gxi", "ig"), (0.9, 0.99), range(40)):
+        rank = {j: r for r, j in enumerate(ir.candidate_scores(F[i], W, method)[2].tolist())}
+        rules = {}
+        for construction in ir.CONSTRUCTIONS[1:]:
+            cfg = ir.RuleConfig(candidates=method, confidence=conf, construction=construction)
+            rules[construction] = rule = ir.explain_instance(F[i], W, F, pred, cfg, exclude=i)
+            check_rule(rule, i, F, pred, cfg)
+            order = [rank[j] for j, _, _ in rule["literals"]]
+            assert order == sorted(order) and len(order) >= 1
+        assert all(s == 0 for _, _, s in rules["ordered_nocut"]["literals"])
+        # a scan starts as the prefix does and can only go on from there
+        prefix, scan = rules["ordered_prefix"]["literals"], rules["ordered_scan"]["literals"]
+        assert scan[:len(prefix)] == prefix and rules["ordered_scan"]["lcb"] >= rules["ordered_prefix"]["lcb"]
 
 
 def test_stl_and_simplification():

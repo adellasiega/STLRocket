@@ -8,21 +8,26 @@ The formula bank and the lasso are built once per run on the fit part, as in the
 
     python scripts/run_explanation_ablation.py --datasets ERing --runs 0 1
 
-Part A, variants: candidate formulae (RuleConfig.candidates: gxi, ig, union, all) x greedy
-generalization pass (RuleConfig.generalize). Each variant builds the instance rules of the fit
-series (each left out of its own counts) and of the validation series, and the global
-explanation of each class from the rules of the fit series. Rules are scored in feature space
-(instance_rules.covered), which is equivalent to evaluating their STL formula, w.r.t. the
-classes predicted by the model.
+Part A, variants: every combination of
+  construction  how a rule is built (RuleConfig.construction): beam (beam search over
+                formulae and cuts), ordered_prefix, ordered_scan and ordered_nocut (formulae
+                in the order of their attribution, see instance_rules._ordered_rule)
+  candidates    attribution score that selects and ranks the formulae (RuleConfig.candidates)
+  confidence    confidence level of the Wilson bound
+Each variant builds the instance rules of the fit series (each left out of its own counts) and
+of the validation series, and the global explanation of each class from the rules of the fit
+series. Rules are scored in feature space (instance_rules.covered), which is equivalent to
+evaluating their STL formula, w.r.t. the classes predicted by the model. Faithfulness to the
+model is measured on the explained series itself (faithfulness).
 
-Part B, simplification: for the distinct rules of the reference variant (gxi, generalize), the
+Part B, simplification: for the distinct rules of the reference variant (REFERENCE), the
 STL formula is built and simplified (instance_rules.simplify_rule) on the fit series, and the
 series satisfying it are compared before and after, on fit and on validation.
 
 Written to OUT_DIR, one set of files per dataset and run (prefix <dataset>_run<r>):
   .variants.csv        one row per variant: rule length, precision lower bound, precision and
-                       coverage of the instance rules on fit and validation, precision,
-                       coverage and F1 of the global explanations, times
+                       coverage of the instance rules on fit and validation, their
+                       faithfulness, precision, coverage and F1 of the global explanations, times
   .instances.csv.gz    one row per (variant, explained series): its rule as literals
                        (formula index, direction, cut) and its counts on fit and validation
   .simplification.csv  one row per rule of part B: series whose satisfaction differs between
@@ -60,7 +65,7 @@ from stlrocket.formula_sampler import F0
 from stlrocket import instance_rules as ir
 
 SPLITS = ("fit", "val")
-REFERENCE = ("gxi", True)   # variant whose rules are simplified in part B
+REFERENCE = ("ordered_scan", "gxi", 0.95)   # variant whose rules are simplified in part B (else the first one run)
 
 
 def log(msg: str) -> None:
@@ -74,13 +79,40 @@ def f1(m: dict) -> float:
     return 2 * m["tp"] / (m["support"] + m["tp"] / m["coverage"]) if m["tp"] else 0.0
 
 
-def instance_rows(rules: list[dict], idx: np.ndarray, own: str, F: dict, pred: dict) -> list[dict]:
-    """One row per explained series: its rule and the rule's counts on both splits (the
-    series itself left out of its own split)."""
+def faithfulness(x: np.ndarray, W: np.ndarray, literals: list) -> dict:
+    """How much of the model's decision on features x the formulae R of a rule carry. The
+    measure is the same for every variant (Gradient x Input scores s_j, sum_j s_j > 0):
+      attr_share      sum of s_j over R / sum of the positive s_j
+      attr_share_top  the same for the |R| formulae with the largest s_j: the most a rule of
+                      this length can carry
+      margin_drop     1 - m'/m, with m the margin of the predicted class over the best other
+                      class and m' the same margin once the features of R are set to 0, their
+                      train mean (above 1 when the prediction changes)
+      flip            whether that changes the prediction"""
+    if not literals:
+        return dict(attr_share=np.nan, attr_share_top=np.nan, margin_drop=np.nan, flip=np.nan)
+    k, s, _ = ir.candidate_scores(x, W, "gxi")
+    R = [j for j, _, _ in literals]
+    total = s[s > 0].sum()
+
+    def margin(z):
+        return z[k] - np.delete(z, k).max()
+
+    x0 = x.copy()
+    x0[R] = 0.0
+    m, m0 = margin(W @ x), margin(W @ x0)
+    return dict(attr_share=float(s[R].sum() / total), attr_share_top=float(np.sort(s)[-len(R):].sum() / total),
+                margin_drop=float(1 - m0 / m) if m > 0 else np.nan, flip=float(m0 <= 0))
+
+
+def instance_rows(rules: list[dict], idx: np.ndarray, own: str, F: dict, pred: dict, W: np.ndarray) -> list[dict]:
+    """One row per explained series: its rule, the rule's counts on both splits (the series
+    itself left out of its own split) and its faithfulness."""
     rows = []
     for i, r in zip(idx.tolist(), rules):
         row = {"own": own, "i": i, "k": r["k"], "n_candidates": r["n_candidates"],
-               "n_literals": len(r["literals"]), "literals": json.dumps(r["literals"]), "lcb": r["lcb"]}
+               "n_literals": len(r["literals"]), "literals": json.dumps(r["literals"]), "lcb": r["lcb"],
+               **faithfulness(F[own][i], W, r["literals"])}
         for s in SPLITS:
             if r["literals"]:
                 m = ir.rule_metrics(ir.covered(r["literals"], F[s]), r["k"], pred[s], exclude=i if s == own else None)
@@ -120,7 +152,11 @@ def variant_summary(df: pd.DataFrame) -> dict:
         found = d[d.n_literals > 0]
         out.update({f"{own}_explained": len(d), f"{own}_found": len(found) / max(len(d), 1),
                     f"{own}_candidates": float(d.n_candidates.mean()),
-                    f"{own}_length": float(found.n_literals.mean()), f"{own}_lcb": float(found.lcb.mean())})
+                    f"{own}_length": float(found.n_literals.mean()), f"{own}_lcb": float(found.lcb.mean()),
+                    # distinct rules (as sets of formulae) per explained series: 1 if no rule is shared
+                    f"{own}_distinct_rules": found.literals.map(
+                        lambda lits: tuple(sorted(j for j, _, _ in json.loads(lits)))).nunique() / max(len(found), 1),
+                    **{f"{own}_{c}": float(found[c].mean()) for c in ("attr_share", "attr_share_top", "margin_drop", "flip")}})
         for s in SPLITS:
             out[f"{own}_pooled_prec_{s}"] = float(found[f"tp_{s}"].sum() / max(found[f"support_{s}"].sum(), 1))
             out[f"{own}_prec_{s}"] = float(found[f"prec_{s}"].mean())
@@ -212,10 +248,10 @@ def run(args, dataset: str, run_id: int) -> None:
 
     # Part A
     variant_rows, instance_frames, reference_rules = [], [], []
-    for candidates, generalize in itertools.product(args.candidates, (True, False)):
-        rcfg = ir.RuleConfig(n_max=args.n_max, beam_width=args.beam_width,
-                             confidence=args.confidence, min_new_share=args.min_new_share,
-                             candidates=candidates, generalize=generalize)
+    for construction, candidates, confidence in itertools.product(args.constructions, args.candidates, args.confidences):
+        rcfg = ir.RuleConfig(n_max=args.n_max, beam_width=args.beam_width, confidence=confidence,
+                             min_new_share=args.min_new_share, candidates=candidates, construction=construction)
+        variant = {"construction": construction, "candidates": candidates, "confidence": confidence}
         rows, times, rules = [], {}, {}
         for own in SPLITS:
             t = time.perf_counter()
@@ -223,18 +259,19 @@ def run(args, dataset: str, run_id: int) -> None:
             rules[own] = ir.explain_instances(F[own][explained[own]], W, F_fit, pred["fit"], rcfg, n_jobs=args.n_jobs,
                                               exclude=explained[own].tolist() if own == "fit" else None)
             times[f"time_{own}_s"] = time.perf_counter() - t
-            rows += instance_rows(rules[own], explained[own], own, F, pred)
+            rows += instance_rows(rules[own], explained[own], own, F, pred, W)
         df = pd.DataFrame(rows)
-        df.insert(0, "generalize", generalize)
-        df.insert(0, "candidates", candidates)
+        for col, value in reversed(list(variant.items())):
+            df.insert(0, col, value)
         instance_frames.append(df)
-        variant_rows.append({**base, "candidates": candidates, "generalize": generalize, **variant_summary(df),
+        variant_rows.append({**base, **variant, **variant_summary(df),
                              **global_summary(rules["fit"], F, pred, len(index), rcfg), **times})
-        if (candidates, generalize) == REFERENCE:
+        if tuple(variant.values()) == REFERENCE or not reference_rules:
             reference_rules = rules["fit"] + rules["val"]
         v = variant_rows[-1]
-        log(f"  {candidates:5s} generalize={generalize!s:5s}: val rules precision {v['val_pooled_prec_val']:.3f}, "
-            f"length {v['val_length']:.2f}, global F1 val {v['global_f1_val']:.3f} "
+        log(f"  {construction:14s} {candidates:5s} {confidence:.2f}: val rules precision {v['val_pooled_prec_val']:.3f}, "
+            f"coverage {v['val_coverage_val']:.3f}, length {v['val_length']:.2f}, attribution share "
+            f"{v['val_attr_share']:.2f}, global F1 val {v['global_f1_val']:.3f} "
             f"({times['time_fit_s'] + times['time_val_s']:.0f} s)")
     pd.DataFrame(variant_rows).to_csv(out_dir / f"{stem}.variants.csv", index=False)
     inst = pd.concat(instance_frames, ignore_index=True)
@@ -268,11 +305,13 @@ def main():
     p.add_argument("--n_formulas", type=int, default=10000)
     p.add_argument("--cv", type=int, default=3)
     p.add_argument("--cut_point", type=float, default=1.0)
-    p.add_argument("--candidates", nargs="+", default=list(ir.CANDIDATE_METHODS), choices=ir.CANDIDATE_METHODS)
+    p.add_argument("--constructions", nargs="+", default=list(ir.CONSTRUCTIONS), choices=ir.CONSTRUCTIONS)
+    p.add_argument("--candidates", nargs="+", default=["gxi", "ig"], choices=ir.CANDIDATE_METHODS)
+    p.add_argument("--confidences", type=float, nargs="+", default=[0.9, 0.95, 0.99],
+                   help="confidence levels of the Wilson bound")
     defaults = ir.RuleConfig()
     p.add_argument("--n_max", type=int, default=defaults.n_max, help="max literals per rule")
     p.add_argument("--beam_width", type=int, default=defaults.beam_width)
-    p.add_argument("--confidence", type=float, default=defaults.confidence, help="confidence of the Wilson bound")
     p.add_argument("--min_new_share", type=float, default=defaults.min_new_share,
                    help="global: share of its class a rule must newly cover to enter the OR")
     p.add_argument("--max_explained", type=int, default=1000,

@@ -46,7 +46,7 @@ class RuleConfig:
     min_new_share: float | None = 0.05   # global: a rule enters the OR only if it covers this share
                                          # of its class in new train series (None: every distinct rule)
     candidates: str = "gxi"              # candidate formulae: one of CANDIDATE_METHODS (candidate_scores)
-    generalize: bool = True              # greedy generalization pass after the beam search
+    construction: str = "beam"           # how a rule is built: one of CONSTRUCTIONS (explain_instance)
 
 
 def model_logits_matrix(model) -> np.ndarray:
@@ -159,8 +159,9 @@ def explain_instance(
     cfg: RuleConfig,
     exclude: int | None = None,
 ) -> dict:
-    """Instance rule for the prediction on features x, by beam search (paper, "Building
-    Instance Explanations").
+    """Instance rule for the prediction on features x (paper, "Building Instance
+    Explanations"), built as cfg.construction says: by beam search over formulae and cuts
+    (_beam_rule), or from the formulae in the order of their attribution (_ordered_rule).
 
     ref_labels: train class indices counts are taken against, the model's predictions
     f(tau^(i)). exclude: train index of tau when tau is a train series (left out of every
@@ -168,8 +169,7 @@ def explain_instance(
 
     Returns dict(k, literals [(j, e, s)], tp, support, precision, lcb, n_candidates), lcb
     the Wilson bound of the rule's train precision; literals is empty if no rule is satisfied
-    by a train series. Candidates come from candidate_scores(method=cfg.candidates), and the
-    beam's best rule is refined by _generalize unless cfg.generalize is False.
+    by a train series. Candidates come from candidate_scores(method=cfg.candidates).
     """
     k, score, J = candidate_scores(x, W_full, cfg.candidates)
     keep = np.ones(len(X_tr_feats), dtype=bool)
@@ -185,6 +185,29 @@ def explain_instance(
     u_tau = x[J] * eps
     grids = [cuts(U[keep, p], u_tau[p]) for p in range(len(J))]
 
+    if cfg.construction == "beam":
+        lits = _beam_rule(U, grids, keep, pos, score[J], cfg)
+    elif cfg.construction in CONSTRUCTIONS:
+        lits = _ordered_rule(U, grids, keep, pos, cfg)
+    else:
+        raise ValueError(f"unknown construction {cfg.construction!r}: expected one of {CONSTRUCTIONS}")
+    if not lits:
+        return empty
+    mask = covered([(p, 1.0, s) for p, s in lits], U) & keep
+    n, tp = int(mask.sum()), int((mask & pos).sum())
+    literals = [(int(J[p]), float(eps[p]), float(s)) for p, s in lits]
+    return dict(k=k, literals=literals, tp=tp, support=n, precision=tp / n if n else 0.0,
+                lcb=float(wilson_lower(tp, n, cfg.confidence)), n_candidates=len(J))
+
+
+CONSTRUCTIONS = ("beam", "ordered_prefix", "ordered_scan", "ordered_nocut")
+
+
+def _beam_rule(U, grids, keep, pos, score, cfg: RuleConfig):
+    """Beam search over conjunctions of at most cfg.n_max literals (p, s), p a column of U:
+    the rule with the largest Wilson bound met at any step (on equal bound the shorter one,
+    then the one with more TP), or None. score: attribution score of each column, the last
+    tie-break between extensions."""
     def summary(lits, mask):
         return dict(literals=lits, mask=mask)
 
@@ -200,7 +223,7 @@ def explain_instance(
             mask = state["mask"]
             pos_mask = pos[mask]
             U_mask = np.ascontiguousarray(U[mask].T)  # (|J|, n covered): one row per formula
-            for p in range(len(J)):
+            for p in range(U.shape[1]):
                 if p in used:
                     continue
                 grid = grids[p]
@@ -224,7 +247,7 @@ def explain_instance(
                     lits = state["literals"] + ((p, float(grid[i])),)
                     key = frozenset(lits)
                     # By the bound, then TP, then the attribution score of the new formula.
-                    sort_key = (lcb_i, tp_i, score[J[p]])
+                    sort_key = (lcb_i, tp_i, score[p])
                     if key not in ext or sort_key > ext[key][0]:
                         ext[key] = (sort_key, lits, n_i, tp_i)
         if not ext:
@@ -238,63 +261,49 @@ def explain_instance(
             if best is None or rank(cand) > rank(best):
                 best = cand
 
-    if best is None:
-        return empty
-    if cfg.generalize:
-        chosen = _generalize(list(best["literals"]), U, grids, keep, pos, cfg)
-    else:
-        mask = covered([(p, 1.0, s) for p, s in best["literals"]], U) & keep
-        n, tp = int(mask.sum()), int((mask & pos).sum())
-        chosen = dict(literals=best["literals"], tp=tp, support=n, precision=tp / n if n else 0.0)
-    literals = [(int(J[p]), float(eps[p]), float(s)) for p, s in chosen["literals"]]
-    return dict(k=k, literals=literals, tp=chosen["tp"], support=chosen["support"],
-                precision=chosen["precision"],
-                lcb=float(wilson_lower(chosen["tp"], chosen["support"], cfg.confidence)),
-                n_candidates=len(J))
+    return best["literals"] if best is not None else None
 
 
-def _generalize(lits: list, U, grids, keep, pos, cfg: RuleConfig) -> dict:
-    """Greedy generalization pass: repeatedly apply the move (drop a literal, or loosen
-    its cut to any looser cut toward 0) that
-    gives the largest Wilson bound, on equal bound the shorter rule. Stops when no move
-    raises the bound or shortens the rule."""
-    def value(tp, n, n_lits):
-        return (float(wilson_lower(tp, n, cfg.confidence)), -n_lits)
+def _literal_options(values: np.ndarray, is_pos: np.ndarray, grid: np.ndarray, cfg: RuleConfig):
+    """Cuts of one literal on the series still covered (values, is_pos): of the cuts giving
+    the same covered set the middle one, satisfied by at least one series. Returns
+    (cut, support, tp, bound) arrays."""
+    n_cov, n_tp = _cut_counts(values, is_pos, grid)
+    _, first, size = np.unique(-n_cov, return_index=True, return_counts=True)
+    idx = first + size // 2
+    idx = idx[n_cov[idx] > 0]
+    return grid[idx], n_cov[idx], n_tp[idx], wilson_lower(n_tp[idx], n_cov[idx], cfg.confidence)
 
-    def masks_without(i):
-        m = keep.copy()
-        for q, (p, s) in enumerate(lits):
-            if q != i:
-                m &= U[:, p] > s
-        return m
 
-    full = masks_without(-1)
-    cur = value(int((full & pos).sum()), int(full.sum()), len(lits))
-    while True:
-        best_move, best_val = None, cur
-        for i, (p, s) in enumerate(lits):
-            others = masks_without(i)
-            if len(lits) > 1:      # drop literal i
-                n, tp = int(others.sum()), int((others & pos).sum())
-                val = value(tp, n, len(lits) - 1)
-                if val > best_val:
-                    best_move, best_val = (i, None), val
-            looser = grids[p][grids[p] < s]
-            if len(looser):        # loosen literal i: the first cut with the largest bound
-                n_cov, n_tp = _cut_counts(U[others, p], pos[others], looser)
-                lcb = wilson_lower(n_tp, n_cov, cfg.confidence)
-                c = int(np.argmax(lcb))
-                val = (float(lcb[c]), -len(lits))
-                if val > best_val:
-                    best_move, best_val = (i, float(looser[c])), val
-        if best_move is None or best_val <= cur:
+def _ordered_rule(U, grids, keep, pos, cfg: RuleConfig):
+    """Attribution-ordered construction: the columns of U are visited by decreasing
+    attribution score (the order of candidate_scores) and a formula becomes a literal, at its
+    cut with the largest Wilson bound given the literals already chosen (then more TP, then
+    the looser cut), only if that raises the bound of the rule. The search is over cuts only.
+
+    ordered_prefix  stop at the first formula that does not raise the bound: the rule uses
+                    the top formulae of the ranking
+    ordered_scan    skip such a formula and go on down the ranking
+    ordered_nocut   as ordered_scan with every cut fixed at 0: a literal only asks for the
+                    sign the formula has on tau
+    A formula with no cut satisfied by a train series cannot form a literal and is skipped in
+    every mode. Returns the literals (p, s) or None."""
+    lits, mask, cur = [], keep.copy(), -np.inf
+    for p in range(U.shape[1]):
+        if len(lits) == cfg.n_max:
             break
-        i, c = best_move
-        lits = lits[:i] + lits[i + 1:] if c is None else lits[:i] + [(lits[i][0], c)] + lits[i + 1:]
-        cur = best_val
-    full = masks_without(-1)
-    n, tp = int(full.sum()), int((full & pos).sum())
-    return dict(literals=tuple(lits), tp=tp, support=n, precision=tp / n if n else 0.0)
+        grid = grids[p][:1] if cfg.construction == "ordered_nocut" else grids[p]
+        cut, n, tp, lcb = _literal_options(U[mask, p], pos[mask], grid, cfg)
+        if len(cut) == 0:
+            continue
+        c = np.lexsort((cut, -tp, -lcb))[0]
+        if lcb[c] > cur:
+            lits.append((p, float(cut[c])))
+            mask &= U[:, p] > cut[c]
+            cur = float(lcb[c])
+        elif cfg.construction == "ordered_prefix":
+            break
+    return tuple(lits) or None
 
 
 def explain_instances(X_feats: np.ndarray, W_full: np.ndarray, X_tr_feats: np.ndarray,
