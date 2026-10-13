@@ -1,0 +1,21 @@
+Task 14: python -u scripts/run_explanation_ablation.py --datasets UWaveGestureLibrary --runs 4 5 --depth 2 --n_formulas 10000 --val_ratio 0.25 --cv 3 --cut_point 1.0 --max_explained 1000 --max_simplified 300 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/ablation/explanations
+[17:28:16] UWaveGestureLibrary run 4: 90 fit / 30 val series, 93 formulae selected, balanced accuracy fit 1.000 / val 0.896 (13 s)
+[17:28:37]   gxi   generalize=True : val rules precision 0.797, length 1.83, global F1 val 0.726 (20 s)
+[17:28:57]   gxi   generalize=False: val rules precision 0.803, length 1.83, global F1 val 0.717 (20 s)
+[17:29:18]   ig    generalize=True : val rules precision 0.797, length 1.83, global F1 val 0.726 (20 s)
+[17:29:38]   ig    generalize=False: val rules precision 0.803, length 1.83, global F1 val 0.717 (20 s)
+[17:29:54]   union generalize=True : val rules precision 0.844, length 1.83, global F1 val 0.681 (16 s)
+[17:30:09]   union generalize=False: val rules precision 0.852, length 1.83, global F1 val 0.669 (16 s)
+[17:30:34]   all   generalize=True : val rules precision 0.831, length 1.83, global F1 val 0.681 (24 s)
+[17:30:58]   all   generalize=False: val rules precision 0.839, length 1.83, global F1 val 0.669 (24 s)
+[17:30:59]   simplification of 56 rules (0 s): size 9.8 -> 7.5; series changing satisfaction on fit 0, on val 2; feature space vs STL on fit 0, on val 0
+[17:31:12] UWaveGestureLibrary run 5: 90 fit / 30 val series, 45 formulae selected, balanced accuracy fit 0.933 / val 0.865 (13 s)
+[17:31:24]   gxi   generalize=True : val rules precision 0.827, length 1.63, global F1 val 0.734 (12 s)
+[17:31:38]   gxi   generalize=False: val rules precision 0.827, length 1.63, global F1 val 0.759 (13 s)
+[17:31:50]   ig    generalize=True : val rules precision 0.827, length 1.63, global F1 val 0.734 (12 s)
+[17:32:02]   ig    generalize=False: val rules precision 0.827, length 1.63, global F1 val 0.759 (12 s)
+[17:32:09]   union generalize=True : val rules precision 0.824, length 1.63, global F1 val 0.745 (8 s)
+[17:32:17]   union generalize=False: val rules precision 0.824, length 1.63, global F1 val 0.759 (8 s)
+[17:32:29]   all   generalize=True : val rules precision 0.827, length 1.63, global F1 val 0.758 (12 s)
+[17:32:41]   all   generalize=False: val rules precision 0.827, length 1.63, global F1 val 0.772 (12 s)
+[17:32:41]   simplification of 42 rules (0 s): size 9.3 -> 7.8; series changing satisfaction on fit 0, on val 6; feature space vs STL on fit 0, on val 0

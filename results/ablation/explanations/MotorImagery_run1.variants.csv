@@ -1,0 +1,9 @@
+dataset,run,seed,n_fit,n_val,n_classes,n_selected,n_selected_multiclass,bacc_fit,bacc_val,candidates,generalize,fit_explained,fit_found,fit_candidates,fit_length,fit_lcb,fit_pooled_prec_fit,fit_prec_fit,fit_coverage_fit,fit_pooled_prec_val,fit_prec_val,fit_coverage_val,val_explained,val_found,val_candidates,val_length,val_lcb,val_pooled_prec_fit,val_prec_fit,val_coverage_fit,val_pooled_prec_val,val_prec_val,val_coverage_val,global_rules_per_class,global_literals_per_class,global_precision_fit,global_coverage_fit,global_f1_fit,global_precision_val,global_coverage_val,global_f1_val,time_fit_s,time_val_s
+MotorImagery,1,1,208,70,2,0,0,0.5,0.5,gxi,True,208,0.0,0.0,,,0.0,,,0.0,,,70,0.0,0.0,,,0.0,,,0.0,,,0.0,0.0,,0.0,0.0,,0.0,0.0,0.11443599686026573,0.011502380948513746
+MotorImagery,1,1,208,70,2,0,0,0.5,0.5,gxi,False,208,0.0,0.0,,,0.0,,,0.0,,,70,0.0,0.0,,,0.0,,,0.0,,,0.0,0.0,,0.0,0.0,,0.0,0.0,0.03390276990830898,0.0115467868745327
+MotorImagery,1,1,208,70,2,0,0,0.5,0.5,ig,True,208,0.0,0.0,,,0.0,,,0.0,,,70,0.0,0.0,,,0.0,,,0.0,,,0.0,0.0,,0.0,0.0,,0.0,0.0,0.04669948574155569,0.01592622511088848
+MotorImagery,1,1,208,70,2,0,0,0.5,0.5,ig,False,208,0.0,0.0,,,0.0,,,0.0,,,70,0.0,0.0,,,0.0,,,0.0,,,0.0,0.0,,0.0,0.0,,0.0,0.0,0.04669460700824857,0.01585126342251897
+MotorImagery,1,1,208,70,2,0,0,0.5,0.5,union,True,208,0.0,0.0,,,0.0,,,0.0,,,70,0.0,0.0,,,0.0,,,0.0,,,0.0,0.0,,0.0,0.0,,0.0,0.0,0.02424038201570511,0.008214590139687061
+MotorImagery,1,1,208,70,2,0,0,0.5,0.5,union,False,208,0.0,0.0,,,0.0,,,0.0,,,70,0.0,0.0,,,0.0,,,0.0,,,0.0,0.0,,0.0,0.0,,0.0,0.0,0.024263624101877213,0.008187470957636833
+MotorImagery,1,1,208,70,2,0,0,0.5,0.5,all,True,208,0.0,0.0,,,0.0,,,0.0,,,70,0.0,0.0,,,0.0,,,0.0,,,0.0,0.0,,0.0,0.0,,0.0,0.0,0.026031342800706625,0.008744316175580025
+MotorImagery,1,1,208,70,2,0,0,0.5,0.5,all,False,208,0.0,0.0,,,0.0,,,0.0,,,70,0.0,0.0,,,0.0,,,0.0,,,0.0,0.0,,0.0,0.0,,0.0,0.0,0.025944585911929607,0.00895924586802721

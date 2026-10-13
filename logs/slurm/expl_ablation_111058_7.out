@@ -1,0 +1,21 @@
+Task 7: python -u scripts/run_explanation_ablation.py --datasets Libras --runs 2 3 --depth 2 --n_formulas 10000 --val_ratio 0.25 --cv 3 --cut_point 1.0 --max_explained 1000 --max_simplified 300 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/ablation/explanations
+[17:19:05] Libras run 2: 135 fit / 45 val series, 126 formulae selected, balanced accuracy fit 0.941 / val 0.644 (29 s)
+[17:19:42]   gxi   generalize=True : val rules precision 0.578, length 1.89, global F1 val 0.620 (37 s)
+[17:20:19]   gxi   generalize=False: val rules precision 0.573, length 1.89, global F1 val 0.668 (37 s)
+[17:20:56]   ig    generalize=True : val rules precision 0.584, length 1.89, global F1 val 0.620 (37 s)
+[17:21:33]   ig    generalize=False: val rules precision 0.580, length 1.89, global F1 val 0.668 (37 s)
+[17:22:02]   union generalize=True : val rules precision 0.580, length 1.89, global F1 val 0.614 (30 s)
+[17:22:32]   union generalize=False: val rules precision 0.580, length 1.89, global F1 val 0.662 (29 s)
+[17:23:20]   all   generalize=True : val rules precision 0.626, length 1.87, global F1 val 0.621 (49 s)
+[17:24:09]   all   generalize=False: val rules precision 0.618, length 1.87, global F1 val 0.692 (49 s)
+[17:24:10]   simplification of 88 rules (1 s): size 10.9 -> 9.0; series changing satisfaction on fit 0, on val 10; feature space vs STL on fit 0, on val 0
+[17:24:39] Libras run 3: 135 fit / 45 val series, 165 formulae selected, balanced accuracy fit 0.985 / val 0.867 (29 s)
+[17:25:25]   gxi   generalize=True : val rules precision 0.667, length 1.78, global F1 val 0.671 (45 s)
+[17:26:09]   gxi   generalize=False: val rules precision 0.694, length 1.78, global F1 val 0.651 (45 s)
+[17:26:55]   ig    generalize=True : val rules precision 0.667, length 1.78, global F1 val 0.671 (45 s)
+[17:27:39]   ig    generalize=False: val rules precision 0.694, length 1.78, global F1 val 0.651 (45 s)
+[17:28:18]   union generalize=True : val rules precision 0.658, length 1.78, global F1 val 0.627 (39 s)
+[17:28:56]   union generalize=False: val rules precision 0.671, length 1.78, global F1 val 0.627 (38 s)
+[17:30:00]   all   generalize=True : val rules precision 0.641, length 1.71, global F1 val 0.637 (64 s)
+[17:31:04]   all   generalize=False: val rules precision 0.667, length 1.71, global F1 val 0.633 (64 s)
+[17:31:05]   simplification of 90 rules (1 s): size 11.1 -> 9.2; series changing satisfaction on fit 0, on val 4; feature space vs STL on fit 0, on val 0

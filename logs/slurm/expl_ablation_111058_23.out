@@ -1,0 +1,21 @@
+Task 23: python -u scripts/run_explanation_ablation.py --datasets PEMS-SF --runs 8 9 --depth 2 --n_formulas 10000 --val_ratio 0.25 --cv 3 --cut_point 1.0 --max_explained 1000 --max_simplified 300 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/ablation/explanations
+[17:40:21] PEMS-SF run 8: 200 fit / 67 val series, 102 formulae selected, balanced accuracy fit 0.928 / val 0.744 (18 s)
+[17:41:15]   gxi   generalize=True : val rules precision 0.853, length 1.67, global F1 val 0.828 (55 s)
+[17:42:10]   gxi   generalize=False: val rules precision 0.846, length 1.67, global F1 val 0.813 (54 s)
+[17:43:04]   ig    generalize=True : val rules precision 0.853, length 1.67, global F1 val 0.748 (54 s)
+[17:43:59]   ig    generalize=False: val rules precision 0.846, length 1.67, global F1 val 0.813 (54 s)
+[17:44:42]   union generalize=True : val rules precision 0.853, length 1.67, global F1 val 0.756 (43 s)
+[17:45:25]   union generalize=False: val rules precision 0.846, length 1.67, global F1 val 0.785 (43 s)
+[17:46:27]   all   generalize=True : val rules precision 0.858, length 1.64, global F1 val 0.803 (62 s)
+[17:47:29]   all   generalize=False: val rules precision 0.846, length 1.64, global F1 val 0.791 (62 s)
+[17:47:29]   simplification of 80 rules (1 s): size 8.0 -> 6.3; series changing satisfaction on fit 0, on val 0; feature space vs STL on fit 0, on val 0
+[17:48:13] PEMS-SF run 9: 200 fit / 67 val series, 96 formulae selected, balanced accuracy fit 0.981 / val 0.783 (17 s)
+[17:49:04]   gxi   generalize=True : val rules precision 0.900, length 1.73, global F1 val 0.788 (51 s)
+[17:49:54]   gxi   generalize=False: val rules precision 0.907, length 1.73, global F1 val 0.800 (50 s)
+[17:50:45]   ig    generalize=True : val rules precision 0.900, length 1.73, global F1 val 0.788 (51 s)
+[17:51:35]   ig    generalize=False: val rules precision 0.907, length 1.73, global F1 val 0.800 (50 s)
+[17:52:14]   union generalize=True : val rules precision 0.905, length 1.73, global F1 val 0.788 (39 s)
+[17:52:54]   union generalize=False: val rules precision 0.911, length 1.73, global F1 val 0.800 (39 s)
+[17:53:51]   all   generalize=True : val rules precision 0.890, length 1.72, global F1 val 0.780 (58 s)
+[17:54:49]   all   generalize=False: val rules precision 0.896, length 1.72, global F1 val 0.792 (57 s)
+[17:54:49]   simplification of 76 rules (1 s): size 9.1 -> 6.5; series changing satisfaction on fit 0, on val 0; feature space vs STL on fit 0, on val 1

@@ -1,0 +1,14 @@
+Task 0: python -u scripts/run_explanation_ablation.py --datasets ArticularyWordRecognition --runs 0 1 --depth 2 --n_formulas 10000 --val_ratio 0.25 --cv 3 --cut_point 1.0 --max_explained 1000 --max_simplified 300 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/ablation/explanations
+[16:38:44] ArticularyWordRecognition run 0: 206 fit / 69 val series, 306 formulae selected, balanced accuracy fit 1.000 / val 0.987 (68 s)
+[16:40:27]   gxi   generalize=True : val rules precision 0.784, length 1.71, global F1 val 0.823 (103 s)
+[16:42:05]   gxi   generalize=False: val rules precision 0.808, length 1.71, global F1 val 0.832 (98 s)
+[16:43:43]   ig    generalize=True : val rules precision 0.784, length 1.71, global F1 val 0.823 (98 s)
+[16:45:21]   ig    generalize=False: val rules precision 0.808, length 1.71, global F1 val 0.832 (98 s)
+[16:47:02]   union generalize=True : val rules precision 0.752, length 1.71, global F1 val 0.800 (101 s)
+[16:48:42]   union generalize=False: val rules precision 0.775, length 1.71, global F1 val 0.822 (100 s)
+[16:51:20]   all   generalize=True : val rules precision 0.750, length 1.68, global F1 val 0.819 (158 s)
+[16:53:55]   all   generalize=False: val rules precision 0.770, length 1.68, global F1 val 0.846 (155 s)
+[16:53:57]   simplification of 116 rules (2 s): size 9.6 -> 7.5; series changing satisfaction on fit 0, on val 11; feature space vs STL on fit 0, on val 0
+[16:54:59] ArticularyWordRecognition run 1: 206 fit / 69 val series, 316 formulae selected, balanced accuracy fit 1.000 / val 0.940 (61 s)
+[16:56:40]   gxi   generalize=True : val rules precision 0.742, length 1.59, global F1 val 0.764 (101 s)
+[16:58:21]   gxi   generalize=False: val rules precision 0.746, length 1.59, global F1 val 0.764 (101 s)

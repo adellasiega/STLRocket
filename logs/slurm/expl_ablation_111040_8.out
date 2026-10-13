@@ -1,0 +1,5 @@
+Task 8: python -u scripts/run_explanation_ablation.py --datasets FaceDetection --runs 0 1 --depth 2 --n_formulas 10000 --val_ratio 0.25 --cv 3 --cut_point 1.0 --max_explained 1000 --max_simplified 300 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/ablation/explanations
+[16:43:26] FaceDetection run 0: 4417 fit / 1473 val series, 362 formulae selected, balanced accuracy fit 0.795 / val 0.707 (204 s)
+[16:48:20]   gxi   generalize=True : val rules precision 0.843, length 2.51, global F1 val 0.000 (294 s)
+[16:53:18]   gxi   generalize=False: val rules precision 0.847, length 2.51, global F1 val 0.000 (297 s)
+[16:58:20]   ig    generalize=True : val rules precision 0.843, length 2.51, global F1 val 0.000 (301 s)

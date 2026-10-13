@@ -1,0 +1,10 @@
+Task 41: python -u scripts/run_ablation.py --datasets LSST --runs 2 3 --depths 1 --until_weights 0 --n_formulas 100 500 1000 5000 10000 --fit_intercept false --val_ratio 0.25 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --output /share/ai-lab/adsiega/STLRocket/results/ablation/full/LSST_d1_u0_r2-3.csv
+LSST run=2 depth=1 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.24124395112002975 [ok]
+LSST run=2 depth=1 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.21714632199393757 [ok]
+LSST run=2 depth=1 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.23053565307606064 [ok]
+LSST run=2 depth=1 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.21546035940822716 [ok]
+LSST run=2 depth=1 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.2770105908408718 [ok]
+LSST run=3 depth=1 until=0.0 corr=None calib=False M=100 intercept=False -> val=0.2449601232683226 [ok]
+LSST run=3 depth=1 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.1702037351443124 [ok]
+LSST run=3 depth=1 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.24808450936859003 [ok]
+LSST run=3 depth=1 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.29262259200402113 [ok]
