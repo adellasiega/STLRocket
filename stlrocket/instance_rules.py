@@ -47,6 +47,8 @@ class RuleConfig:
     min_new_share: float | None = 0.05   # global: a rule enters the OR only if it covers this share
                                          # of its class in new train series (None: every distinct rule)
     decimals: int = 2                    # global: thresholds rounded to this many decimals
+    candidates: str = "gxi"              # candidate formulae: one of CANDIDATE_METHODS (candidate_scores)
+    generalize: bool = True              # greedy generalization pass after the beam search
 
 
 def model_logits_matrix(model) -> np.ndarray:
@@ -62,21 +64,44 @@ def predict_indices(X_feats: np.ndarray, W_full: np.ndarray) -> np.ndarray:
     return np.argmax(X_feats @ W_full.T, axis=1)
 
 
-def candidate_scores(x: np.ndarray, W_full: np.ndarray) -> tuple[int, np.ndarray, np.ndarray]:
-    """Predicted class k, scores s_j = sum_l pi_l (w_kj - w_lj) x_j with Gradient x
-    Input weights pi_l = P(l|x) / (1 - P(k|x)) (eq. 18-19), and candidates J = {s_j > 0}
-    ranked by decreasing s_j (eq. 21). Unselected formulae (w_.j = 0) and columns
-    constant on train (x_j = 0) have s_j = 0, so they are never candidates."""
+CANDIDATE_METHODS = ("gxi", "ig", "union", "all")
+IG_STEPS = 64   # midpoint quadrature of the Integrated Gradients path integral
+
+
+def candidate_scores(x: np.ndarray, W_full: np.ndarray, method: str = "gxi") -> tuple[int, np.ndarray, np.ndarray]:
+    """Predicted class k, scores s_j and candidates J ranked by decreasing s_j, from the
+    margin attributions A_lj = (w_kj - w_lj) x_j (eq. 17). Unselected formulae (w_.j = 0)
+    and columns constant on train (x_j = 0) have A_.j = 0 and are never candidates.
+
+    gxi    s_j = sum_l pi_l A_lj with Gradient x Input weights pi_l = P(l|x) / (1 - P(k|x)),
+           J = {s_j > 0}
+    ig     the same with Integrated Gradients weights: P(l | beta x) averaged over
+           beta in [0, 1] (reference 0, where every class has probability 1/K), J = {s_j > 0}
+    union  per-competitor candidates J = {j : A_lj > 0 for some l}, s_j = max_l A_lj
+    all    every formula with some A_lj != 0, s_j = max_l |A_lj|: no attribution"""
     z = W_full @ x
     k = int(np.argmax(z))
-    P = np.exp(z - z.max())
-    P /= P.sum()
     others = np.arange(len(z)) != k
-    pi = P[others] / max(1.0 - P[k], 1e-300)
-    if pi.sum() == 0:   # P(k|x) == 1 in floating point: fall back to uniform weights
-        pi = np.full(others.sum(), 1.0 / others.sum())
     A = (W_full[k] - W_full[others]) * x       # (K-1, M) margin attributions, eq. 17
-    s = pi @ A
+    if method == "gxi":
+        P = np.exp(z - z.max())
+        P /= P.sum()
+        pi = P[others] / max(1.0 - P[k], 1e-300)
+        if pi.sum() == 0:   # P(k|x) == 1 in floating point: fall back to uniform weights
+            pi = np.full(others.sum(), 1.0 / others.sum())
+        s = pi @ A
+    elif method == "ig":
+        beta = (np.arange(IG_STEPS) + 0.5) / IG_STEPS
+        Z = np.outer(beta, z)                  # logits along the path from 0 to x
+        P = np.exp(Z - Z.max(axis=1, keepdims=True))
+        P /= P.sum(axis=1, keepdims=True)
+        s = P.mean(axis=0)[others] @ A
+    elif method == "union":
+        s = A.max(axis=0)
+    elif method == "all":
+        s = np.abs(A).max(axis=0)
+    else:
+        raise ValueError(f"unknown candidate method {method!r}: expected one of {CANDIDATE_METHODS}")
     J = np.flatnonzero(s > 0)
     return k, s, J[np.argsort(-s[J], kind="stable")]
 
@@ -142,16 +167,18 @@ def explain_instance(
     f(tau^(i)). exclude: train index of tau when tau is a train series (left out of every
     count).
 
-    Returns dict(k, literals [(j, e, s)], tp, support, precision, lcb), lcb the Wilson
-    bound of the rule's train precision; literals is empty if no rule reaches support n_min.
+    Returns dict(k, literals [(j, e, s)], tp, support, precision, lcb, n_candidates), lcb
+    the Wilson bound of the rule's train precision; literals is empty if no rule reaches
+    support n_min. Candidates come from candidate_scores(method=cfg.candidates), and the
+    beam's best rule is refined by _generalize unless cfg.generalize is False.
     """
-    k, score, J = candidate_scores(x, W_full)
+    k, score, J = candidate_scores(x, W_full, cfg.candidates)
     keep = np.ones(len(X_tr_feats), dtype=bool)
     if exclude is not None:
         keep[exclude] = False
     pos = (ref_labels == k) & keep
-    empty = dict(k=k, literals=[], tp=0, support=0, precision=0.0, lcb=0.0)
-    if len(J) == 0:   # cannot happen: sum_j s_j = sum_l pi_l m_l > 0
+    empty = dict(k=k, literals=[], tp=0, support=0, precision=0.0, lcb=0.0, n_candidates=len(J))
+    if len(J) == 0:   # cannot happen: some A_lj > 0 for every l, since every margin is positive
         return empty
 
     eps = np.sign(x[J])
@@ -214,11 +241,17 @@ def explain_instance(
 
     if best is None:
         return empty
-    chosen = _generalize(list(best["literals"]), U, grids, keep, pos, cfg)
+    if cfg.generalize:
+        chosen = _generalize(list(best["literals"]), U, grids, keep, pos, cfg)
+    else:
+        mask = covered([(p, 1.0, s) for p, s in best["literals"]], U) & keep
+        n, tp = int(mask.sum()), int((mask & pos).sum())
+        chosen = dict(literals=best["literals"], tp=tp, support=n, precision=tp / n if n else 0.0)
     literals = [(int(J[p]), float(eps[p]), float(s)) for p, s in chosen["literals"]]
     return dict(k=k, literals=literals, tp=chosen["tp"], support=chosen["support"],
                 precision=chosen["precision"],
-                lcb=float(wilson_lower(chosen["tp"], chosen["support"], cfg.confidence)))
+                lcb=float(wilson_lower(chosen["tp"], chosen["support"], cfg.confidence)),
+                n_candidates=len(J))
 
 
 def _generalize(lits: list, U, grids, keep, pos, cfg: RuleConfig) -> dict:
@@ -267,13 +300,14 @@ def _generalize(lits: list, U, grids, keep, pos, cfg: RuleConfig) -> dict:
 
 def explain_instances(X_feats: np.ndarray, W_full: np.ndarray, X_tr_feats: np.ndarray,
                       ref_labels: np.ndarray, cfg: RuleConfig, train: bool = False,
-                      n_jobs: int = 1) -> list[dict]:
+                      n_jobs: int = 1, exclude: list | None = None) -> list[dict]:
     """Instance rules for every row of X_feats. train=True: the rows are the train
-    series themselves, each left out of its own counts. n_jobs > 1: rows split over that
+    series themselves, each left out of its own counts. exclude: for rows that are a
+    subset of the train series, the train index of each row, left out likewise. n_jobs > 1: rows split over that
     many worker processes (same rules; workers run the functions as defined in this
     module, so a candidate_scores patched at runtime is not seen by them). Starting the
     workers takes ~15 s (each imports torch), so small problems stay in this process."""
-    excl = list(range(len(X_feats))) if train else [None] * len(X_feats)
+    excl = exclude if exclude is not None else list(range(len(X_feats))) if train else [None] * len(X_feats)
     if n_jobs <= 1 or len(X_feats) * len(X_tr_feats) < MIN_PARALLEL_WORK:
         return [explain_instance(x, W_full, X_tr_feats, ref_labels, cfg, exclude=e)
                 for x, e in zip(X_feats, excl)]
