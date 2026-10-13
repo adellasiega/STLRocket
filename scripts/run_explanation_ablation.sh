@@ -25,14 +25,11 @@ PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
 VENV="/share/ai-lab/adsiega/STLRocket/env"
 OUT_DIR="${PROJECT_DIR}/results/ablation/explanations"
 
-# The datasets of the main ablation, without Handwriting (too few series per class to split)
-# and the three at chance (AtrialFibrillation, StandWalkJump, SelfRegulationSCP2)
-DATASETS=(
-    ArticularyWordRecognition BasicMotions Cricket DuckDuckGeese EigenWorms Epilepsy
-    EthanolConcentration ERing FaceDetection FingerMovements HandMovementDirection Heartbeat
-    Libras LSST MotorImagery NATOPS PenDigits PEMS-SF PhonemeSpectra RacketSports
-    SelfRegulationSCP1 UWaveGestureLibrary
-)
+# Five fast datasets on which the classifier is well above chance and every class has
+# enough fit series for a rule to be supported: 4 to 15 classes, 90 to 200 fit series.
+# (The full set is the 26 of scripts/run_ablation.sh without Handwriting, too small to
+# split, and the three at chance: AtrialFibrillation, StandWalkJump, SelfRegulationSCP2.)
+DATASETS=(Epilepsy NATOPS Libras PEMS-SF UWaveGestureLibrary)
 N_RUNS=10
 RUNS_PER_TASK=2
 

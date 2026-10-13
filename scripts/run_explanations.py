@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Full explanation pipeline (stlrocket/instance_rules.py, paper §3.3) per dataset and run:
+Full explanation pipeline (stlrocket/instance_rules.py, paper Section "Explanations") per dataset and run:
 formula bank and lasso as in the experiments (no intercept, 1-SE lambda), instance rules
 for every train and test series, and global explanations per class. Seeded by
 base_seed + run.
@@ -96,8 +96,8 @@ def run(args, dataset: str, run_id: int) -> None:
         explain=False, pool_size=0, precision_threshold=0.0, simplify_agreement=0.0, simplify_min_gain=0.0,
         simplify_decimals=0,
     )
-    rcfg = ir.RuleConfig(n_min=args.n_min, n_max=args.n_max, beam_width=args.beam_width,
-                         confidence=args.confidence, min_new_share=args.min_new_share, decimals=args.decimals)
+    rcfg = ir.RuleConfig(n_max=args.n_max, beam_width=args.beam_width,
+                         confidence=args.confidence, min_new_share=args.min_new_share)
     (out / "config.json").write_text(json.dumps(
         {"dataset": dataset, "run": run_id, "seed": seed, "experiment": dataclasses.asdict(cfg),
          "rules": dataclasses.asdict(rcfg)}, indent=2))
@@ -154,7 +154,7 @@ def run(args, dataset: str, run_id: int) -> None:
                    "k": r["k"], "n_literals": len(r["literals"]), "literals": json.dumps(r["literals"]),
                    "lcb_train": r["lcb"], "size_raw": 0, "size": 0,
                    **{c: np.nan for s in SPLITS for c in metric_cols(s, dict.fromkeys(METRICS))}, "rule": ""}
-            phi = ir.rule_formula(r["literals"], formulas, sigma, X_tr, rcfg)
+            phi = ir.rule_formula(r["literals"], formulas, sigma, X_tr)
             if phi is not None:
                 row["size_raw"] = F0.formula_size(ir.to_stl(r["literals"], formulas, sigma))
                 row["size"] = F0.formula_size(phi)
@@ -221,13 +221,11 @@ def main():
     p.add_argument("--cv", type=int, default=3)
     p.add_argument("--cut_point", type=float, default=1.0)
     defaults = ir.RuleConfig()
-    p.add_argument("--n_min", type=int, default=defaults.n_min, help="min support of a rule")
     p.add_argument("--n_max", type=int, default=defaults.n_max, help="max literals per rule")
     p.add_argument("--beam_width", type=int, default=defaults.beam_width)
     p.add_argument("--confidence", type=float, default=defaults.confidence, help="confidence of the Wilson bound")
     p.add_argument("--min_new_share", type=float, default=defaults.min_new_share,
                    help="global: share of its class a rule must newly cover to enter the OR")
-    p.add_argument("--decimals", type=int, default=defaults.decimals, help="simplification: threshold rounding")
     p.add_argument("--base_seed", type=int, default=0)
     p.add_argument("--device", default="cpu")
     p.add_argument("--n_jobs", type=int, default=int(os.environ.get("SLURM_CPUS_PER_TASK", 1)),

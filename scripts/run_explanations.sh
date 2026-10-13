@@ -45,12 +45,10 @@ CUT_POINT=1.0
 BASE_SEED=0
 
 # Instance rules and global explanations (defaults of stlrocket.instance_rules.RuleConfig)
-N_MIN=5
 N_MAX=3
 BEAM_WIDTH=5
 CONFIDENCE=0.9
 MIN_NEW_SHARE=0.05
-DECIMALS=2
 
 MAX_ARRAY_SIZE=1001   # cluster's MaxArraySize: task ids must be < this
 # ===========================================================================
@@ -66,8 +64,8 @@ task_command() {  # $1 = task id -> prints the python command
     echo python -u scripts/run_explanations.py \
         --datasets "$dataset" --runs "$run" --depth "$DEPTH" --n_formulas "$N_FORMULAS" \
         --cv "$CV" --cut_point "$CUT_POINT" --base_seed "$BASE_SEED" --device cpu \
-        --n_min "$N_MIN" --n_max "$N_MAX" --beam_width "$BEAM_WIDTH" --confidence "$CONFIDENCE" \
-        --min_new_share "$MIN_NEW_SHARE" --decimals "$DECIMALS" \
+        --n_max "$N_MAX" --beam_width "$BEAM_WIDTH" --confidence "$CONFIDENCE" \
+        --min_new_share "$MIN_NEW_SHARE" \
         --out_dir "$OUT_DIR"
 }
 

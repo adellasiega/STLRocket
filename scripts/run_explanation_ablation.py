@@ -16,8 +16,8 @@ explanation of each class from the rules of the fit series. Rules are scored in 
 classes predicted by the model.
 
 Part B, simplification: for the distinct rules of the reference variant (gxi, generalize), the
-STL formula is built and simplified (pruning, then threshold rounding) on the fit series, and
-the series satisfying it are compared before and after, on fit and on validation.
+STL formula is built and simplified (instance_rules.simplify_rule) on the fit series, and the
+series satisfying it are compared before and after, on fit and on validation.
 
 Written to OUT_DIR, one set of files per dataset and run (prefix <dataset>_run<r>):
   .variants.csv        one row per variant: rule length, precision lower bound, precision and
@@ -26,8 +26,8 @@ Written to OUT_DIR, one set of files per dataset and run (prefix <dataset>_run<r
   .instances.csv.gz    one row per (variant, explained series): its rule as literals
                        (formula index, direction, cut) and its counts on fit and validation
   .simplification.csv  one row per rule of part B: series whose satisfaction differs between
-                       feature space and STL, and between the raw, pruned and rounded formula;
-                       formula sizes; validation precision before and after
+                       feature space and STL, and between the raw and the simplified formula;
+                       formula sizes; counts on fit and validation before and after
   .done.json           settings and status; written last, so it marks the run as complete
 
 Runs whose .done.json exists are skipped, so a resubmitted job only redoes unfinished runs.
@@ -57,7 +57,6 @@ from stlrocket.data import standardize_series
 from stlrocket.features import build_formula_bank, eval_robustness
 from stlrocket.classifier import train_classifier
 from stlrocket.formula_sampler import F0
-from stlrocket.simplification import simplify_data_aware, round_thresholds
 from stlrocket import instance_rules as ir
 
 SPLITS = ("fit", "val")
@@ -129,31 +128,30 @@ def variant_summary(df: pd.DataFrame) -> dict:
     return out
 
 
-def simplification_rows(rules: list[dict], formulas: list, sigma: np.ndarray, X: dict, F: dict, pred: dict,
-                        rcfg: ir.RuleConfig) -> list[dict]:
+def simplification_rows(rules: list[dict], formulas: list, sigma: np.ndarray, X: dict, F: dict,
+                        pred: dict) -> list[dict]:
     """Part B. Masks are the series with positive robustness; every count is the number of
-    series whose mask differs between two versions of the same rule."""
+    series whose mask differs between two versions of the same rule: raw (to_stl) and
+    pruned (simplify_rule)."""
     rows = []
     for r in rules:
         t = time.perf_counter()
         raw = ir.to_stl(r["literals"], formulas, sigma)
-        pruned = simplify_data_aware(raw, X["fit"], agreement=1.0)
-        final = round_thresholds(pruned, X["fit"], decimals=rcfg.decimals, agreement=1.0)
+        pruned = ir.simplify_rule(raw, X["fit"])
         elapsed = time.perf_counter() - t
         row = {"k": r["k"], "n_literals": len(r["literals"]), "literals": json.dumps(r["literals"]),
                "size_raw": F0.formula_size(raw), "size_pruned": F0.formula_size(pruned),
-               "size_final": F0.formula_size(final), "time_s": elapsed,
-               "idempotent": str(ir.simplify_rule(final, X["fit"], rcfg)) == str(final)}
+               "time_s": elapsed,
+               "idempotent": str(ir.simplify_rule(pruned, X["fit"])) == str(pruned)}
         for s in SPLITS:
             feat = ir.covered(r["literals"], F[s])
-            masks = {v: eval_robustness(phi, X[s]) > 0 for v, phi in (("raw", raw), ("pruned", pruned), ("final", final))}
+            masks = {v: eval_robustness(phi, X[s]) > 0 for v, phi in (("raw", raw), ("pruned", pruned))}
             row.update({f"n_{s}": len(feat), f"feat_vs_raw_{s}": int((feat != masks["raw"]).sum()),
-                        f"raw_vs_pruned_{s}": int((masks["raw"] != masks["pruned"]).sum()),
-                        f"raw_vs_final_{s}": int((masks["raw"] != masks["final"]).sum())})
-            for v in ("raw", "final"):
+                        f"raw_vs_pruned_{s}": int((masks["raw"] != masks["pruned"]).sum())})
+            for v in masks:
                 m = ir.rule_metrics(masks[v], r["k"], pred[s])
                 row.update({f"support_{v}_{s}": m["support"], f"tp_{v}_{s}": m["tp"]})
-        row.update({"rule_raw": str(raw), "rule_final": str(final)})
+        row.update({"rule_raw": str(raw), "rule_pruned": str(pruned)})
         rows.append(row)
     return rows
 
@@ -215,8 +213,8 @@ def run(args, dataset: str, run_id: int) -> None:
     # Part A
     variant_rows, instance_frames, reference_rules = [], [], []
     for candidates, generalize in itertools.product(args.candidates, (True, False)):
-        rcfg = ir.RuleConfig(n_min=args.n_min, n_max=args.n_max, beam_width=args.beam_width,
-                             confidence=args.confidence, min_new_share=args.min_new_share, decimals=args.decimals,
+        rcfg = ir.RuleConfig(n_max=args.n_max, beam_width=args.beam_width,
+                             confidence=args.confidence, min_new_share=args.min_new_share,
                              candidates=candidates, generalize=generalize)
         rows, times, rules = [], {}, {}
         for own in SPLITS:
@@ -249,15 +247,14 @@ def run(args, dataset: str, run_id: int) -> None:
     if len(distinct) > args.max_simplified:
         distinct = [distinct[i] for i in np.sort(rng.choice(len(distinct), args.max_simplified, replace=False))]
     t = time.perf_counter()
-    rcfg = ir.RuleConfig(decimals=args.decimals)
-    simp = pd.DataFrame(simplification_rows(distinct, formulas, sigma, X, F, pred, rcfg))
+    simp = pd.DataFrame(simplification_rows(distinct, formulas, sigma, X, F, pred))
     simp.insert(0, "run", run_id)
     simp.insert(0, "dataset", dataset)
     simp.to_csv(out_dir / f"{stem}.simplification.csv", index=False)
     if len(simp):
         log(f"  simplification of {len(simp)} rules ({time.perf_counter() - t:.0f} s): size "
-            f"{simp.size_raw.mean():.1f} -> {simp.size_final.mean():.1f}; series changing satisfaction on fit "
-            f"{int(simp.raw_vs_final_fit.sum())}, on val {int(simp.raw_vs_final_val.sum())}; feature space vs "
+            f"{simp.size_raw.mean():.1f} -> {simp.size_pruned.mean():.1f}; series changing satisfaction on fit "
+            f"{int(simp.raw_vs_pruned_fit.sum())}, on val {int(simp.raw_vs_pruned_val.sum())}; feature space vs "
             f"STL on fit {int(simp.feat_vs_raw_fit.sum())}, on val {int(simp.feat_vs_raw_val.sum())}")
     done.write_text(json.dumps({**info, "status": "ok", **base}, indent=1))
 
@@ -273,13 +270,11 @@ def main():
     p.add_argument("--cut_point", type=float, default=1.0)
     p.add_argument("--candidates", nargs="+", default=list(ir.CANDIDATE_METHODS), choices=ir.CANDIDATE_METHODS)
     defaults = ir.RuleConfig()
-    p.add_argument("--n_min", type=int, default=defaults.n_min, help="min support of a rule")
     p.add_argument("--n_max", type=int, default=defaults.n_max, help="max literals per rule")
     p.add_argument("--beam_width", type=int, default=defaults.beam_width)
     p.add_argument("--confidence", type=float, default=defaults.confidence, help="confidence of the Wilson bound")
     p.add_argument("--min_new_share", type=float, default=defaults.min_new_share,
                    help="global: share of its class a rule must newly cover to enter the OR")
-    p.add_argument("--decimals", type=int, default=defaults.decimals, help="simplification: threshold rounding")
     p.add_argument("--max_explained", type=int, default=1000,
                    help="series explained per split; larger splits are subsampled (same series for every variant)")
     p.add_argument("--max_simplified", type=int, default=300, help="rules simplified in part B")

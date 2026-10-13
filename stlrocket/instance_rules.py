@@ -1,4 +1,4 @@
-"""Instance rules and global explanations (paper §3.3).
+"""Instance rules and global explanations (paper, Section "Explanations").
 
 An instance rule L(tau) for the prediction k = f(tau) is a conjunction of literals, one
 per reparametrized formula phi_j of the bank (already centred on the train series, see
@@ -12,7 +12,7 @@ and STL is only evaluated to build the final formula (to_stl).
 Rules are consistent: every literal holds on tau (0 <= s < e * x_j(tau)). Counts are
 taken on the train set w.r.t. reference labels, the model's predictions: the support of
 a rule is the number of train series satisfying it, TP the number of those predicted as
-k. Among the consistent rules with support >= n_min, the search maximises the Wilson
+k. Among the consistent rules satisfied by at least one train series, the search maximises the Wilson
 lower confidence bound of the precision TP / support (wilson_lower), which favours rules
 that are both precise and supported by many series.
 
@@ -34,19 +34,17 @@ import numpy as np
 from torcheck.stl import And, Not
 
 from .features import shift_atom_thresholds
-from .simplification import simplify_data_aware, round_thresholds
+from .simplification import simplify_data_aware
 
 
 @dataclass
 class RuleConfig:
     """Hyperparameters of instance rules and global explanations."""
-    n_min: int = 5                       # min support (train series satisfying a rule)
     n_max: int = 3                       # max literals per rule
     beam_width: int = 5                  # rules kept per beam search step
     confidence: float = 0.9              # confidence level of the Wilson lower bound
     min_new_share: float | None = 0.05   # global: a rule enters the OR only if it covers this share
                                          # of its class in new train series (None: every distinct rule)
-    decimals: int = 2                    # global: thresholds rounded to this many decimals
     candidates: str = "gxi"              # candidate formulae: one of CANDIDATE_METHODS (candidate_scores)
     generalize: bool = True              # greedy generalization pass after the beam search
 
@@ -70,7 +68,7 @@ IG_STEPS = 64   # midpoint quadrature of the Integrated Gradients path integral
 
 def candidate_scores(x: np.ndarray, W_full: np.ndarray, method: str = "gxi") -> tuple[int, np.ndarray, np.ndarray]:
     """Predicted class k, scores s_j and candidates J ranked by decreasing s_j, from the
-    margin attributions A_lj = (w_kj - w_lj) x_j (eq. 17). Unselected formulae (w_.j = 0)
+    margin attributions A_lj = (w_kj - w_lj) x_j (paper, "Selecting Candidates"). Unselected formulae (w_.j = 0)
     and columns constant on train (x_j = 0) have A_.j = 0 and are never candidates.
 
     gxi    s_j = sum_l pi_l A_lj with Gradient x Input weights pi_l = P(l|x) / (1 - P(k|x)),
@@ -82,7 +80,7 @@ def candidate_scores(x: np.ndarray, W_full: np.ndarray, method: str = "gxi") -> 
     z = W_full @ x
     k = int(np.argmax(z))
     others = np.arange(len(z)) != k
-    A = (W_full[k] - W_full[others]) * x       # (K-1, M) margin attributions, eq. 17
+    A = (W_full[k] - W_full[others]) * x       # (K-1, M) margin attributions
     if method == "gxi":
         P = np.exp(z - z.max())
         P /= P.sum()
@@ -161,15 +159,16 @@ def explain_instance(
     cfg: RuleConfig,
     exclude: int | None = None,
 ) -> dict:
-    """Instance rule for the prediction on features x (eq. 15), by beam search (§3.3.3).
+    """Instance rule for the prediction on features x, by beam search (paper, "Building
+    Instance Explanations").
 
     ref_labels: train class indices counts are taken against, the model's predictions
     f(tau^(i)). exclude: train index of tau when tau is a train series (left out of every
     count).
 
     Returns dict(k, literals [(j, e, s)], tp, support, precision, lcb, n_candidates), lcb
-    the Wilson bound of the rule's train precision; literals is empty if no rule reaches
-    support n_min. Candidates come from candidate_scores(method=cfg.candidates), and the
+    the Wilson bound of the rule's train precision; literals is empty if no rule is satisfied
+    by a train series. Candidates come from candidate_scores(method=cfg.candidates), and the
     beam's best rule is refined by _generalize unless cfg.generalize is False.
     """
     k, score, J = candidate_scores(x, W_full, cfg.candidates)
@@ -210,7 +209,7 @@ def explain_instance(
                 # keep the middle one, i.e. the widest margin among the covered values.
                 _, first, size = np.unique(-n_cov, return_index=True, return_counts=True)
                 idx = first + size // 2
-                idx = idx[n_cov[idx] >= cfg.n_min]
+                idx = idx[n_cov[idx] > 0]
                 if len(idx) == 0:
                     continue
                 n, tp = n_cov[idx], n_tp[idx]
@@ -256,7 +255,7 @@ def explain_instance(
 
 def _generalize(lits: list, U, grids, keep, pos, cfg: RuleConfig) -> dict:
     """Greedy generalization pass: repeatedly apply the move (drop a literal, or loosen
-    its cut to any looser cut toward 0) that keeps support >= n_min and
+    its cut to any looser cut toward 0) that
     gives the largest Wilson bound, on equal bound the shorter rule. Stops when no move
     raises the bound or shortens the rule."""
     def value(tp, n, n_lits):
@@ -278,15 +277,15 @@ def _generalize(lits: list, U, grids, keep, pos, cfg: RuleConfig) -> dict:
             if len(lits) > 1:      # drop literal i
                 n, tp = int(others.sum()), int((others & pos).sum())
                 val = value(tp, n, len(lits) - 1)
-                if n >= cfg.n_min and val > best_val:
+                if val > best_val:
                     best_move, best_val = (i, None), val
             looser = grids[p][grids[p] < s]
             if len(looser):        # loosen literal i: the first cut with the largest bound
                 n_cov, n_tp = _cut_counts(U[others, p], pos[others], looser)
-                lcb = np.where(n_cov >= cfg.n_min, wilson_lower(n_tp, n_cov, cfg.confidence), -np.inf)
+                lcb = wilson_lower(n_tp, n_cov, cfg.confidence)
                 c = int(np.argmax(lcb))
                 val = (float(lcb[c]), -len(lits))
-                if lcb[c] > -np.inf and val > best_val:
+                if val > best_val:
                     best_move, best_val = (i, float(looser[c])), val
         if best_move is None or best_val <= cur:
             break
@@ -349,7 +348,7 @@ def rule_metrics(satisfied: np.ndarray, k: int, labels: np.ndarray, exclude: int
 
 
 def to_stl(literals: list, formulas: list, sigma: np.ndarray):
-    """STL formula of a rule (eq. 22): literal (j, e, s) is phi_j^{-c} (e > 0) or
+    """STL formula of a rule: literal (j, e, s) is phi_j^{-c} (e > 0) or
     Not(phi_j)^{-c} (e < 0) with c = s * sigma_j, the cut on e * rho(phi_j, .).
     sigma: the feature scales from build_formula_bank."""
     if not literals:
@@ -364,27 +363,26 @@ def to_stl(literals: list, formulas: list, sigma: np.ndarray):
     return reduce(And, parts)
 
 
-def simplify_rule(phi, X_tr: np.ndarray, cfg: RuleConfig):
+def simplify_rule(phi, X_tr: np.ndarray):
     """Data-aware simplification of a rule's STL formula, exact on the train series X_tr:
-    an and/or replaced by a child, double negation removed, thresholds rounded to
-    cfg.decimals, each only if the train series satisfying the formula stay exactly the
-    same. A branch can be dead for one rule but not for another, because the cut decides
-    which branch matters. On new series the simplified formula can differ slightly."""
-    phi = simplify_data_aware(phi, X_tr, agreement=1.0)
-    return round_thresholds(phi, X_tr, decimals=cfg.decimals, agreement=1.0)
+    an and/or is replaced by a child and a double negation removed, each only if the train
+    series satisfying the formula stay exactly the same. A branch can be dead for one rule
+    but not for another, because the cut decides which branch matters. On new series the
+    simplified formula can differ slightly. Thresholds are left as they are: formulae
+    print them rounded (torcheck), which does not change what is evaluated."""
+    return simplify_data_aware(phi, X_tr, agreement=1.0)
 
 
-def rule_formula(literals: list, formulas: list, sigma: np.ndarray, X_tr: np.ndarray,
-                 cfg: RuleConfig, simplify: bool = True):
+def rule_formula(literals: list, formulas: list, sigma: np.ndarray, X_tr: np.ndarray, simplify: bool = True):
     """STL formula of an instance rule (to_stl), simplified (simplify_rule) unless simplify
     is False. None for the empty rule."""
     phi = to_stl(literals, formulas, sigma)
-    return simplify_rule(phi, X_tr, cfg) if simplify and phi is not None else phi
+    return simplify_rule(phi, X_tr) if simplify and phi is not None else phi
 
 
 def global_rules(train_rules: list[dict], X_tr_feats: np.ndarray, ref_labels: np.ndarray,
                  cfg: RuleConfig) -> dict[int, list]:
-    """Rules of the global explanation per class (eq. 24), in feature space: the distinct
+    """Rules of the global explanation per class, in feature space: the distinct
     instance rules of the train series predicted as that class, then few, general ones of
     them (select_disjuncts). Returns {k: [literals, ...]}.
 
@@ -439,6 +437,6 @@ def global_explanations(train_rules: list[dict], X_tr_feats: np.ndarray, X_tr: n
     False; rules that become identical are kept once."""
     out = {}
     for k, R in global_rules(train_rules, X_tr_feats, ref_labels, cfg).items():
-        phis = [rule_formula(lits, formulas, sigma, X_tr, cfg, simplify) for lits in R]
+        phis = [rule_formula(lits, formulas, sigma, X_tr, simplify) for lits in R]
         out[k] = list({str(phi): phi for phi in phis}.values())
     return out

@@ -55,7 +55,7 @@ def test_rules():
             assert all(s >= 0 and e * F[i, j] > s for j, e, s in rule["literals"])   # consistency
             assert len({j for j, _, _ in rule["literals"]}) == len(rule["literals"]) <= 3
             m = ir.rule_metrics(ir.covered(rule["literals"], F), rule["k"], pred, exclude=i)
-            assert (m["tp"], m["support"]) == (rule["tp"], rule["support"]) and m["support"] >= 5
+            assert (m["tp"], m["support"]) == (rule["tp"], rule["support"]) and m["support"] >= 1
             assert np.isclose(rule["lcb"], ir.wilson_lower(m["tp"], m["support"]))
 
 
@@ -79,9 +79,9 @@ def test_stl_and_simplification():
             continue
         n_rules += 1
         mask = ir.covered(lits, F)
-        raw = ir.rule_formula(lits, formulas, sigma, X, rcfg, simplify=False)
+        raw = ir.rule_formula(lits, formulas, sigma, X, simplify=False)
         assert np.array_equal(eval_robustness(raw, X) > 0, mask)
-        assert np.array_equal(eval_robustness(ir.simplify_rule(raw, X, rcfg), X) > 0, mask)
+        assert np.array_equal(eval_robustness(ir.simplify_rule(raw, X), X) > 0, mask)
     assert n_rules > 0
 
 
