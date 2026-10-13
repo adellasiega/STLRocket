@@ -8,3 +8,4 @@ LSST run=3 depth=1 until=0.0 corr=None calib=False M=100 intercept=False -> val=
 LSST run=3 depth=1 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.1702037351443124 [ok]
 LSST run=3 depth=1 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.24808450936859003 [ok]
 LSST run=3 depth=1 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.29262259200402113 [ok]
+LSST run=3 depth=1 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.2551195487990155 [ok]

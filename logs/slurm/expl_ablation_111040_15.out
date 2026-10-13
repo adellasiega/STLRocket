@@ -1,2 +1,0 @@
-Task 15: python -u scripts/run_explanation_ablation.py --datasets NATOPS --runs 0 1 --depth 2 --n_formulas 10000 --val_ratio 0.25 --cv 3 --cut_point 1.0 --max_explained 1000 --max_simplified 300 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/ablation/explanations
-[16:58:34] NATOPS run 0: 135 fit / 45 val series, 31 formulae selected, balanced accuracy fit 0.913 / val 0.884 (16 s)

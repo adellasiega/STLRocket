@@ -8,3 +8,4 @@ PhonemeSpectra run=5 depth=1 until=0.0 corr=None calib=False M=100 intercept=Fal
 PhonemeSpectra run=5 depth=1 until=0.0 corr=None calib=False M=500 intercept=False -> val=0.09357309357309355 [ok]
 PhonemeSpectra run=5 depth=1 until=0.0 corr=None calib=False M=1000 intercept=False -> val=0.08635808635808635 [ok]
 PhonemeSpectra run=5 depth=1 until=0.0 corr=None calib=False M=5000 intercept=False -> val=0.10728160728160727 [ok]
+PhonemeSpectra run=5 depth=1 until=0.0 corr=None calib=False M=10000 intercept=False -> val=0.12759462759462759 [ok]
