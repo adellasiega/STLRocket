@@ -1,0 +1,17 @@
+{
+ "dataset": "FaceDetection",
+ "run": 0,
+ "seed": 0,
+ "n_train": 5890,
+ "n_test": 3524,
+ "n_channels": 144,
+ "length": 62,
+ "n_classes": 2,
+ "method": "minirocket",
+ "bacc_train": 0.9869269949066214,
+ "bacc_test": 0.5820090805902384,
+ "acc_train": 0.9869269949066214,
+ "acc_test": 0.5820090805902384,
+ "fit_s": 42.66369063826278,
+ "predict_s": 2.1606550263240933
+}

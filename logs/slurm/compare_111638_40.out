@@ -1,0 +1,8 @@
+Task 40: python -u scripts/run_comparison.py --datasets Libras --runs 1 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
+[16:03:32] Libras run 1: 180 train / 180 test series, shape (2, 45), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
+[16:03:43]   STL features: 10000 formulae in 11 s
+[16:04:27]   stlrocket: balanced accuracy test 0.772 (train 0.944), fit 43 s
+[16:04:32]   stl_tree: balanced accuracy test 0.483 (train 0.772), fit 6 s
+[16:04:35]   minirocket: balanced accuracy test 0.939 (train 1.000), fit 0 s
+[16:04:37]   multirockethydra: balanced accuracy test 0.933 (train 1.000), fit 1 s
+[16:04:59]   minirocket_lasso: balanced accuracy test 0.828 (train 0.989), fit 22 s

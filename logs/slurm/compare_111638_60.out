@@ -1,0 +1,8 @@
+Task 60: python -u scripts/run_comparison.py --datasets ERing --runs 2 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
+[16:06:04] ERing run 2: 30 train / 270 test series, shape (4, 65), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
+[16:06:13]   STL features: 10000 formulae in 9 s
+[16:06:15]   stlrocket: balanced accuracy test 0.852 (train 0.967), fit 2 s
+[16:06:18]   stl_tree: balanced accuracy test 0.652 (train 1.000), fit 3 s
+[16:06:20]   minirocket: balanced accuracy test 0.989 (train 1.000), fit 0 s
+[16:06:22]   multirockethydra: balanced accuracy test 0.993 (train 1.000), fit 1 s
+[16:06:23]   minirocket_lasso: balanced accuracy test 0.748 (train 0.933), fit 1 s

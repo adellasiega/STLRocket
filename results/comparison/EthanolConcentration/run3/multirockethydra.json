@@ -1,0 +1,17 @@
+{
+ "dataset": "EthanolConcentration",
+ "run": 3,
+ "seed": 3,
+ "n_train": 261,
+ "n_test": 263,
+ "n_channels": 3,
+ "length": 1751,
+ "n_classes": 4,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.5561188811188811,
+ "acc_train": 1.0,
+ "acc_test": 0.5551330798479087,
+ "fit_s": 17.302670361939818,
+ "predict_s": 15.905381805729121
+}

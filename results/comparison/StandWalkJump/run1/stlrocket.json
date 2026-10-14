@@ -1,0 +1,27 @@
+{
+ "dataset": "StandWalkJump",
+ "run": 1,
+ "seed": 1,
+ "n_train": 12,
+ "n_test": 15,
+ "n_channels": 4,
+ "length": 2500,
+ "n_classes": 3,
+ "method": "stlrocket",
+ "bacc_train": 0.3333333333333333,
+ "bacc_test": 0.3333333333333333,
+ "acc_train": 0.3333333333333333,
+ "acc_test": 0.3333333333333333,
+ "features_s": 13.297511305194348,
+ "fit_s": 0.5726447850465775,
+ "predict_s": 0.08100955095142126,
+ "lambda": 0.40273530160387366,
+ "n_features": 10000,
+ "n_selected": 0,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

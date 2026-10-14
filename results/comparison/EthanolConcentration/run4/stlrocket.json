@@ -1,0 +1,27 @@
+{
+ "dataset": "EthanolConcentration",
+ "run": 4,
+ "seed": 4,
+ "n_train": 261,
+ "n_test": 263,
+ "n_channels": 3,
+ "length": 1751,
+ "n_classes": 4,
+ "method": "stlrocket",
+ "bacc_train": 0.7434731934731934,
+ "bacc_test": 0.426981351981352,
+ "acc_train": 0.7432950191570882,
+ "acc_test": 0.42585551330798477,
+ "features_s": 100.55497796973214,
+ "fit_s": 99.03018421400338,
+ "predict_s": 0.20210814476013184,
+ "lambda": 0.008239623769171697,
+ "n_features": 10000,
+ "n_selected": 98,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

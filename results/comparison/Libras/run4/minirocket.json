@@ -1,0 +1,17 @@
+{
+ "dataset": "Libras",
+ "run": 4,
+ "seed": 4,
+ "n_train": 180,
+ "n_test": 180,
+ "n_channels": 2,
+ "length": 45,
+ "n_classes": 15,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.9444444444444444,
+ "acc_train": 1.0,
+ "acc_test": 0.9444444444444444,
+ "fit_s": 0.36955375876277685,
+ "predict_s": 0.1780180330388248
+}

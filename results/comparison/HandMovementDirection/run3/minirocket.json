@@ -1,0 +1,17 @@
+{
+ "dataset": "HandMovementDirection",
+ "run": 3,
+ "seed": 3,
+ "n_train": 160,
+ "n_test": 74,
+ "n_channels": 10,
+ "length": 400,
+ "n_classes": 4,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.3607142857142857,
+ "acc_train": 1.0,
+ "acc_test": 0.3783783783783784,
+ "fit_s": 0.8852100423537195,
+ "predict_s": 0.3561450531706214
+}

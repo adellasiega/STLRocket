@@ -1,0 +1,17 @@
+{
+ "dataset": "NATOPS",
+ "run": 2,
+ "seed": 2,
+ "n_train": 180,
+ "n_test": 180,
+ "n_channels": 24,
+ "length": 51,
+ "n_classes": 6,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.9277777777777777,
+ "acc_train": 1.0,
+ "acc_test": 0.9277777777777778,
+ "fit_s": 0.3900091960094869,
+ "predict_s": 0.2034386834129691
+}

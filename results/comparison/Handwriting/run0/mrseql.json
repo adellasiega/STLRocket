@@ -1,0 +1,18 @@
+{
+ "dataset": "Handwriting",
+ "run": 0,
+ "seed": 0,
+ "n_train": 150,
+ "n_test": 850,
+ "n_channels": 3,
+ "length": 152,
+ "n_classes": 26,
+ "method": "mrseql",
+ "bacc_train": 1.0,
+ "bacc_test": 0.42027337857666713,
+ "acc_train": 1.0,
+ "acc_test": 0.42705882352941177,
+ "fit_s": 246.01049242727458,
+ "predict_s": 23.54307339526713,
+ "mode": "channel_ensemble"
+}

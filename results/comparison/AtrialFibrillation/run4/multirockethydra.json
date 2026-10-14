@@ -1,0 +1,17 @@
+{
+ "dataset": "AtrialFibrillation",
+ "run": 4,
+ "seed": 4,
+ "n_train": 15,
+ "n_test": 15,
+ "n_channels": 2,
+ "length": 640,
+ "n_classes": 3,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.06666666666666667,
+ "acc_train": 1.0,
+ "acc_test": 0.06666666666666667,
+ "fit_s": 0.9464759258553386,
+ "predict_s": 0.42799930181354284
+}

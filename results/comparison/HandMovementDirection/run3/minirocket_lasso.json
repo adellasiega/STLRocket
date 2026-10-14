@@ -1,0 +1,26 @@
+{
+ "dataset": "HandMovementDirection",
+ "run": 3,
+ "seed": 3,
+ "n_train": 160,
+ "n_test": 74,
+ "n_channels": 10,
+ "length": 400,
+ "n_classes": 4,
+ "method": "minirocket_lasso",
+ "bacc_train": 0.3375,
+ "bacc_test": 0.26666666666666666,
+ "acc_train": 0.3375,
+ "acc_test": 0.35135135135135137,
+ "features_s": 1.0304577010683715,
+ "fit_s": 3.348271762020886,
+ "predict_s": 0.11996199563145638,
+ "n_constant": 0,
+ "lambda": 0.17167137232940247,
+ "n_features": 9996,
+ "n_selected": 2,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

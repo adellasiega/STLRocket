@@ -1,0 +1,34 @@
+{
+ "dataset": "AtrialFibrillation",
+ "run": 3,
+ "seed": 3,
+ "n_train": 15,
+ "n_test": 15,
+ "n_channels": 2,
+ "length": 640,
+ "n_classes": 3,
+ "method": "stl_tree",
+ "bacc_train": 0.6666666666666666,
+ "bacc_test": 0.39999999999999997,
+ "acc_train": 0.6666666666666666,
+ "acc_test": 0.4,
+ "features_s": 6.531901660840958,
+ "fit_s": 2.1956146568991244,
+ "predict_s": 0.004137673880904913,
+ "max_depth": 1,
+ "depth": 1,
+ "n_leaves": 2,
+ "n_splits": 3,
+ "cv_bacc": {
+  "1": 0.3333333333333333,
+  "2": 0.1111111111111111,
+  "3": 0.1111111111111111,
+  "4": 0.1111111111111111,
+  "5": 0.1111111111111111
+ },
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3
+ }
+}

@@ -1,0 +1,26 @@
+{
+ "dataset": "Heartbeat",
+ "run": 0,
+ "seed": 0,
+ "n_train": 204,
+ "n_test": 205,
+ "n_channels": 61,
+ "length": 405,
+ "n_classes": 2,
+ "method": "minirocket_lasso",
+ "bacc_train": 0.7198353025420694,
+ "bacc_test": 0.6325865339023233,
+ "acc_train": 0.6813725490196079,
+ "acc_test": 0.5707317073170731,
+ "features_s": 3.1858914643526077,
+ "fit_s": 1.5540667069144547,
+ "predict_s": 0.03173217969015241,
+ "n_constant": 0,
+ "lambda": 0.21088638671849189,
+ "n_features": 9996,
+ "n_selected": 2,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

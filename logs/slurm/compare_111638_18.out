@@ -1,0 +1,5 @@
+Task 18: python -u scripts/run_comparison.py --datasets PenDigits --runs 0 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
+[16:02:20] PenDigits run 0: 7494 train / 3498 test series, shape (2, 8), methods ['minirocket', 'multirockethydra', 'minirocket_lasso']
+[16:02:21]   minirocket: FAILED, ValueError: n_timepoints must be >= 9, but found 8; zero pad shorter series so that n_timepoints == 9
+[16:02:22]   multirockethydra: FAILED, ValueError: n_timepoints must be >= 9, but found 8; zero pad shorter series so that n_timepoints == 9
+[16:02:22]   minirocket_lasso: FAILED, ValueError: n_timepoints must be >= 9, but found 8; zero pad shorter series so that n_timepoints == 9

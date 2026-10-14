@@ -1,0 +1,17 @@
+{
+ "dataset": "ArticularyWordRecognition",
+ "run": 1,
+ "seed": 1,
+ "n_train": 275,
+ "n_test": 300,
+ "n_channels": 9,
+ "length": 144,
+ "n_classes": 25,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.99,
+ "acc_train": 1.0,
+ "acc_test": 0.99,
+ "fit_s": 2.97690210910514,
+ "predict_s": 2.2266643550246954
+}

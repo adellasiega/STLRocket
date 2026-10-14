@@ -1,0 +1,27 @@
+{
+ "dataset": "SelfRegulationSCP2",
+ "run": 0,
+ "seed": 0,
+ "n_train": 200,
+ "n_test": 180,
+ "n_channels": 7,
+ "length": 1152,
+ "n_classes": 2,
+ "method": "stlrocket",
+ "bacc_train": 0.5,
+ "bacc_test": 0.5,
+ "acc_train": 0.5,
+ "acc_test": 0.5,
+ "features_s": 44.86907566944137,
+ "fit_s": 2.3214103155769408,
+ "predict_s": 0.04007826093584299,
+ "lambda": 0.08208880329970278,
+ "n_features": 10000,
+ "n_selected": 0,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

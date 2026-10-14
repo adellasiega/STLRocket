@@ -1,0 +1,27 @@
+{
+ "dataset": "Cricket",
+ "run": 2,
+ "seed": 2,
+ "n_train": 108,
+ "n_test": 72,
+ "n_channels": 6,
+ "length": 1197,
+ "n_classes": 12,
+ "method": "stlrocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.9305555555555557,
+ "acc_train": 1.0,
+ "acc_test": 0.9305555555555556,
+ "features_s": 25.604781118687242,
+ "fit_s": 12.505976298823953,
+ "predict_s": 0.29955881694331765,
+ "lambda": 0.020896677556970795,
+ "n_features": 10000,
+ "n_selected": 111,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

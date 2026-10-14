@@ -1,0 +1,26 @@
+{
+ "dataset": "Handwriting",
+ "run": 0,
+ "seed": 0,
+ "n_train": 150,
+ "n_test": 850,
+ "n_channels": 3,
+ "length": 152,
+ "n_classes": 26,
+ "method": "minirocket_lasso",
+ "bacc_train": 1.0,
+ "bacc_test": 0.39044659959963324,
+ "acc_train": 1.0,
+ "acc_test": 0.38588235294117645,
+ "features_s": 0.7557942662388086,
+ "fit_s": 18.215925585944206,
+ "predict_s": 0.5449947542510927,
+ "n_constant": 0,
+ "lambda": 0.0014950071168902627,
+ "n_features": 9996,
+ "n_selected": 517,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

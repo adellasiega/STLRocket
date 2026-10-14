@@ -1,0 +1,27 @@
+{
+ "dataset": "UWaveGestureLibrary",
+ "run": 3,
+ "seed": 3,
+ "n_train": 120,
+ "n_test": 320,
+ "n_channels": 3,
+ "length": 315,
+ "n_classes": 8,
+ "method": "stlrocket",
+ "bacc_train": 0.9750000000000001,
+ "bacc_test": 0.85625,
+ "acc_train": 0.975,
+ "acc_test": 0.85625,
+ "features_s": 14.83718954026699,
+ "fit_s": 9.44010056508705,
+ "predict_s": 0.2730009527876973,
+ "lambda": 0.05458294123135954,
+ "n_features": 10000,
+ "n_selected": 71,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

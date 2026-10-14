@@ -1,0 +1,26 @@
+{
+ "dataset": "Epilepsy",
+ "run": 0,
+ "seed": 0,
+ "n_train": 137,
+ "n_test": 138,
+ "n_channels": 3,
+ "length": 206,
+ "n_classes": 4,
+ "method": "minirocket_lasso",
+ "bacc_train": 1.0,
+ "bacc_test": 0.9858903020667726,
+ "acc_train": 1.0,
+ "acc_test": 0.9855072463768116,
+ "features_s": 0.3538232468999922,
+ "fit_s": 2.4822193579748273,
+ "predict_s": 0.10424173716455698,
+ "n_constant": 0,
+ "lambda": 0.07560453807531213,
+ "n_features": 9996,
+ "n_selected": 31,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

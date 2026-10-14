@@ -1,0 +1,17 @@
+{
+ "dataset": "RacketSports",
+ "run": 4,
+ "seed": 4,
+ "n_train": 151,
+ "n_test": 152,
+ "n_channels": 6,
+ "length": 30,
+ "n_classes": 4,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.8914244186046512,
+ "acc_train": 1.0,
+ "acc_test": 0.881578947368421,
+ "fit_s": 0.19224882498383522,
+ "predict_s": 0.15113802487030625
+}

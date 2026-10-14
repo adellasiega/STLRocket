@@ -1,0 +1,17 @@
+{
+ "dataset": "Epilepsy",
+ "run": 2,
+ "seed": 2,
+ "n_train": 137,
+ "n_test": 138,
+ "n_channels": 3,
+ "length": 206,
+ "n_classes": 4,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 1.0,
+ "acc_train": 1.0,
+ "acc_test": 1.0,
+ "fit_s": 0.43351340806111693,
+ "predict_s": 0.26402807515114546
+}

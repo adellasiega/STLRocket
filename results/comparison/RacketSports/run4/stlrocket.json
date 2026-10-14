@@ -1,0 +1,27 @@
+{
+ "dataset": "RacketSports",
+ "run": 4,
+ "seed": 4,
+ "n_train": 151,
+ "n_test": 152,
+ "n_channels": 6,
+ "length": 30,
+ "n_classes": 4,
+ "method": "stlrocket",
+ "bacc_train": 0.9581097197376267,
+ "bacc_test": 0.7980848153214775,
+ "acc_train": 0.9536423841059603,
+ "acc_test": 0.7828947368421053,
+ "features_s": 9.684693587012589,
+ "fit_s": 4.693896581884474,
+ "predict_s": 0.1342181651853025,
+ "lambda": 0.07183291067409737,
+ "n_features": 10000,
+ "n_selected": 71,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

@@ -1,0 +1,27 @@
+{
+ "dataset": "NATOPS",
+ "run": 5,
+ "seed": 5,
+ "n_train": 180,
+ "n_test": 180,
+ "n_channels": 24,
+ "length": 51,
+ "n_classes": 6,
+ "method": "stlrocket",
+ "bacc_train": 0.9222222222222222,
+ "bacc_test": 0.8833333333333333,
+ "acc_train": 0.9222222222222223,
+ "acc_test": 0.8833333333333333,
+ "features_s": 11.454034907743335,
+ "fit_s": 12.532750193960965,
+ "predict_s": 0.22082216059789062,
+ "lambda": 0.10849033676818778,
+ "n_features": 10000,
+ "n_selected": 22,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

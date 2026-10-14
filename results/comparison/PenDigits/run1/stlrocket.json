@@ -1,0 +1,27 @@
+{
+ "dataset": "PenDigits",
+ "run": 1,
+ "seed": 1,
+ "n_train": 7494,
+ "n_test": 3498,
+ "n_channels": 2,
+ "length": 8,
+ "n_classes": 10,
+ "method": "stlrocket",
+ "bacc_train": 0.9985029785035564,
+ "bacc_test": 0.9736762333098833,
+ "acc_train": 0.9985321590605818,
+ "acc_test": 0.9731275014293882,
+ "features_s": 197.34281477332115,
+ "fit_s": 1138.783979112748,
+ "predict_s": 4.068743071053177,
+ "lambda": 0.0005499913818948068,
+ "n_features": 10000,
+ "n_selected": 381,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

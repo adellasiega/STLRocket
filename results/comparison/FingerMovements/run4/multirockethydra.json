@@ -1,0 +1,17 @@
+{
+ "dataset": "FingerMovements",
+ "run": 4,
+ "seed": 4,
+ "n_train": 316,
+ "n_test": 100,
+ "n_channels": 28,
+ "length": 50,
+ "n_classes": 2,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.6202480992396959,
+ "acc_train": 1.0,
+ "acc_test": 0.62,
+ "fit_s": 1.887883411720395,
+ "predict_s": 0.4560526153072715
+}

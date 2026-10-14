@@ -1,0 +1,26 @@
+{
+ "dataset": "MotorImagery",
+ "run": 1,
+ "seed": 1,
+ "n_train": 278,
+ "n_test": 100,
+ "n_channels": 64,
+ "length": 3000,
+ "n_classes": 2,
+ "method": "minirocket_lasso",
+ "bacc_train": 1.0,
+ "bacc_test": 0.5,
+ "acc_train": 1.0,
+ "acc_test": 0.5,
+ "features_s": 26.172682086005807,
+ "fit_s": 1.5494028707034886,
+ "predict_s": 0.030211471021175385,
+ "n_constant": 4,
+ "lambda": 0.016317093054482992,
+ "n_features": 9996,
+ "n_selected": 151,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

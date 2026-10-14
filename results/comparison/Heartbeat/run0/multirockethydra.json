@@ -1,0 +1,17 @@
+{
+ "dataset": "Heartbeat",
+ "run": 0,
+ "seed": 0,
+ "n_train": 204,
+ "n_test": 205,
+ "n_channels": 61,
+ "length": 405,
+ "n_classes": 2,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.659850640113798,
+ "acc_train": 1.0,
+ "acc_test": 0.7658536585365854,
+ "fit_s": 3.694463066291064,
+ "predict_s": 2.676576950121671
+}

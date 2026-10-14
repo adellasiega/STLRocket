@@ -1,0 +1,34 @@
+{
+ "dataset": "HandMovementDirection",
+ "run": 4,
+ "seed": 4,
+ "n_train": 160,
+ "n_test": 74,
+ "n_channels": 10,
+ "length": 400,
+ "n_classes": 4,
+ "method": "stl_tree",
+ "bacc_train": 0.825,
+ "bacc_test": 0.26071428571428573,
+ "acc_train": 0.825,
+ "acc_test": 0.25675675675675674,
+ "features_s": 14.852066514082253,
+ "fit_s": 5.5575549360364676,
+ "predict_s": 0.0065489718690514565,
+ "max_depth": 5,
+ "depth": 5,
+ "n_leaves": 16,
+ "n_splits": 3,
+ "cv_bacc": {
+  "1": 0.28571428571428564,
+  "2": 0.25778388278388276,
+  "3": 0.2765567765567765,
+  "4": 0.2870879120879121,
+  "5": 0.31272893772893773
+ },
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3
+ }
+}

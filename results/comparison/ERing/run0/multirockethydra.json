@@ -1,0 +1,17 @@
+{
+ "dataset": "ERing",
+ "run": 0,
+ "seed": 0,
+ "n_train": 30,
+ "n_test": 270,
+ "n_channels": 4,
+ "length": 65,
+ "n_classes": 6,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.9740740740740742,
+ "acc_train": 1.0,
+ "acc_test": 0.9740740740740741,
+ "fit_s": 2.2869306220673025,
+ "predict_s": 0.8213641881011426
+}

@@ -1,0 +1,27 @@
+{
+ "dataset": "EigenWorms",
+ "run": 2,
+ "seed": 2,
+ "n_train": 128,
+ "n_test": 131,
+ "n_channels": 6,
+ "length": 17984,
+ "n_classes": 5,
+ "method": "stlrocket",
+ "bacc_train": 0.9363636363636363,
+ "bacc_test": 0.6697692645518734,
+ "acc_train": 0.8984375,
+ "acc_test": 0.6946564885496184,
+ "features_s": 2519.4042005012743,
+ "fit_s": 4.414404068142176,
+ "predict_s": 0.1503718988969922,
+ "lambda": 0.06912068506860489,
+ "n_features": 10000,
+ "n_selected": 65,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

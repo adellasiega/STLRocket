@@ -1,0 +1,17 @@
+{
+ "dataset": "PEMS-SF",
+ "run": 4,
+ "seed": 4,
+ "n_train": 267,
+ "n_test": 173,
+ "n_channels": 963,
+ "length": 144,
+ "n_classes": 7,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.8199109746935834,
+ "acc_train": 1.0,
+ "acc_test": 0.8265895953757225,
+ "fit_s": 10.41171783581376,
+ "predict_s": 6.048784935846925
+}

@@ -1,0 +1,34 @@
+{
+ "dataset": "EthanolConcentration",
+ "run": 0,
+ "seed": 0,
+ "n_train": 261,
+ "n_test": 263,
+ "n_channels": 3,
+ "length": 1751,
+ "n_classes": 4,
+ "method": "stl_tree",
+ "bacc_train": 0.6041958041958042,
+ "bacc_test": 0.39090909090909093,
+ "acc_train": 0.6053639846743295,
+ "acc_test": 0.3916349809885932,
+ "features_s": 64.27822001371533,
+ "fit_s": 6.661607658024877,
+ "predict_s": 0.008277317974716425,
+ "max_depth": 5,
+ "depth": 5,
+ "n_leaves": 16,
+ "n_splits": 3,
+ "cv_bacc": {
+  "1": 0.3068181818181818,
+  "2": 0.36958874458874463,
+  "3": 0.36760461760461766,
+  "4": 0.3531746031746032,
+  "5": 0.37806637806637805
+ },
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3
+ }
+}

@@ -1,0 +1,27 @@
+{
+ "dataset": "FingerMovements",
+ "run": 2,
+ "seed": 2,
+ "n_train": 316,
+ "n_test": 100,
+ "n_channels": 28,
+ "length": 50,
+ "n_classes": 2,
+ "method": "stlrocket",
+ "bacc_train": 0.7057845611505027,
+ "bacc_test": 0.5096038415366146,
+ "acc_train": 0.7056962025316456,
+ "acc_test": 0.51,
+ "features_s": 13.151934502180666,
+ "fit_s": 3.918716046027839,
+ "predict_s": 0.04541123379021883,
+ "lambda": 0.022996263666839527,
+ "n_features": 10000,
+ "n_selected": 26,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

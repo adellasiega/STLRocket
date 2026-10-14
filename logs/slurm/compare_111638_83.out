@@ -1,0 +1,5 @@
+Task 83: python -u scripts/run_comparison.py --datasets EigenWorms --runs 3 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
+[16:11:39] EigenWorms run 3: 128 train / 131 test series, shape (6, 17984), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
+[16:50:42]   STL features: 10000 formulae in 2343 s
+[16:50:46]   stlrocket: balanced accuracy test 0.680 (train 0.955), fit 5 s
+[16:50:51]   stl_tree: balanced accuracy test 0.486 (train 0.991), fit 5 s

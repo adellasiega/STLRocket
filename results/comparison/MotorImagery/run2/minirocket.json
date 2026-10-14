@@ -1,0 +1,17 @@
+{
+ "dataset": "MotorImagery",
+ "run": 2,
+ "seed": 2,
+ "n_train": 278,
+ "n_test": 100,
+ "n_channels": 64,
+ "length": 3000,
+ "n_classes": 2,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.49,
+ "acc_train": 1.0,
+ "acc_test": 0.49,
+ "fit_s": 18.642648786772043,
+ "predict_s": 6.702258086297661
+}

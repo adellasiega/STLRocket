@@ -1,0 +1,17 @@
+{
+ "dataset": "DuckDuckGeese",
+ "run": 5,
+ "seed": 5,
+ "n_train": 50,
+ "n_test": 50,
+ "n_channels": 1345,
+ "length": 270,
+ "n_classes": 5,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.4600000000000001,
+ "acc_train": 1.0,
+ "acc_test": 0.46,
+ "fit_s": 6.590434403158724,
+ "predict_s": 5.611642757896334
+}

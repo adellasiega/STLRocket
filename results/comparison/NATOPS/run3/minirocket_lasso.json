@@ -1,0 +1,26 @@
+{
+ "dataset": "NATOPS",
+ "run": 3,
+ "seed": 3,
+ "n_train": 180,
+ "n_test": 180,
+ "n_channels": 24,
+ "length": 51,
+ "n_classes": 6,
+ "method": "minirocket_lasso",
+ "bacc_train": 1.0,
+ "bacc_test": 0.9,
+ "acc_train": 1.0,
+ "acc_test": 0.9,
+ "features_s": 0.3363935831002891,
+ "fit_s": 6.030980271287262,
+ "predict_s": 0.14128258218988776,
+ "n_constant": 10,
+ "lambda": 0.012184437957563903,
+ "n_features": 9996,
+ "n_selected": 116,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

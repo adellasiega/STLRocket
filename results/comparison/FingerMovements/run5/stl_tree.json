@@ -1,0 +1,34 @@
+{
+ "dataset": "FingerMovements",
+ "run": 5,
+ "seed": 5,
+ "n_train": 316,
+ "n_test": 100,
+ "n_channels": 28,
+ "length": 50,
+ "n_classes": 2,
+ "method": "stl_tree",
+ "bacc_train": 0.6507430997876857,
+ "bacc_test": 0.542016806722689,
+ "acc_train": 0.6487341772151899,
+ "acc_test": 0.55,
+ "features_s": 12.549472977872938,
+ "fit_s": 7.524605154059827,
+ "predict_s": 0.007983215153217316,
+ "max_depth": 2,
+ "depth": 2,
+ "n_leaves": 4,
+ "n_splits": 3,
+ "cv_bacc": {
+  "1": 0.5214078374455733,
+  "2": 0.5313860667634253,
+  "3": 0.49715771649733914,
+  "4": 0.5003023705853894,
+  "5": 0.5219521044992743
+ },
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3
+ }
+}

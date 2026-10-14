@@ -1,0 +1,17 @@
+{
+ "dataset": "UWaveGestureLibrary",
+ "run": 3,
+ "seed": 3,
+ "n_train": 120,
+ "n_test": 320,
+ "n_channels": 3,
+ "length": 315,
+ "n_classes": 8,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.9375,
+ "acc_train": 1.0,
+ "acc_test": 0.9375,
+ "fit_s": 0.5154067920520902,
+ "predict_s": 0.872813225723803
+}

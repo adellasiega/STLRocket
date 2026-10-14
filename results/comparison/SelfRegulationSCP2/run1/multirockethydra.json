@@ -1,0 +1,17 @@
+{
+ "dataset": "SelfRegulationSCP2",
+ "run": 1,
+ "seed": 1,
+ "n_train": 200,
+ "n_test": 180,
+ "n_channels": 7,
+ "length": 1152,
+ "n_classes": 2,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.5388888888888889,
+ "acc_train": 1.0,
+ "acc_test": 0.5388888888888889,
+ "fit_s": 10.104589388240129,
+ "predict_s": 7.960048776119947
+}

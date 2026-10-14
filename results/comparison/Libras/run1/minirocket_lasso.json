@@ -1,0 +1,26 @@
+{
+ "dataset": "Libras",
+ "run": 1,
+ "seed": 1,
+ "n_train": 180,
+ "n_test": 180,
+ "n_channels": 2,
+ "length": 45,
+ "n_classes": 15,
+ "method": "minirocket_lasso",
+ "bacc_train": 0.9888888888888888,
+ "bacc_test": 0.8277777777777776,
+ "acc_train": 0.9888888888888889,
+ "acc_test": 0.8277777777777777,
+ "features_s": 0.237188755068928,
+ "fit_s": 22.030483456794173,
+ "predict_s": 0.3237425512634218,
+ "n_constant": 9,
+ "lambda": 0.022077103922297583,
+ "n_features": 9996,
+ "n_selected": 132,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

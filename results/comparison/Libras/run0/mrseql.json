@@ -1,0 +1,18 @@
+{
+ "dataset": "Libras",
+ "run": 0,
+ "seed": 0,
+ "n_train": 180,
+ "n_test": 180,
+ "n_channels": 2,
+ "length": 45,
+ "n_classes": 15,
+ "method": "mrseql",
+ "bacc_train": 1.0,
+ "bacc_test": 0.7833333333333332,
+ "acc_train": 1.0,
+ "acc_test": 0.7833333333333333,
+ "fit_s": 22.103136288933456,
+ "predict_s": 0.5485900621861219,
+ "mode": "channel_ensemble"
+}

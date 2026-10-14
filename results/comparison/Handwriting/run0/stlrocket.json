@@ -1,0 +1,27 @@
+{
+ "dataset": "Handwriting",
+ "run": 0,
+ "seed": 0,
+ "n_train": 150,
+ "n_test": 850,
+ "n_channels": 3,
+ "length": 152,
+ "n_classes": 26,
+ "method": "stlrocket",
+ "bacc_train": 0.8779872904872905,
+ "bacc_test": 0.1886199467178441,
+ "acc_train": 0.84,
+ "acc_test": 0.1952941176470588,
+ "features_s": 20.983588739763945,
+ "fit_s": 29.26348495716229,
+ "predict_s": 1.26948656514287,
+ "lambda": 0.030605102949779386,
+ "n_features": 10000,
+ "n_selected": 243,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

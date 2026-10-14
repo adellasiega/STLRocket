@@ -1,0 +1,17 @@
+{
+ "dataset": "Handwriting",
+ "run": 5,
+ "seed": 5,
+ "n_train": 150,
+ "n_test": 850,
+ "n_channels": 3,
+ "length": 152,
+ "n_classes": 26,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.5229197718711464,
+ "acc_train": 1.0,
+ "acc_test": 0.5258823529411765,
+ "fit_s": 0.4106980077922344,
+ "predict_s": 1.1259727808646858
+}

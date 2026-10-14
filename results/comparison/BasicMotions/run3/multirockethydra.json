@@ -1,0 +1,17 @@
+{
+ "dataset": "BasicMotions",
+ "run": 3,
+ "seed": 3,
+ "n_train": 40,
+ "n_test": 40,
+ "n_channels": 6,
+ "length": 100,
+ "n_classes": 4,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 1.0,
+ "acc_train": 1.0,
+ "acc_test": 1.0,
+ "fit_s": 0.6494599827565253,
+ "predict_s": 0.2508121314458549
+}

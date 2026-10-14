@@ -1,0 +1,17 @@
+{
+ "dataset": "PEMS-SF",
+ "run": 2,
+ "seed": 2,
+ "n_train": 267,
+ "n_test": 173,
+ "n_channels": 963,
+ "length": 144,
+ "n_classes": 7,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.8331177679003766,
+ "acc_train": 1.0,
+ "acc_test": 0.838150289017341,
+ "fit_s": 4.833748964127153,
+ "predict_s": 2.90080031612888
+}

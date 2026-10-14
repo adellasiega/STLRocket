@@ -1,0 +1,26 @@
+{
+ "dataset": "BasicMotions",
+ "run": 2,
+ "seed": 2,
+ "n_train": 40,
+ "n_test": 40,
+ "n_channels": 6,
+ "length": 100,
+ "n_classes": 4,
+ "method": "minirocket_lasso",
+ "bacc_train": 0.25,
+ "bacc_test": 0.25,
+ "acc_train": 0.25,
+ "acc_test": 0.25,
+ "features_s": 0.1897060670889914,
+ "fit_s": 2.2055361117236316,
+ "predict_s": 0.07707072515040636,
+ "n_constant": 2,
+ "lambda": 0.4290203986504622,
+ "n_features": 9996,
+ "n_selected": 0,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

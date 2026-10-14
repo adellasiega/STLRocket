@@ -1,0 +1,34 @@
+{
+ "dataset": "ArticularyWordRecognition",
+ "run": 2,
+ "seed": 2,
+ "n_train": 275,
+ "n_test": 300,
+ "n_channels": 9,
+ "length": 144,
+ "n_classes": 25,
+ "method": "stl_tree",
+ "bacc_train": 0.24,
+ "bacc_test": 0.20666666666666664,
+ "acc_train": 0.24,
+ "acc_test": 0.20666666666666667,
+ "features_s": 19.103525361046195,
+ "fit_s": 10.303886037319899,
+ "predict_s": 0.009209549985826015,
+ "max_depth": 5,
+ "depth": 5,
+ "n_leaves": 6,
+ "n_splits": 3,
+ "cv_bacc": {
+  "1": 0.07555555555555556,
+  "2": 0.1111111111111111,
+  "3": 0.13999999999999999,
+  "4": 0.16888888888888887,
+  "5": 0.1922222222222222
+ },
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3
+ }
+}

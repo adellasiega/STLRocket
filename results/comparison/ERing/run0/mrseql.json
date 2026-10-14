@@ -1,0 +1,18 @@
+{
+ "dataset": "ERing",
+ "run": 0,
+ "seed": 0,
+ "n_train": 30,
+ "n_test": 270,
+ "n_channels": 4,
+ "length": 65,
+ "n_classes": 6,
+ "method": "mrseql",
+ "bacc_train": 1.0,
+ "bacc_test": 0.8629629629629628,
+ "acc_train": 1.0,
+ "acc_test": 0.8629629629629629,
+ "fit_s": 15.28625456104055,
+ "predict_s": 1.4597019739449024,
+ "mode": "channel_ensemble"
+}

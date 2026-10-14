@@ -1,0 +1,17 @@
+{
+ "dataset": "EigenWorms",
+ "run": 1,
+ "seed": 1,
+ "n_train": 128,
+ "n_test": 131,
+ "n_channels": 6,
+ "length": 17984,
+ "n_classes": 5,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.9429951690821256,
+ "acc_train": 1.0,
+ "acc_test": 0.9541984732824428,
+ "fit_s": 31.08532070182264,
+ "predict_s": 27.75854123616591
+}

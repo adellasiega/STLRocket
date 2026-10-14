@@ -1,0 +1,9 @@
+Task 14: python -u scripts/run_comparison.py --datasets Libras --runs 0 --methods stlrocket stl_tree minirocket multirockethydra mrseql minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
+[15:01:42] Libras run 0: 180 train / 180 test series, shape (2, 45), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'mrseql', 'minirocket_lasso']
+[15:01:52]   STL features: 10000 formulae in 10 s
+[15:02:24]   stlrocket: balanced accuracy test 0.794 (train 0.933), fit 32 s
+[15:02:29]   stl_tree: balanced accuracy test 0.461 (train 0.750), fit 5 s
+[15:02:31]   minirocket: balanced accuracy test 0.933 (train 1.000), fit 0 s
+[15:02:33]   multirockethydra: balanced accuracy test 0.939 (train 1.000), fit 1 s
+[15:02:59]   mrseql: balanced accuracy test 0.783 (train 1.000), fit 22 s
+[15:03:18]   minirocket_lasso: balanced accuracy test 0.867 (train 1.000), fit 19 s

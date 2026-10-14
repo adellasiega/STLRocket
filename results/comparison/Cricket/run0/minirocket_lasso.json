@@ -1,0 +1,26 @@
+{
+ "dataset": "Cricket",
+ "run": 0,
+ "seed": 0,
+ "n_train": 108,
+ "n_test": 72,
+ "n_channels": 6,
+ "length": 1197,
+ "n_classes": 12,
+ "method": "minirocket_lasso",
+ "bacc_train": 0.9907407407407408,
+ "bacc_test": 0.8888888888888888,
+ "acc_train": 0.9907407407407407,
+ "acc_test": 0.8888888888888888,
+ "features_s": 1.0726005868054926,
+ "fit_s": 4.696780325844884,
+ "predict_s": 0.22664246102795005,
+ "n_constant": 3,
+ "lambda": 0.08183964287053422,
+ "n_features": 9996,
+ "n_selected": 58,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

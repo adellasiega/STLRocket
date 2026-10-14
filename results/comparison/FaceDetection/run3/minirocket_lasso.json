@@ -1,0 +1,26 @@
+{
+ "dataset": "FaceDetection",
+ "run": 3,
+ "seed": 3,
+ "n_train": 5890,
+ "n_test": 3524,
+ "n_channels": 144,
+ "length": 62,
+ "n_classes": 2,
+ "method": "minirocket_lasso",
+ "bacc_train": 0.7198641765704583,
+ "bacc_test": 0.6206015891032917,
+ "acc_train": 0.7198641765704584,
+ "acc_test": 0.6206015891032917,
+ "features_s": 10.109674935694784,
+ "fit_s": 122.69687468418851,
+ "predict_s": 0.24495738791301847,
+ "n_constant": 0,
+ "lambda": 0.015202098587445182,
+ "n_features": 9996,
+ "n_selected": 181,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}
