@@ -4,6 +4,7 @@ import numpy as np
 from glmnet import LogitNet
 from glmnet.scorer import make_scorer
 from sklearn.metrics import balanced_accuracy_score
+from sklearn.model_selection import StratifiedKFold
 from sklearn.utils.class_weight import compute_sample_weight
 from .config import ExperimentConfig
 
@@ -23,17 +24,28 @@ def available_cpus() -> int:
         return os.cpu_count() or 1
 
 
+def cv_n_splits(y_tr: np.ndarray, cv: int) -> int:
+    """Number of CV folds used to select lambda."""
+    # glmnet passes n_splits straight to StratifiedKFold, which raises if a class
+    # has fewer members than folds (e.g. StandWalkJump: 4 per class), so clamp as
+    # the tree head does. Below 3 splits glmnet silently skips CV altogether and
+    # leaves lambda untuned, so never go under that floor.
+    return max(3, min(cv, int(np.unique(y_tr, return_counts=True)[1].min())))
+
+
+def cv_splitter(y_tr: np.ndarray, cv: int, seed: int) -> StratifiedKFold:
+    """The folds glmnet uses inside train_classifier (LogitNet.fit builds exactly this
+    splitter from n_splits and random_state), for other models to share them."""
+    return StratifiedKFold(n_splits=cv_n_splits(y_tr, cv), shuffle=True, random_state=seed)
+
+
 def train_classifier(
     X_tr_feats: np.ndarray,
     y_tr: np.ndarray,
     config: ExperimentConfig,
     seed: int | None = None,
 ) -> LogitNet:
-    # glmnet passes n_splits straight to StratifiedKFold, which raises if a class
-    # has fewer members than folds (e.g. StandWalkJump: 4 per class), so clamp as
-    # the tree head does. Below 3 splits glmnet silently skips CV altogether and
-    # leaves lambda untuned, so never go under that floor.
-    n_splits = max(3, min(config.cv, int(np.unique(y_tr, return_counts=True)[1].min())))
+    n_splits = cv_n_splits(y_tr, config.cv)
 
     model = LogitNet(
         alpha=1.0,          # LASSO
