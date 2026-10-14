@@ -1,0 +1,8 @@
+Task 157: python -u scripts/run_comparison.py --datasets AtrialFibrillation --runs 6 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
+[16:57:19] AtrialFibrillation run 6: 15 train / 15 test series, shape (2, 640), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
+[16:57:26]   STL features: 10000 formulae in 7 s
+[16:57:27]   stlrocket: balanced accuracy test 0.200 (train 0.667), fit 1 s
+[16:57:29]   stl_tree: balanced accuracy test 0.133 (train 1.000), fit 2 s
+[16:57:31]   minirocket: balanced accuracy test 0.067 (train 1.000), fit 0 s
+[16:57:33]   multirockethydra: balanced accuracy test 0.067 (train 1.000), fit 1 s
+[16:57:34]   minirocket_lasso: balanced accuracy test 0.200 (train 1.000), fit 1 s

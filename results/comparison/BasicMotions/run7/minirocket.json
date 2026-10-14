@@ -1,0 +1,17 @@
+{
+ "dataset": "BasicMotions",
+ "run": 7,
+ "seed": 7,
+ "n_train": 40,
+ "n_test": 40,
+ "n_channels": 6,
+ "length": 100,
+ "n_classes": 4,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 1.0,
+ "acc_train": 1.0,
+ "acc_test": 1.0,
+ "fit_s": 0.1694028708152473,
+ "predict_s": 0.13666830491274595
+}

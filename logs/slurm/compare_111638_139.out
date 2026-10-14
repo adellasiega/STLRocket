@@ -4,3 +4,5 @@ Task 139: python -u scripts/run_comparison.py --datasets FaceDetection --runs 5 
 [16:46:36]   stlrocket: balanced accuracy test 0.664 (train 0.791), fit 120 s
 [16:48:52]   stl_tree: balanced accuracy test 0.542 (train 0.621), fit 136 s
 [16:49:49]   minirocket: balanced accuracy test 0.574 (train 0.991), fit 46 s
+[16:51:47]   multirockethydra: balanced accuracy test 0.593 (train 1.000), fit 81 s
+[16:53:57]   minirocket_lasso: balanced accuracy test 0.610 (train 0.729), fit 119 s

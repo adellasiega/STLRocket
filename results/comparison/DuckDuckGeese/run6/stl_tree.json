@@ -1,0 +1,34 @@
+{
+ "dataset": "DuckDuckGeese",
+ "run": 6,
+ "seed": 6,
+ "n_train": 50,
+ "n_test": 50,
+ "n_channels": 1345,
+ "length": 270,
+ "n_classes": 5,
+ "method": "stl_tree",
+ "bacc_train": 0.96,
+ "bacc_test": 0.48,
+ "acc_train": 0.96,
+ "acc_test": 0.48,
+ "features_s": 7.468012318946421,
+ "fit_s": 3.0929909078404307,
+ "predict_s": 0.005158221814781427,
+ "max_depth": 4,
+ "depth": 4,
+ "n_leaves": 6,
+ "n_splits": 3,
+ "cv_bacc": {
+  "1": 0.3166666666666667,
+  "2": 0.45,
+  "3": 0.4777777777777778,
+  "4": 0.5,
+  "5": 0.5
+ },
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3
+ }
+}

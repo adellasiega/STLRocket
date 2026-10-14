@@ -1,0 +1,3 @@
+Task 176: python -u scripts/run_comparison.py --datasets PhonemeSpectra --runs 6 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
+[17:14:46] PhonemeSpectra run 6: 3315 train / 3353 test series, shape (11, 217), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
+[17:18:03]   STL features: 10000 formulae in 197 s

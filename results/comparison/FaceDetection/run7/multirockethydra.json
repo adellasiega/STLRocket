@@ -1,0 +1,17 @@
+{
+ "dataset": "FaceDetection",
+ "run": 7,
+ "seed": 7,
+ "n_train": 5890,
+ "n_test": 3524,
+ "n_channels": 144,
+ "length": 62,
+ "n_classes": 2,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.6004540295119183,
+ "acc_train": 1.0,
+ "acc_test": 0.6004540295119183,
+ "fit_s": 78.2842218503356,
+ "predict_s": 12.753514402080327
+}

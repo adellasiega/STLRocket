@@ -1,0 +1,8 @@
+Task 169: python -u scripts/run_comparison.py --datasets Heartbeat --runs 6 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
+[17:03:58] Heartbeat run 6: 204 train / 205 test series, shape (61, 405), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
+[17:04:22]   STL features: 10000 formulae in 24 s
+[17:04:24]   stlrocket: balanced accuracy test 0.645 (train 0.775), fit 2 s
+[17:04:30]   stl_tree: balanced accuracy test 0.666 (train 0.863), fit 6 s
+[17:04:37]   minirocket: balanced accuracy test 0.697 (train 1.000), fit 2 s
+[17:04:54]   multirockethydra: balanced accuracy test 0.644 (train 1.000), fit 6 s
+[17:04:59]   minirocket_lasso: balanced accuracy test 0.649 (train 0.739), fit 2 s

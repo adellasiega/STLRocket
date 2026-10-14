@@ -1,0 +1,26 @@
+{
+ "dataset": "ArticularyWordRecognition",
+ "run": 9,
+ "seed": 9,
+ "n_train": 275,
+ "n_test": 300,
+ "n_channels": 9,
+ "length": 144,
+ "n_classes": 25,
+ "method": "minirocket_lasso",
+ "bacc_train": 1.0,
+ "bacc_test": 0.9600000000000002,
+ "acc_train": 1.0,
+ "acc_test": 0.96,
+ "features_s": 1.0311612538062036,
+ "fit_s": 31.516193206887692,
+ "predict_s": 0.5234188199974597,
+ "n_constant": 2,
+ "lambda": 0.0021664127887790737,
+ "n_features": 9996,
+ "n_selected": 269,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

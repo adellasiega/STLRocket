@@ -3,3 +3,6 @@ Task 146: python -u scripts/run_comparison.py --datasets MotorImagery --runs 5 -
 [16:50:03]   STL features: 10000 formulae in 174 s
 [16:50:06]   stlrocket: balanced accuracy test 0.500 (train 0.500), fit 3 s
 [16:50:14]   stl_tree: balanced accuracy test 0.420 (train 0.568), fit 7 s
+[16:51:03]   minirocket: balanced accuracy test 0.430 (train 1.000), fit 21 s
+[16:53:15]   multirockethydra: balanced accuracy test 0.500 (train 1.000), fit 58 s
+[16:53:43]   minirocket_lasso: balanced accuracy test 0.500 (train 0.500), fit 2 s

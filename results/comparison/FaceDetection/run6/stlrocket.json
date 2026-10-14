@@ -1,0 +1,27 @@
+{
+ "dataset": "FaceDetection",
+ "run": 6,
+ "seed": 6,
+ "n_train": 5890,
+ "n_test": 3524,
+ "n_channels": 144,
+ "length": 62,
+ "n_classes": 2,
+ "method": "stlrocket",
+ "bacc_train": 0.8171477079796264,
+ "bacc_test": 0.6606129398410896,
+ "acc_train": 0.8171477079796264,
+ "acc_test": 0.6606129398410897,
+ "features_s": 219.87071146583185,
+ "fit_s": 120.53778111096472,
+ "predict_s": 0.4269592361524701,
+ "lambda": 0.007343253846565054,
+ "n_features": 10000,
+ "n_selected": 580,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

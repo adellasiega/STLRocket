@@ -1,0 +1,17 @@
+{
+ "dataset": "Libras",
+ "run": 7,
+ "seed": 7,
+ "n_train": 180,
+ "n_test": 180,
+ "n_channels": 2,
+ "length": 45,
+ "n_classes": 15,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.9222222222222223,
+ "acc_train": 1.0,
+ "acc_test": 0.9222222222222223,
+ "fit_s": 1.164726308081299,
+ "predict_s": 0.47563985362648964
+}

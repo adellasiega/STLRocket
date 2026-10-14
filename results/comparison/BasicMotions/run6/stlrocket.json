@@ -1,0 +1,27 @@
+{
+ "dataset": "BasicMotions",
+ "run": 6,
+ "seed": 6,
+ "n_train": 40,
+ "n_test": 40,
+ "n_channels": 6,
+ "length": 100,
+ "n_classes": 4,
+ "method": "stlrocket",
+ "bacc_train": 0.975,
+ "bacc_test": 0.95,
+ "acc_train": 0.975,
+ "acc_test": 0.95,
+ "features_s": 5.8900061547756195,
+ "fit_s": 2.181507672648877,
+ "predict_s": 0.1124841570854187,
+ "lambda": 0.26756310388308974,
+ "n_features": 10000,
+ "n_selected": 6,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

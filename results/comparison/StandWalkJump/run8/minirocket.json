@@ -1,0 +1,17 @@
+{
+ "dataset": "StandWalkJump",
+ "run": 8,
+ "seed": 8,
+ "n_train": 12,
+ "n_test": 15,
+ "n_channels": 4,
+ "length": 2500,
+ "n_classes": 3,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.4000000000000001,
+ "acc_train": 1.0,
+ "acc_test": 0.4,
+ "fit_s": 0.7516747936606407,
+ "predict_s": 0.23111916473135352
+}

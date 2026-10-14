@@ -3,3 +3,6 @@ Task 83: python -u scripts/run_comparison.py --datasets EigenWorms --runs 3 --me
 [16:50:42]   STL features: 10000 formulae in 2343 s
 [16:50:46]   stlrocket: balanced accuracy test 0.680 (train 0.955), fit 5 s
 [16:50:51]   stl_tree: balanced accuracy test 0.486 (train 0.991), fit 5 s
+[16:52:20]   minirocket: balanced accuracy test 0.941 (train 1.000), fit 32 s
+[16:58:52]   multirockethydra: balanced accuracy test 0.965 (train 1.000), fit 136 s
+[16:59:56]   minirocket_lasso: balanced accuracy test 0.928 (train 1.000), fit 4 s

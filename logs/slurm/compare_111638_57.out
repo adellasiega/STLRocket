@@ -4,3 +4,5 @@ Task 57: python -u scripts/run_comparison.py --datasets EigenWorms --runs 2 --me
 [16:48:00]   stlrocket: balanced accuracy test 0.670 (train 0.936), fit 4 s
 [16:48:05]   stl_tree: balanced accuracy test 0.652 (train 0.912), fit 5 s
 [16:49:31]   minirocket: balanced accuracy test 0.941 (train 1.000), fit 31 s
+[16:56:04]   multirockethydra: balanced accuracy test 0.965 (train 1.000), fit 137 s
+[16:57:11]   minirocket_lasso: balanced accuracy test 0.896 (train 1.000), fit 4 s

@@ -1,0 +1,17 @@
+{
+ "dataset": "LSST",
+ "run": 2,
+ "seed": 2,
+ "n_train": 2459,
+ "n_test": 2466,
+ "n_channels": 6,
+ "length": 36,
+ "n_classes": 14,
+ "method": "minirocket",
+ "bacc_train": 0.9149581394781592,
+ "bacc_test": 0.4488944903267633,
+ "acc_train": 0.9483529890199268,
+ "acc_test": 0.6313868613138686,
+ "fit_s": 6.072661500889808,
+ "predict_s": 1.0502546033822
+}

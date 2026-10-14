@@ -1,0 +1,17 @@
+{
+ "dataset": "ERing",
+ "run": 7,
+ "seed": 7,
+ "n_train": 30,
+ "n_test": 270,
+ "n_channels": 4,
+ "length": 65,
+ "n_classes": 6,
+ "method": "minirocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.9851851851851853,
+ "acc_train": 1.0,
+ "acc_test": 0.9851851851851852,
+ "fit_s": 0.12890385277569294,
+ "predict_s": 0.2855966007336974
+}

@@ -1,0 +1,8 @@
+Task 189: python -u scripts/run_comparison.py --datasets EthanolConcentration --runs 7 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
+[17:21:44] EthanolConcentration run 7: 261 train / 263 test series, shape (3, 1751), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
+[17:23:25]   STL features: 10000 formulae in 101 s
+[17:25:25]   stlrocket: balanced accuracy test 0.335 (train 0.501), fit 120 s
+[17:25:33]   stl_tree: balanced accuracy test 0.391 (train 0.449), fit 7 s
+[17:25:41]   minirocket: balanced accuracy test 0.450 (train 0.985), fit 2 s
+[17:26:29]   multirockethydra: balanced accuracy test 0.533 (train 1.000), fit 17 s
+[17:26:40]   minirocket_lasso: balanced accuracy test 0.518 (train 0.943), fit 7 s

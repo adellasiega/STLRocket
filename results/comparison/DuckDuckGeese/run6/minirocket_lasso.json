@@ -1,0 +1,26 @@
+{
+ "dataset": "DuckDuckGeese",
+ "run": 6,
+ "seed": 6,
+ "n_train": 50,
+ "n_test": 50,
+ "n_channels": 1345,
+ "length": 270,
+ "n_classes": 5,
+ "method": "minirocket_lasso",
+ "bacc_train": 0.6199999999999999,
+ "bacc_test": 0.4,
+ "acc_train": 0.62,
+ "acc_test": 0.4,
+ "features_s": 7.186215681023896,
+ "fit_s": 1.6966234943829477,
+ "predict_s": 0.11938445083796978,
+ "n_constant": 1,
+ "lambda": 0.2657321480997009,
+ "n_features": 9996,
+ "n_selected": 5,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

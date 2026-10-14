@@ -1,0 +1,26 @@
+{
+ "dataset": "LSST",
+ "run": 3,
+ "seed": 3,
+ "n_train": 2459,
+ "n_test": 2466,
+ "n_channels": 6,
+ "length": 36,
+ "n_classes": 14,
+ "method": "minirocket_lasso",
+ "bacc_train": 0.8783332800024288,
+ "bacc_test": 0.5312108659375315,
+ "acc_train": 0.684017893452623,
+ "acc_test": 0.4975669099756691,
+ "features_s": 2.154287938028574,
+ "fit_s": 943.1833804640919,
+ "predict_s": 0.6561907161958516,
+ "n_constant": 0,
+ "lambda": 0.004090797524316878,
+ "n_features": 9996,
+ "n_selected": 1129,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

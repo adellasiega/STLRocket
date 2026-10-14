@@ -1,0 +1,26 @@
+{
+ "dataset": "FingerMovements",
+ "run": 7,
+ "seed": 7,
+ "n_train": 316,
+ "n_test": 100,
+ "n_channels": 28,
+ "length": 50,
+ "n_classes": 2,
+ "method": "minirocket_lasso",
+ "bacc_train": 0.6105636341785843,
+ "bacc_test": 0.5210084033613445,
+ "acc_train": 0.6107594936708861,
+ "acc_test": 0.52,
+ "features_s": 0.3724866430275142,
+ "fit_s": 1.9065719107165933,
+ "predict_s": 0.030976041685789824,
+ "n_constant": 106,
+ "lambda": 0.10925644801701206,
+ "n_features": 9996,
+ "n_selected": 2,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

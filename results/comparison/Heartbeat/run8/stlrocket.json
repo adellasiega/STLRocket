@@ -1,0 +1,27 @@
+{
+ "dataset": "Heartbeat",
+ "run": 8,
+ "seed": 8,
+ "n_train": 204,
+ "n_test": 205,
+ "n_channels": 61,
+ "length": 405,
+ "n_classes": 2,
+ "method": "stlrocket",
+ "bacc_train": 0.7158968850698173,
+ "bacc_test": 0.6144499762920816,
+ "acc_train": 0.6911764705882353,
+ "acc_test": 0.6146341463414634,
+ "features_s": 20.96612288802862,
+ "fit_s": 1.8185314582660794,
+ "predict_s": 0.04238652205094695,
+ "lambda": 0.10901653971847641,
+ "n_features": 10000,
+ "n_selected": 6,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

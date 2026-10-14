@@ -1,0 +1,26 @@
+{
+ "dataset": "PEMS-SF",
+ "run": 7,
+ "seed": 7,
+ "n_train": 267,
+ "n_test": 173,
+ "n_channels": 963,
+ "length": 144,
+ "n_classes": 7,
+ "method": "minirocket_lasso",
+ "bacc_train": 0.9713569638381668,
+ "bacc_test": 0.7550503280938063,
+ "acc_train": 0.9700374531835206,
+ "acc_test": 0.7630057803468208,
+ "features_s": 7.274169103242457,
+ "fit_s": 10.069177125114948,
+ "predict_s": 0.17639287607744336,
+ "n_constant": 36,
+ "lambda": 0.03797143990739117,
+ "n_features": 9996,
+ "n_selected": 117,
+ "settings": {
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

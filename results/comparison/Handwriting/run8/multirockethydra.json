@@ -1,0 +1,17 @@
+{
+ "dataset": "Handwriting",
+ "run": 8,
+ "seed": 8,
+ "n_train": 150,
+ "n_test": 850,
+ "n_channels": 3,
+ "length": 152,
+ "n_classes": 26,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.5106899214855958,
+ "acc_train": 1.0,
+ "acc_test": 0.5141176470588236,
+ "fit_s": 1.6859266478568316,
+ "predict_s": 5.807912915945053
+}

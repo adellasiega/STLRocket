@@ -1,0 +1,34 @@
+{
+ "dataset": "BasicMotions",
+ "run": 8,
+ "seed": 8,
+ "n_train": 40,
+ "n_test": 40,
+ "n_channels": 6,
+ "length": 100,
+ "n_classes": 4,
+ "method": "stl_tree",
+ "bacc_train": 1.0,
+ "bacc_test": 0.825,
+ "acc_train": 1.0,
+ "acc_test": 0.825,
+ "features_s": 5.925477586686611,
+ "fit_s": 2.9010434499941766,
+ "predict_s": 0.005028491374105215,
+ "max_depth": 3,
+ "depth": 2,
+ "n_leaves": 4,
+ "n_splits": 3,
+ "cv_bacc": {
+  "1": 0.4444444444444444,
+  "2": 0.6458333333333333,
+  "3": 0.875,
+  "4": 0.875,
+  "5": 0.875
+ },
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3
+ }
+}

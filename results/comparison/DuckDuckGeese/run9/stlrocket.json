@@ -1,0 +1,27 @@
+{
+ "dataset": "DuckDuckGeese",
+ "run": 9,
+ "seed": 9,
+ "n_train": 50,
+ "n_test": 50,
+ "n_channels": 1345,
+ "length": 270,
+ "n_classes": 5,
+ "method": "stlrocket",
+ "bacc_train": 0.96,
+ "bacc_test": 0.5599999999999999,
+ "acc_train": 0.96,
+ "acc_test": 0.56,
+ "features_s": 7.239195499103516,
+ "fit_s": 1.7115202248096466,
+ "predict_s": 0.14015188161283731,
+ "lambda": 0.10111323311965616,
+ "n_features": 10000,
+ "n_selected": 32,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

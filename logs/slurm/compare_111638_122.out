@@ -1,3 +1,8 @@
 Task 122: python -u scripts/run_comparison.py --datasets PenDigits --runs 4 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
 [16:28:38] PenDigits run 4: 7494 train / 3498 test series, shape (2, 8), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
 [16:31:50]   STL features: 10000 formulae in 191 s
+[16:51:26]   stlrocket: balanced accuracy test 0.976 (train 1.000), fit 1172 s
+[16:52:09]   stl_tree: balanced accuracy test 0.703 (train 0.728), fit 43 s
+[16:52:11]   minirocket: FAILED, ValueError: n_timepoints must be >= 9, but found 8; zero pad shorter series so that n_timepoints == 9
+[16:52:12]   multirockethydra: FAILED, ValueError: n_timepoints must be >= 9, but found 8; zero pad shorter series so that n_timepoints == 9
+[16:52:12]   minirocket_lasso: FAILED, ValueError: n_timepoints must be >= 9, but found 8; zero pad shorter series so that n_timepoints == 9

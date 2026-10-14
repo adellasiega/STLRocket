@@ -1,0 +1,17 @@
+{
+ "dataset": "LSST",
+ "run": 2,
+ "seed": 2,
+ "n_train": 2459,
+ "n_test": 2466,
+ "n_channels": 6,
+ "length": 36,
+ "n_classes": 14,
+ "method": "multirockethydra",
+ "bacc_train": 1.0,
+ "bacc_test": 0.46172025456448956,
+ "acc_train": 1.0,
+ "acc_test": 0.6370640713706407,
+ "fit_s": 15.964049849659204,
+ "predict_s": 5.247268609702587
+}
