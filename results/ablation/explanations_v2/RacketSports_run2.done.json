@@ -1,0 +1,51 @@
+{
+ "dataset": "RacketSports",
+ "run": 2,
+ "seed": 2,
+ "args": {
+  "datasets": [
+   "RacketSports"
+  ],
+  "runs": [
+   2,
+   3
+  ],
+  "val_ratio": 0.25,
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0,
+  "constructions": [
+   "beam",
+   "ordered_prefix",
+   "ordered_scan",
+   "ordered_nocut"
+  ],
+  "candidates": [
+   "gxi",
+   "ig"
+  ],
+  "confidences": [
+   0.9,
+   0.95,
+   0.99
+  ],
+  "n_max": 3,
+  "beam_width": 5,
+  "min_new_share": 0.05,
+  "max_explained": 1000,
+  "max_simplified": 300,
+  "base_seed": 0,
+  "device": "cpu",
+  "n_jobs": 8,
+  "out_dir": "/share/ai-lab/adsiega/STLRocket/results/ablation/explanations_v2"
+ },
+ "status": "ok",
+ "n_fit": 113,
+ "n_val": 38,
+ "n_classes": 4,
+ "n_selected": 51,
+ "n_selected_multiclass": 1,
+ "bacc_fit": 0.9671336206896551,
+ "bacc_val": 0.8590909090909091
+}

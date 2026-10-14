@@ -1,0 +1,51 @@
+{
+ "dataset": "FaceDetection",
+ "run": 6,
+ "seed": 6,
+ "args": {
+  "datasets": [
+   "FaceDetection"
+  ],
+  "runs": [
+   6,
+   7
+  ],
+  "val_ratio": 0.25,
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0,
+  "constructions": [
+   "beam",
+   "ordered_prefix",
+   "ordered_scan",
+   "ordered_nocut"
+  ],
+  "candidates": [
+   "gxi",
+   "ig"
+  ],
+  "confidences": [
+   0.9,
+   0.95,
+   0.99
+  ],
+  "n_max": 3,
+  "beam_width": 5,
+  "min_new_share": 0.05,
+  "max_explained": 1000,
+  "max_simplified": 300,
+  "base_seed": 0,
+  "device": "cpu",
+  "n_jobs": 8,
+  "out_dir": "/share/ai-lab/adsiega/STLRocket/results/ablation/explanations_v2"
+ },
+ "status": "ok",
+ "n_fit": 4417,
+ "n_val": 1473,
+ "n_classes": 2,
+ "n_selected": 464,
+ "n_selected_multiclass": 0,
+ "bacc_fit": 0.8148084704535464,
+ "bacc_val": 0.7372666066898708
+}
