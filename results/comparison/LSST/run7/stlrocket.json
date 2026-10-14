@@ -1,0 +1,27 @@
+{
+ "dataset": "LSST",
+ "run": 7,
+ "seed": 7,
+ "n_train": 2459,
+ "n_test": 2466,
+ "n_channels": 6,
+ "length": 36,
+ "n_classes": 14,
+ "method": "stlrocket",
+ "bacc_train": 0.43611306346073814,
+ "bacc_test": 0.3485844691820343,
+ "acc_train": 0.20130134200894673,
+ "acc_test": 0.1711273317112733,
+ "features_s": 88.74997122120112,
+ "fit_s": 3249.437978907954,
+ "predict_s": 3.0793765080161393,
+ "lambda": 0.0047572266533992425,
+ "n_features": 10000,
+ "n_selected": 107,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

@@ -1,0 +1,27 @@
+{
+ "dataset": "PhonemeSpectra",
+ "run": 7,
+ "seed": 7,
+ "n_train": 3315,
+ "n_test": 3353,
+ "n_channels": 11,
+ "length": 217,
+ "n_classes": 39,
+ "method": "stlrocket",
+ "bacc_train": 0.330316742081448,
+ "bacc_test": 0.15123294398260198,
+ "acc_train": 0.33031674208144796,
+ "acc_test": 0.15120787354607815,
+ "features_s": 202.5831256248057,
+ "fit_s": 8194.078301239759,
+ "predict_s": 10.799358169082552,
+ "lambda": 0.004204375881030542,
+ "n_features": 10000,
+ "n_selected": 1218,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}

@@ -1,0 +1,17 @@
+{
+ "dataset": "PhonemeSpectra",
+ "run": 0,
+ "seed": 0,
+ "n_train": 3315,
+ "n_test": 3353,
+ "n_channels": 11,
+ "length": 217,
+ "n_classes": 39,
+ "method": "minirocket",
+ "bacc_train": 0.9840120663650072,
+ "bacc_test": 0.31708232487986254,
+ "acc_train": 0.9840120663650075,
+ "acc_test": 0.31702952579779303,
+ "fit_s": 17.981193050276488,
+ "predict_s": 7.931072792969644
+}

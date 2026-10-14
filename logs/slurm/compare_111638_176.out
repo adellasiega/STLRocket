@@ -1,3 +1,8 @@
 Task 176: python -u scripts/run_comparison.py --datasets PhonemeSpectra --runs 6 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
 [17:14:46] PhonemeSpectra run 6: 3315 train / 3353 test series, shape (11, 217), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
 [17:18:03]   STL features: 10000 formulae in 197 s
+[19:37:13]   stlrocket: balanced accuracy test 0.138 (train 0.256), fit 8339 s
+[19:39:00]   stl_tree: balanced accuracy test 0.128 (train 0.173), fit 107 s
+[19:39:35]   minirocket: balanced accuracy test 0.310 (train 0.984), fit 17 s
+[19:41:39]   multirockethydra: balanced accuracy test 0.337 (train 1.000), fit 53 s
+[21:08:10]   minirocket_lasso: balanced accuracy test 0.278 (train 0.501), fit 5174 s

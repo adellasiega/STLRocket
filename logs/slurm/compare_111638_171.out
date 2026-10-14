@@ -5,3 +5,4 @@ Task 171: python -u scripts/run_comparison.py --datasets LSST --runs 6 --methods
 [18:00:36]   stl_tree: balanced accuracy test 0.378 (train 0.478), fit 73 s
 [18:00:45]   minirocket: balanced accuracy test 0.464 (train 0.902), fit 6 s
 [18:01:10]   multirockethydra: balanced accuracy test 0.424 (train 1.000), fit 15 s
+[18:38:39]   minirocket_lasso: balanced accuracy test 0.478 (train 0.617), fit 2246 s

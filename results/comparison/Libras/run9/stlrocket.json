@@ -1,0 +1,27 @@
+{
+ "dataset": "Libras",
+ "run": 9,
+ "seed": 9,
+ "n_train": 180,
+ "n_test": 180,
+ "n_channels": 2,
+ "length": 45,
+ "n_classes": 15,
+ "method": "stlrocket",
+ "bacc_train": 1.0,
+ "bacc_test": 0.8555555555555555,
+ "acc_train": 1.0,
+ "acc_test": 0.8555555555555555,
+ "features_s": 10.273329600226134,
+ "fit_s": 41.844269594177604,
+ "predict_s": 0.4108244660310447,
+ "lambda": 0.0029727741576449826,
+ "n_features": 10000,
+ "n_selected": 197,
+ "settings": {
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0
+ }
+}
