@@ -5,3 +5,4 @@ Task 254: python -u scripts/run_comparison.py --datasets PhonemeSpectra --runs 9
 [20:55:42]   stl_tree: balanced accuracy test 0.119 (train 0.164), fit 107 s
 [20:56:16]   minirocket: balanced accuracy test 0.311 (train 0.984), fit 17 s
 [20:58:06]   multirockethydra: balanced accuracy test 0.332 (train 1.000), fit 48 s
+[23:01:27]   minirocket_lasso: balanced accuracy test 0.146 (train 0.169), fit 7385 s
