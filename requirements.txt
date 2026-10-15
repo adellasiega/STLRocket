@@ -8,6 +8,10 @@ pandas
 matplotlib
 seaborn
 
+# Anchors baseline (scripts/run_anchors_comparison.py). anchor-exp pulls in spaCy and lime
+# pulls in scikit-image, neither needed for tabular anchors, so install without deps:
+#   pip install --no-deps anchor-exp lime
+
 # torcheck is not on PyPI -- install separately from the local project, e.g.:
 #   pip install -e ~/Projects/TorCheck
 # (or wherever TorCheck is checked out on this machine)

@@ -15,11 +15,13 @@ Methods (METHODS):
   stl_tree           DecisionTreeClassifier(class_weight="balanced") on the same STL feature
                      matrix as stlrocket (built once per run and shared), max_depth in 1..5
                      chosen by CV on balanced accuracy over the same folds (stlrocket.tree)
-  minirocket         aeon MiniRocketClassifier, default parameters
+  minirocket         aeon MiniRocketClassifier, default parameters; series shorter than 9
+                     time steps (PenDigits) are zero-padded to 9, as for every Rocket method
   multirockethydra   aeon MultiRocketHydraClassifier, default parameters
   mrseql             aeon MrSEQLClassifier, default parameters; univariate only, so on
-                     multivariate data one MrSEQL per channel (ClassifierChannelEnsemble,
-                     probabilities summed), recorded as "mode"
+                     multivariate data one MrSEQL per channel, fitted in parallel, with
+                     probabilities summed as in aeon's ClassifierChannelEnsemble; recorded
+                     as "mode"
   minirocket_lasso   ablation: aeon MiniRocket transform fitted on train, each feature
                      standardized with its train mean and std (constant features set to 0),
                      then exactly the lasso of stlrocket; only the feature map differs
@@ -59,6 +61,7 @@ from stlrocket.data import load_dataset
 from stlrocket.features import build_formula_bank
 from stlrocket.tree import train_tree
 
+ROCKET_MIN_LENGTH = 9   # shortest series MiniRocket and MultiRocket accept
 METHODS = ("stlrocket", "stl_tree", "minirocket", "multirockethydra", "mrseql", "minirocket_lasso")
 # settings of the experiments each method depends on, recorded in its json
 LASSO_SETTINGS = {"stlrocket": ("depth", "n_formulas", "cv", "cut_point"), "stl_tree": ("depth", "n_formulas", "cv"),
@@ -144,17 +147,30 @@ def run_stl_tree(ctx) -> dict:
                                                         search.cv_results_["mean_test_score"])}}
 
 
-def run_aeon(ctx, make) -> dict:
-    """Fit and evaluate the aeon classifier make(ctx) returns, as (classifier, details)."""
+def pad_series(X_tr, X_te, min_length: int):
+    """Zero-pad the series at the end up to min_length time steps (MiniRocket and MultiRocket
+    need at least ROCKET_MIN_LENGTH, more than PenDigits has). The series are standardized,
+    so 0 is the train mean of each variable. Returns X_tr, X_te and the details to record."""
+    T = X_tr.shape[2]
+    if T >= min_length:
+        return X_tr, X_te, {}
+    pad = ((0, 0), (0, 0), (0, min_length - T))
+    return np.pad(X_tr, pad), np.pad(X_te, pad), {"padded_from": int(T), "padded_to": int(min_length)}
+
+
+def run_aeon(ctx, make, min_length: int = 0) -> dict:
+    """Fit and evaluate the aeon classifier make(ctx) returns, as (classifier, details), on
+    the series zero-padded to min_length (pad_series)."""
     clf, details = make(ctx)
+    X_tr, X_te, padded = pad_series(ctx["X_tr"], ctx["X_te"], min_length)
     t = time.perf_counter()
-    clf.fit(ctx["X_tr"], ctx["y_tr"])
+    clf.fit(X_tr, ctx["y_tr"])
     fit_s = time.perf_counter() - t
     t = time.perf_counter()
-    p_te = clf.predict(ctx["X_te"])
+    p_te = clf.predict(X_te)
     predict_s = time.perf_counter() - t
-    return {**scores(ctx["y_tr"], clf.predict(ctx["X_tr"]), ctx["y_te"], p_te),
-            "fit_s": fit_s, "predict_s": predict_s, **details}
+    return {**scores(ctx["y_tr"], clf.predict(X_tr), ctx["y_te"], p_te),
+            "fit_s": fit_s, "predict_s": predict_s, **details, **padded}
 
 
 def make_minirocket(ctx):
@@ -167,22 +183,55 @@ def make_multirockethydra(ctx):
     return MultiRocketHydraClassifier(n_jobs=ctx["n_jobs"], random_state=ctx["seed"]), {}
 
 
-def make_mrseql(ctx):
-    from aeon.classification.compose import ClassifierChannelEnsemble
+def _channel_proba(make, X_tr, y_tr, X_te):
+    """Fit make() on one channel; its classes and class probabilities on train and test."""
+    clf = make().fit(X_tr, y_tr)
+    return list(clf.classes_), clf.predict_proba(X_tr), clf.predict_proba(X_te)
+
+
+def channel_ensemble(make, X_tr, y_tr, X_te, n_jobs: int, seed: int):
+    """Train and test predictions of aeon's ClassifierChannelEnsemble(channels=["all-split"],
+    majority_vote=False, random_state=seed), with the channels fitted in parallel (aeon fits
+    them one after the other): one make() per channel, class probabilities summed, ties
+    broken at random as aeon does. Each worker fits and predicts its own channel and returns
+    only probabilities, so the fitted models never have to be pickled."""
+    from joblib import Parallel, delayed
+    from sklearn.utils import check_random_state
+    out = Parallel(n_jobs=n_jobs)(delayed(_channel_proba)(make, X_tr[:, [c]], y_tr, X_te[:, [c]])
+                                  for c in range(X_tr.shape[1]))
+    classes = np.unique(y_tr)
+    assert all(o[0] == list(classes) for o in out)
+
+    def predict(i):
+        dists = sum(o[i] for o in out)
+        rng = check_random_state(seed)   # a fresh generator per predict call, as in aeon
+        return np.array([classes[int(rng.choice(np.flatnonzero(p == p.max())))]
+                         for p in dists / dists.sum(axis=1, keepdims=True)])
+
+    return predict(1), predict(2)
+
+
+def run_mrseql(ctx) -> dict:
+    """MrSEQLClassifier with default parameters; it is univariate only, so on multivariate
+    data one per channel (channel_ensemble). The times of the channel ensemble include
+    prediction, which runs in the same workers."""
     from aeon.classification.dictionary_based import MrSEQLClassifier
     if MrSEQLClassifier.get_class_tag("capability:multivariate") or ctx["X_tr"].shape[1] == 1:
-        return MrSEQLClassifier(), {"mode": "native"}
-    return (ClassifierChannelEnsemble([("mrseql", MrSEQLClassifier())], channels=["all-split"],
-                                      random_state=ctx["seed"]),
-            {"mode": "channel_ensemble", "n_channels": int(ctx["X_tr"].shape[1])})
+        return run_aeon(ctx, lambda _: (MrSEQLClassifier(), {"mode": "native"}))
+    t = time.perf_counter()
+    p_tr, p_te = channel_ensemble(MrSEQLClassifier, ctx["X_tr"], ctx["y_tr"], ctx["X_te"], ctx["n_jobs"],
+                                  ctx["seed"])
+    return {**scores(ctx["y_tr"], p_tr, ctx["y_te"], p_te), "fit_s": time.perf_counter() - t, "predict_s": None,
+            "mode": "channel_ensemble", "n_channels": int(ctx["X_tr"].shape[1])}
 
 
 def run_minirocket_lasso(ctx) -> dict:
     from aeon.transformations.collection.convolution_based import MiniRocket
     t = time.perf_counter()
     transform = MiniRocket(n_jobs=ctx["n_jobs"], random_state=ctx["seed"])
-    Z_tr = np.asarray(transform.fit_transform(ctx["X_tr"]), dtype=np.float64)
-    Z_te = np.asarray(transform.transform(ctx["X_te"]), dtype=np.float64)
+    X_tr, X_te, padded = pad_series(ctx["X_tr"], ctx["X_te"], ROCKET_MIN_LENGTH)
+    Z_tr = np.asarray(transform.fit_transform(X_tr), dtype=np.float64)
+    Z_te = np.asarray(transform.transform(X_te), dtype=np.float64)
     # standardized with the train statistics, as the STL features; constant columns are 0
     mean, std = Z_tr.mean(axis=0), Z_tr.std(axis=0)
     const = std == 0
@@ -197,15 +246,15 @@ def run_minirocket_lasso(ctx) -> dict:
     p_te = lasso_predict(model, Z_te)
     return {**scores(ctx["y_tr"], lasso_predict(model, Z_tr), ctx["y_te"], p_te),
             "features_s": feat_s, "fit_s": fit_s, "predict_s": time.perf_counter() - t,
-            "n_constant": int(const.sum()), **lasso_details(model)}
+            "n_constant": int(const.sum()), **lasso_details(model), **padded}
 
 
 RUNNERS = {
     "stlrocket": run_stlrocket,
     "stl_tree": run_stl_tree,
-    "minirocket": lambda ctx: run_aeon(ctx, make_minirocket),
-    "multirockethydra": lambda ctx: run_aeon(ctx, make_multirockethydra),
-    "mrseql": lambda ctx: run_aeon(ctx, make_mrseql),
+    "minirocket": lambda ctx: run_aeon(ctx, make_minirocket, ROCKET_MIN_LENGTH),
+    "multirockethydra": lambda ctx: run_aeon(ctx, make_multirockethydra, ROCKET_MIN_LENGTH),
+    "mrseql": run_mrseql,
     "minirocket_lasso": run_minirocket_lasso,
 }
 

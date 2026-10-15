@@ -97,7 +97,8 @@ def run(args, dataset: str, run_id: int) -> None:
         simplify_decimals=0,
     )
     rcfg = ir.RuleConfig(n_max=args.n_max, beam_width=args.beam_width,
-                         confidence=args.confidence, min_new_share=args.min_new_share)
+                         confidence=args.confidence, min_new_share=args.min_new_share,
+                         candidates=args.candidates, construction=args.construction)
     (out / "config.json").write_text(json.dumps(
         {"dataset": dataset, "run": run_id, "seed": seed, "experiment": dataclasses.asdict(cfg),
          "rules": dataclasses.asdict(rcfg)}, indent=2))
@@ -221,8 +222,12 @@ def main():
     p.add_argument("--cv", type=int, default=3)
     p.add_argument("--cut_point", type=float, default=1.0)
     defaults = ir.RuleConfig()
+    p.add_argument("--construction", choices=ir.CONSTRUCTIONS, default=defaults.construction,
+                   help="how an instance rule is built")
+    p.add_argument("--candidates", choices=ir.CANDIDATE_METHODS, default=defaults.candidates,
+                   help="attribution that selects and ranks the candidate formulae")
     p.add_argument("--n_max", type=int, default=defaults.n_max, help="max literals per rule")
-    p.add_argument("--beam_width", type=int, default=defaults.beam_width)
+    p.add_argument("--beam_width", type=int, default=defaults.beam_width, help="beam search only")
     p.add_argument("--confidence", type=float, default=defaults.confidence, help="confidence of the Wilson bound")
     p.add_argument("--min_new_share", type=float, default=defaults.min_new_share,
                    help="global: share of its class a rule must newly cover to enter the OR")

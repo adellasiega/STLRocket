@@ -42,11 +42,11 @@ class RuleConfig:
     """Hyperparameters of instance rules and global explanations."""
     n_max: int = 3                       # max literals per rule
     beam_width: int = 5                  # rules kept per beam search step
-    confidence: float = 0.9              # confidence level of the Wilson lower bound
+    confidence: float = 0.95             # confidence level of the Wilson lower bound
     min_new_share: float | None = 0.05   # global: a rule enters the OR only if it covers this share
                                          # of its class in new train series (None: every distinct rule)
     candidates: str = "gxi"              # candidate formulae: one of CANDIDATE_METHODS (candidate_scores)
-    construction: str = "beam"           # how a rule is built: one of CONSTRUCTIONS (explain_instance)
+    construction: str = "ordered_scan"   # how a rule is built: one of CONSTRUCTIONS (explain_instance)
 
 
 def model_logits_matrix(model) -> np.ndarray:
@@ -416,14 +416,18 @@ def global_rules(train_rules: list[dict], X_tr_feats: np.ndarray, ref_labels: np
             for k, R in rules.items()}
 
 
-def select_disjuncts(rules: list, X_tr_feats: np.ndarray, pos: np.ndarray, min_new: int) -> list:
+def select_disjuncts(rules: list, X_tr_feats: np.ndarray | None, pos: np.ndarray, min_new: int,
+                     masks: list | None = None) -> list:
     """Greedy cover of the train series of the class (pos) by few, general rules: add the
     rule satisfied by the most positives not yet covered (ties: fewer false positives,
     then shorter), and stop when the best one adds fewer than min_new new positives.
     Every disjunct can bring false positives on new series, while the true positives of
-    the rules mostly overlap, so a rule covering almost nothing new is not worth it."""
-    masks = [covered(lits, X_tr_feats) for lits in rules]
-    done = np.zeros(len(X_tr_feats), dtype=bool)
+    the rules mostly overlap, so a rule covering almost nothing new is not worth it.
+    masks: the train series satisfying each rule, for rules that are not literals of
+    X_tr_feats (e.g. another explainer's); len(rules[i]) is then only the length tie-break."""
+    if masks is None:
+        masks = [covered(lits, X_tr_feats) for lits in rules]
+    done = np.zeros(len(pos), dtype=bool)
     left, chosen = list(range(len(rules))), []
     while left:
         def gain(i):

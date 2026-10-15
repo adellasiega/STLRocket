@@ -46,8 +46,10 @@ BASE_SEED=0
 
 # Instance rules and global explanations (defaults of stlrocket.instance_rules.RuleConfig)
 N_MAX=3
-BEAM_WIDTH=5
-CONFIDENCE=0.9
+CONSTRUCTION=ordered_scan
+CANDIDATES=gxi
+BEAM_WIDTH=5      # beam search only
+CONFIDENCE=0.95
 MIN_NEW_SHARE=0.05
 
 MAX_ARRAY_SIZE=1001   # cluster's MaxArraySize: task ids must be < this
@@ -64,6 +66,7 @@ task_command() {  # $1 = task id -> prints the python command
     echo python -u scripts/run_explanations.py \
         --datasets "$dataset" --runs "$run" --depth "$DEPTH" --n_formulas "$N_FORMULAS" \
         --cv "$CV" --cut_point "$CUT_POINT" --base_seed "$BASE_SEED" --device cpu \
+        --construction "$CONSTRUCTION" --candidates "$CANDIDATES" \
         --n_max "$N_MAX" --beam_width "$BEAM_WIDTH" --confidence "$CONFIDENCE" \
         --min_new_share "$MIN_NEW_SHARE" \
         --out_dir "$OUT_DIR"
