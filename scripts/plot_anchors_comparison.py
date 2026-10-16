@@ -12,8 +12,12 @@ test series, on the test set and w.r.t. the model's predictions. Writes:
   anchors_table.tex           per dataset and method: precision, coverage and length of the
                               instance explanations, F1 of the global explanations and time per
                               series; Mean row with Wilcoxon signed-rank p-values over datasets
-and prints how often each method's own precision guarantee (Anchors: estimated precision >=
-threshold; ours: Wilson lower bound on train) holds on test.
+  anchors_summary.tex         the paper's table: one row per metric, the mean over datasets of
+                              each method, the Wilcoxon p-value and the number of datasets where
+                              STLRocket is higher. Precision is pooled over the explanations (as in
+                              the explanation ablation)
+and prints how often Anchors' precision guarantee (estimated precision >= threshold) holds on
+test, and as a diagnostic how often test precision reaches our Wilson bound (an objective, not a claim).
 """
 from __future__ import annotations
 
@@ -44,7 +48,8 @@ def load(res_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     if empty:
         print(f"runs with an empty model, left out: {empty}")
     summary = pd.concat([pd.read_csv(f) for f in sorted(res_dir.glob("*.summary.csv"))], ignore_index=True)
-    inst = pd.concat([pd.read_csv(f).assign(dataset=f.name.split("_run")[0])
+    inst = pd.concat([pd.read_csv(f).assign(dataset=f.name.split("_run")[0],
+                                            run=int(f.name.split("_run")[1].split(".")[0]))
                       for f in sorted(res_dir.glob("*.instances.csv.gz"))], ignore_index=True)
     return summary, inst
 
@@ -89,6 +94,40 @@ def write_table(per_dataset: pd.DataFrame, path: Path):
     print(f"wrote {path}")
 
 
+SUMMARY_ROWS = [("pooled_precision_test", "Precision", "{:.3f}"), ("mean_coverage_test", "Coverage", "{:.3f}"),
+                ("mean_length", "Length", "{:.2f}"),
+                ("global_f1_test", "Global $F_1$", "{:.3f}"), ("time_s", "Time (s)", "{}")]
+
+
+def precision_gap(inst: pd.DataFrame) -> pd.Series:
+    """Per (dataset, run, method): mean over the explained test series of the precision a
+    method reports (Anchors: its estimate; ours: the Wilson bound on train, an objective rather
+    than a claim) minus the test precision (rules no test series satisfies are left out)."""
+    d = inst[(inst.split == "test") & inst.found].copy()
+    d["claimed"] = np.where(d.method == "anchors", d.est_precision, d.lcb_train)
+    d["gap"] = d.claimed - d.precision_test
+    return d.dropna(subset=["gap"]).groupby(["dataset", "run", "method"]).gap.mean().rename("precision_gap")
+
+
+def write_summary_table(summary: pd.DataFrame, path: Path):
+    p = summary.groupby(["dataset", "method"])[[c for c, _, _ in SUMMARY_ROWS]].mean().unstack("method")
+    lines = [r"\begin{tabular}{lcccc}", r"\toprule",
+             r"Metric & STLRocket & Anchors & $p$ & STLRocket higher \\", r"\midrule"]
+    for c, label, fmt in SUMMARY_ROWS:
+        ours, theirs = p[(c, "stlrocket")], p[(c, "anchors")]
+        diff = (ours - theirs).dropna()
+        pv = wilcoxon(diff).pvalue
+        if c == "time_s":
+            cells = [f"{ours.mean():.3f}", f"{theirs.mean():.0f}"]
+        else:
+            cells = [fmt.format(ours.mean()), fmt.format(theirs.mean())]
+        lines.append(f"{label} & {cells[0]} & {cells[1]} & {pv:.2g} & {(diff > 0).sum()}/{len(diff)} \\\\")
+        print(f"{label:15s} {cells[0]:>8s} {cells[1]:>8s}  p={pv:.2g}  higher {(diff > 0).sum()}/{len(diff)}")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    path.write_text("\n".join(lines) + "\n")
+    print(f"wrote {path}")
+
+
 def guarantees(inst: pd.DataFrame, threshold: float):
     """Share of explained test series whose method-specific precision claim holds on test."""
     d = inst[(inst.split == "test") & inst.found].copy()
@@ -97,7 +136,7 @@ def guarantees(inst: pd.DataFrame, threshold: float):
     print(f"Anchors: estimated precision >= {threshold} for {len(claimed) / max(len(a), 1):.1%} of the "
           f"explanations; test precision >= {threshold} for {(claimed.precision_test >= threshold).mean():.1%} of those")
     s = d[d.method == "stlrocket"]
-    print(f"STLRocket: test precision >= Wilson bound on train for "
+    print(f"STLRocket (diagnostic only, the bound is the search objective): test precision >= Wilson bound on train for "
           f"{(s.precision_test >= s.lcb_train).mean():.1%} of the explanations")
 
 
@@ -121,6 +160,9 @@ def main():
         fig.savefig(out_dir / f"anchors_precision_coverage.{ext}", dpi=200, facecolor="white", bbox_inches="tight")
     print(f"wrote {out_dir / 'anchors_precision_coverage'}.{{pdf,png}}")
     write_table(per_dataset, out_dir / "anchors_table.tex")
+    write_summary_table(summary, out_dir / "anchors_summary.tex")
+    gap = precision_gap(inst).groupby(["dataset", "method"]).mean().unstack("method")["anchors"]
+    print(f"Anchors: estimated minus test precision {gap.mean():+.3f} (mean over datasets)")
     guarantees(inst, args.threshold)
 
 
