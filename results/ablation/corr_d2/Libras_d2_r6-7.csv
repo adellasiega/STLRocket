@@ -1,5 +1,0 @@
-dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,n_bank,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
-Libras,6,6,0.25,2,10000,0.0,0.99,55676,10000,False,False,0.8222222222222223,0.9777777777777777,137,0.8222222222222223,192,20,35,78,0.8222,0.0267,0.837,31.1019,17.57,ok
-Libras,6,6,0.25,2,10000,0.0,0.95,188000,10000,False,False,0.8,0.9925925925925926,140,0.8,156,20,22,77,0.8074,0.0196,0.8148,88.2976,17.9572,ok
-Libras,7,7,0.25,2,10000,0.0,0.99,56132,10000,False,False,0.8444444444444444,1.0,222,0.8444444444444444,222,36,36,77,0.7556,0.0128,0.7556,30.824,20.1656,ok
-Libras,7,7,0.25,2,10000,0.0,0.95,195594,10000,False,False,0.8,1.0,194,0.8666666666666666,270,28,62,77,0.7481,0.0267,0.7704,90.7273,18.3987,ok

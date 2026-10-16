@@ -1,7 +1,0 @@
-Task 4: python -u scripts/run_comparison.py --datasets DuckDuckGeese --runs 0 --methods stlrocket stl_tree minirocket multirockethydra mrseql minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
-[14:48:11] DuckDuckGeese run 0: 50 train / 50 test series, shape (1345, 270), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'mrseql', 'minirocket_lasso']
-[14:48:18]   STL features: 10000 formulae in 7 s
-[14:48:20]   stlrocket: balanced accuracy test 0.540 (train 0.920), fit 1 s
-[14:48:23]   stl_tree: balanced accuracy test 0.380 (train 0.980), fit 3 s
-[14:50:51]   minirocket: balanced accuracy test 0.600 (train 1.000), fit 2 s
-[14:51:02]   multirockethydra: balanced accuracy test 0.440 (train 1.000), fit 5 s

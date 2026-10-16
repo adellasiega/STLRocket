@@ -1,5 +1,0 @@
-dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
-BasicMotions,0,0,0.25,2,10000,0.0,,10000,False,False,0.875,1.0,9,0.875,9,7,7,72,0.9722,0.0278,0.9722,5.3508,1.2618,ok
-BasicMotions,0,0,0.25,2,10000,1.0,,10000,False,False,1.0,1.0,13,1.0,13,14,14,72,0.9722,0.0278,0.9722,27.3438,1.1933,ok
-BasicMotions,1,1,0.25,2,10000,0.0,,10000,False,False,1.0,1.0,6,1.0,22,6,42,72,0.9306,0.0417,0.9583,5.4408,1.162,ok
-BasicMotions,1,1,0.25,2,10000,1.0,,10000,False,False,1.0,1.0,30,1.0,30,47,47,73,1.0,0.0,1.0,25.9198,1.4339,ok

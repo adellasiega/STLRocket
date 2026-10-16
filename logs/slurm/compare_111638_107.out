@@ -1,8 +1,0 @@
-Task 107: python -u scripts/run_comparison.py --datasets Cricket --runs 4 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
-[16:22:03] Cricket run 4: 108 train / 72 test series, shape (6, 1197), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
-[16:22:27]   STL features: 10000 formulae in 24 s
-[16:22:39]   stlrocket: balanced accuracy test 0.917 (train 1.000), fit 11 s
-[16:22:44]   stl_tree: balanced accuracy test 0.694 (train 0.833), fit 5 s
-[16:22:48]   minirocket: balanced accuracy test 0.986 (train 1.000), fit 1 s
-[16:23:04]   multirockethydra: balanced accuracy test 0.986 (train 1.000), fit 6 s
-[16:23:11]   minirocket_lasso: balanced accuracy test 0.958 (train 1.000), fit 5 s
