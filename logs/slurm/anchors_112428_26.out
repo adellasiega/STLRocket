@@ -1,0 +1,6 @@
+Task 26: python -u scripts/run_anchors_comparison.py --datasets DuckDuckGeese --runs 2 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_max 3 --confidence 0.95 --min_new_share 0.05 --anchor_threshold 0.95 --max_explained 200 --out_dir /share/ai-lab/adsiega/STLRocket/results/anchors
+[19:22:52] DuckDuckGeese run 2: 2 formulae selected, balanced accuracy test 0.380
+[19:22:54] train: 50 series explained, 0.00 s/series ours, 0.04 s/series Anchors
+[19:22:56] test: 50 series explained, 0.00 s/series ours, 0.05 s/series Anchors
+[19:22:56]   stlrocket  test precision 0.918, coverage 0.959, length 1.44, global F1 0.958, 0.00 s/series
+[19:22:56]   anchors    test precision 0.927, coverage 0.733, length 1.96, global F1 0.898, 0.05 s/series

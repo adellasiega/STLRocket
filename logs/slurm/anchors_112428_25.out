@@ -1,0 +1,6 @@
+Task 25: python -u scripts/run_anchors_comparison.py --datasets FingerMovements --runs 2 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_max 3 --confidence 0.95 --min_new_share 0.05 --anchor_threshold 0.95 --max_explained 200 --out_dir /share/ai-lab/adsiega/STLRocket/results/anchors
+[19:22:46] FingerMovements run 2: 26 formulae selected, balanced accuracy test 0.510
+[19:29:30] train: 200 series explained, 0.00 s/series ours, 2.02 s/series Anchors
+[19:33:03] test: 100 series explained, 0.00 s/series ours, 2.13 s/series Anchors
+[19:33:03]   stlrocket  test precision 0.830, coverage 0.091, length 2.58, global F1 0.668, 0.00 s/series
+[19:33:03]   anchors    test precision 0.881, coverage 0.082, length 3.00, global F1 0.658, 2.13 s/series

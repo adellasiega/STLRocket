@@ -1,0 +1,57 @@
+{
+ "dataset": "BasicMotions",
+ "run": 1,
+ "seed": 1,
+ "args": {
+  "datasets": [
+   "BasicMotions"
+  ],
+  "runs": [
+   1
+  ],
+  "depth": 2,
+  "n_formulas": 10000,
+  "cv": 3,
+  "cut_point": 1.0,
+  "n_max": 3,
+  "confidence": 0.95,
+  "min_new_share": 0.05,
+  "anchor_threshold": 0.95,
+  "anchor_delta": 0.1,
+  "anchor_tau": 0.15,
+  "anchor_batch_size": 100,
+  "anchor_beam_size": 4,
+  "max_explained": 200,
+  "base_seed": 0,
+  "device": "cpu",
+  "n_jobs": 4,
+  "out_dir": "/share/ai-lab/adsiega/STLRocket/results/anchors"
+ },
+ "rules": {
+  "n_max": 3,
+  "beam_width": 5,
+  "confidence": 0.95,
+  "min_new_share": 0.05,
+  "candidates": "gxi",
+  "construction": "ordered_scan"
+ },
+ "anchors": {
+  "threshold": 0.95,
+  "delta": 0.1,
+  "tau": 0.15,
+  "batch_size": 100,
+  "beam_size": 4,
+  "n_max": 3
+ },
+ "n_train": 40,
+ "n_test": 40,
+ "n_classes": 4,
+ "n_selected": 17,
+ "balanced_accuracy": {
+  "train": 1.0,
+  "test": 1.0
+ },
+ "model_s": 7.813166252337396,
+ "status": "ok",
+ "total_s": 552.7435911349021
+}

@@ -1,0 +1,2 @@
+Task 48: python -u scripts/run_anchors_comparison.py --datasets PEMS-SF --runs 4 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_max 3 --confidence 0.95 --min_new_share 0.05 --anchor_threshold 0.95 --max_explained 200 --out_dir /share/ai-lab/adsiega/STLRocket/results/anchors
+[19:23:10] PEMS-SF run 4: 256 formulae selected, balanced accuracy test 0.838

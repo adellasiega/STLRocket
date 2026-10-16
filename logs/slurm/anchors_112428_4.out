@@ -1,0 +1,6 @@
+Task 4: python -u scripts/run_anchors_comparison.py --datasets NATOPS --runs 0 --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --n_max 3 --confidence 0.95 --min_new_share 0.05 --anchor_threshold 0.95 --max_explained 200 --out_dir /share/ai-lab/adsiega/STLRocket/results/anchors
+[19:02:07] NATOPS run 0: 65 formulae selected, balanced accuracy test 0.933
+[02:10:14] train: 180 series explained, 0.01 s/series ours, 142.69 s/series Anchors
+[09:05:41] test: 180 series explained, 0.01 s/series ours, 138.47 s/series Anchors
+[09:05:41]   stlrocket  test precision 0.889, coverage 0.532, length 2.04, global F1 0.873, 0.01 s/series
+[09:05:41]   anchors    test precision 0.857, coverage 0.451, length 2.97, global F1 0.811, 138.47 s/series
