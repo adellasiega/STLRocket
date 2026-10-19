@@ -6,9 +6,11 @@
 #SBATCH --mem=32G --time=2-00:00:00
 #SBATCH --partition=Main
 
-# Test-set comparison of classifiers (scripts/run_comparison.py) as a SLURM array: STLRocket,
-# a decision tree on the same STL features, MiniRocket, MultiRocket+Hydra, MrSEQL and
-# MiniRocket features + the lasso of STLRocket. No explanations.
+# Test-set comparison of classifiers (scripts/run_comparison.py) as a SLURM array. Default
+# methods: MiniRocket, MultiRocket+Hydra, MiniRocket features + the lasso of STLRocket, a
+# decision tree and a ridge classifier on the STL features. STLRocket itself and MrSEQL are
+# available with METHODS="stlrocket ..." (STLRocket's accuracy also comes from
+# run_explanations.sh, which trains the same model). No explanations.
 #
 # Usage, from PROJECT_DIR:
 #   bash scripts/run_comparison.sh              # submit the whole array
@@ -27,7 +29,7 @@
 # ============================== configuration ==============================
 PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
 VENV="/share/ai-lab/adsiega/STLRocket/env"
-OUT_DIR="${PROJECT_DIR}/results/comparison"
+OUT_DIR="${PROJECT_DIR}/results/comparison_balanced"
 
 DATASETS=(
     ArticularyWordRecognition AtrialFibrillation BasicMotions Cricket
@@ -46,7 +48,7 @@ CV=3
 CUT_POINT=1.0
 BASE_SEED=0
 
-METHODS=(${METHODS:-stlrocket stl_tree minirocket multirockethydra mrseql minirocket_lasso})
+METHODS=(${METHODS:-minirocket multirockethydra minirocket_lasso stl_tree stl_ridge})
 
 MAX_ARRAY_SIZE=1001   # cluster's MaxArraySize: task ids must be < this
 # ===========================================================================

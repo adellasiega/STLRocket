@@ -13,8 +13,13 @@ Methods (METHODS):
                      (classifier.train_classifier: no intercept, balanced weights,
                      stratified CV on balanced accuracy, cut_point standard errors)
   stl_tree           DecisionTreeClassifier(class_weight="balanced") on the same STL feature
-                     matrix as stlrocket (built once per run and shared), max_depth in 1..5
-                     chosen by CV on balanced accuracy over the same folds (stlrocket.tree)
+                     matrix as stlrocket (built once per run and shared), max_depth in
+                     stlrocket.tree.DEPTHS (1, 3, 5, 7 or unlimited) chosen by CV on balanced
+                     accuracy over the same folds, ties to the shallower tree
+  stl_ridge          ablation: the same STL feature matrix with the classifier of
+                     MiniRocketClassifier, StandardScaler(with_mean=False) and
+                     RidgeClassifierCV(alphas=logspace(-3, 3, 10)); differs from minirocket only
+                     in the feature map and from stlrocket only in the classifier
   minirocket         aeon MiniRocketClassifier, default parameters; series shorter than 9
                      time steps (PenDigits) are zero-padded to 9, as for every Rocket method
   multirockethydra   aeon MultiRocketHydraClassifier, default parameters
@@ -23,14 +28,15 @@ Methods (METHODS):
                      probabilities summed as in aeon's ClassifierChannelEnsemble; recorded
                      as "mode"
   minirocket_lasso   ablation: aeon MiniRocket transform fitted on train, each feature
-                     standardized with its train mean and std (constant features set to 0),
-                     then exactly the lasso of stlrocket; only the feature map differs
+                     standardized with its class-balanced train mean and std, as the STL
+                     features (constant features set to 0), then exactly the lasso of
+                     stlrocket; only the feature map differs
 
 Written to OUT_DIR/<dataset>/run<r>/:
   <method>.json      balanced accuracy and accuracy on train and test, fit and predict times,
                      and per-method details (stlrocket and minirocket_lasso: lambda and
-                     number of selected features; stl_tree: chosen depth, depth, leaves and
-                     CV scores; mrseql: mode). Written last, so it marks the method as complete
+                     number of selected features; stl_tree: chosen depth (null: unlimited), depth,
+                     leaves and CV scores; stl_ridge: alpha; mrseql: mode). Written last, so it marks the method as complete
   formulas.pkl.gz,   the formula bank and feature scales (sigma) of the run, written with the
   bank_stats.npz     STL features
   stl_tree.pkl       the fitted tree, which with the bank gives the STL formula of each leaf
@@ -52,6 +58,7 @@ from pathlib import Path
 
 import numpy as np
 from sklearn.metrics import balanced_accuracy_score
+from sklearn.utils.class_weight import compute_sample_weight
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -62,7 +69,7 @@ from stlrocket.features import build_formula_bank
 from stlrocket.tree import train_tree
 
 ROCKET_MIN_LENGTH = 9   # shortest series MiniRocket and MultiRocket accept
-METHODS = ("stlrocket", "stl_tree", "minirocket", "multirockethydra", "mrseql", "minirocket_lasso")
+METHODS = ("stlrocket", "stl_tree", "stl_ridge", "minirocket", "multirockethydra", "mrseql", "minirocket_lasso")
 # settings of the experiments each method depends on, recorded in its json
 LASSO_SETTINGS = {"stlrocket": ("depth", "n_formulas", "cv", "cut_point"), "stl_tree": ("depth", "n_formulas", "cv"),
                   "minirocket_lasso": ("cv", "cut_point")}
@@ -141,10 +148,27 @@ def run_stl_tree(ctx) -> dict:
     p_te = tree.predict(F_te)
     return {**scores(ctx["y_tr"], tree.predict(F_tr), ctx["y_te"], p_te),
             "features_s": feat_s, "fit_s": fit_s, "predict_s": time.perf_counter() - t,
-            "max_depth": int(search.best_params_["max_depth"]), "depth": int(tree.get_depth()),
+            "max_depth": search.best_params_["max_depth"], "depth": int(tree.get_depth()),
             "n_leaves": int(tree.get_n_leaves()), "n_splits": int(search.n_splits_),
             "cv_bacc": {str(d): float(s) for d, s in zip(search.cv_results_["param_max_depth"],
                                                         search.cv_results_["mean_test_score"])}}
+
+
+def run_stl_ridge(ctx) -> dict:
+    from sklearn.linear_model import RidgeClassifierCV
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    F_tr, F_te, feat_s = ctx["stl"].get()
+    t = time.perf_counter()
+    # the classifier of aeon's MiniRocketClassifier with its defaults (no class weights)
+    clf = make_pipeline(StandardScaler(with_mean=False), RidgeClassifierCV(alphas=np.logspace(-3, 3, 10)))
+    clf.fit(F_tr, ctx["y_tr"])
+    fit_s = time.perf_counter() - t
+    t = time.perf_counter()
+    p_te = clf.predict(F_te)
+    return {**scores(ctx["y_tr"], clf.predict(F_tr), ctx["y_te"], p_te),
+            "features_s": feat_s, "fit_s": fit_s, "predict_s": time.perf_counter() - t,
+            "alpha": float(clf[-1].alpha_)}
 
 
 def pad_series(X_tr, X_te, min_length: int):
@@ -232,9 +256,12 @@ def run_minirocket_lasso(ctx) -> dict:
     X_tr, X_te, padded = pad_series(ctx["X_tr"], ctx["X_te"], ROCKET_MIN_LENGTH)
     Z_tr = np.asarray(transform.fit_transform(X_tr), dtype=np.float64)
     Z_te = np.asarray(transform.transform(X_te), dtype=np.float64)
-    # standardized with the train statistics, as the STL features; constant columns are 0
-    mean, std = Z_tr.mean(axis=0), Z_tr.std(axis=0)
-    const = std == 0
+    # standardized with the class-balanced train statistics, as the STL features
+    # (features._center_and_scale); constant columns are 0
+    w = compute_sample_weight("balanced", ctx["y_tr"])
+    mean = np.average(Z_tr, axis=0, weights=w)
+    std = np.sqrt(np.average((Z_tr - mean) ** 2, axis=0, weights=w))
+    const = std <= 1e-12 * np.maximum(np.abs(Z_tr).max(axis=0), 1.0)
     std[const] = 1.0
     Z_tr, Z_te = (Z_tr - mean) / std, (Z_te - mean) / std
     Z_tr[:, const], Z_te[:, const] = 0.0, 0.0
@@ -252,6 +279,7 @@ def run_minirocket_lasso(ctx) -> dict:
 RUNNERS = {
     "stlrocket": run_stlrocket,
     "stl_tree": run_stl_tree,
+    "stl_ridge": run_stl_ridge,
     "minirocket": lambda ctx: run_aeon(ctx, make_minirocket, ROCKET_MIN_LENGTH),
     "multirockethydra": lambda ctx: run_aeon(ctx, make_multirockethydra, ROCKET_MIN_LENGTH),
     "mrseql": run_mrseql,
@@ -314,7 +342,7 @@ def main():
     p.add_argument("--n_jobs", type=int, default=available_cpus())
     p.add_argument("--feature_cache", default=None, help="directory where STL feature matrices are saved and reused")
     p.add_argument("--raise_errors", action="store_true", help="stop at the first failing method")
-    p.add_argument("--out_dir", default="results/comparison")
+    p.add_argument("--out_dir", default="results/comparison_balanced")
     args = p.parse_args()
     for dataset in args.datasets:
         for run_id in args.runs:
