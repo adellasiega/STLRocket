@@ -105,7 +105,7 @@ def run(args, dataset: str, run_id: int) -> None:
     log(f"{dataset} run {run_id}: {len(X_tr)} train / {len(X_te)} test series, shape {X_tr.shape[1:]}")
 
     # Formula bank and model
-    formulas, F_tr, F_te, sigma = build_formula_bank(X_tr, X_te, cfg, seed)
+    formulas, F_tr, F_te, sigma = build_formula_bank(X_tr, X_te, y_tr_raw, cfg, seed)
     times["features_s"] = time.perf_counter() - t
     t = time.perf_counter()
     model = train_classifier(F_tr, y_tr_raw, cfg, seed=seed)
@@ -235,7 +235,7 @@ def main():
     p.add_argument("--device", default="cpu")
     p.add_argument("--n_jobs", type=int, default=int(os.environ.get("SLURM_CPUS_PER_TASK", 1)),
                    help="processes for the instance rules (default: the SLURM allocation, else 1)")
-    p.add_argument("--out_dir", default="results/explanations")
+    p.add_argument("--out_dir", default="results/explanations_balanced")
     args = p.parse_args()
     for dataset in args.datasets:
         for run_id in args.runs:

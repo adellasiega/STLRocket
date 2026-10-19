@@ -1,5 +1,0 @@
-dataset,run,seed,val_ratio,depth_max,n_formulas,until_weight,corr_threshold,n_sampled,n_bank,calibrate,fit_intercept,val_balanced_accuracy,fit_balanced_accuracy,n_selected,val_balanced_accuracy_cvmax,n_selected_cvmax,lambda_index,lambda_index_cvmax,n_lambda,cv_score,cv_se,cv_score_cvmax,time_feats_s,time_fit_s,status
-PEMS-SF,2,2,0.25,2,10000,0.0,0.99,11394,10000,False,False,0.7691197691197692,1.0,176,0.7691197691197692,201,37,46,78,0.7006,0.0101,0.7066,12.3436,7.6345,ok
-PEMS-SF,2,2,0.25,2,10000,0.0,0.95,12983,10000,False,False,0.7074314574314575,0.9352206817098363,85,0.7512626262626263,225,15,55,78,0.6634,0.032,0.6933,13.7712,7.1419,ok
-PEMS-SF,3,3,0.25,2,10000,0.0,0.99,11612,10000,False,False,0.7281746031746031,0.9751228216536892,97,0.6953463203463203,135,17,27,78,0.7193,0.0131,0.7318,12.5372,7.0374,ok
-PEMS-SF,3,3,0.25,2,10000,0.0,0.95,13174,10000,False,False,0.7700216450216449,1.0,134,0.7700216450216449,134,27,28,77,0.728,0.0124,0.7367,14.2337,6.9969,ok

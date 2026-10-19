@@ -1,8 +1,0 @@
-Task 227: python -u scripts/run_comparison.py --datasets PEMS-SF --runs 8 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
-[17:56:08] PEMS-SF run 8: 267 train / 173 test series, shape (963, 144), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
-[17:56:25]   STL features: 10000 formulae in 17 s
-[17:56:39]   stlrocket: balanced accuracy test 0.797 (train 1.000), fit 13 s
-[17:56:46]   stl_tree: balanced accuracy test 0.781 (train 0.895), fit 7 s
-[17:57:00]   minirocket: balanced accuracy test 0.828 (train 1.000), fit 5 s
-[17:57:27]   multirockethydra: balanced accuracy test 0.797 (train 1.000), fit 11 s
-[17:57:47]   minirocket_lasso: balanced accuracy test 0.775 (train 1.000), fit 11 s

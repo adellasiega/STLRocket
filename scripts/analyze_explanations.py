@@ -3,7 +3,7 @@
 Aggregates the runs of scripts/run_explanations.py: one row per dataset, mean (and std)
 over its complete runs (those with summary.json), plus the run counts.
 
-    python scripts/analyze_explanations.py [--res_dir results/explanations] [--out FILE.csv]
+    python scripts/analyze_explanations.py [--res_dir results/explanations_balanced] [--out FILE.csv]
 
 Rule metrics are those of the test-series instance rules (rules_test), evaluated on test;
 global metrics are those of the simplified global explanations on test. All are w.r.t.
@@ -37,7 +37,7 @@ def flatten(s: dict) -> dict:
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--res_dir", default="results/explanations")
+    p.add_argument("--res_dir", default="results/explanations_balanced")
     p.add_argument("--out", default=None, help="write the per-dataset table to this CSV")
     args = p.parse_args()
 

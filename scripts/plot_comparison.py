@@ -12,8 +12,9 @@ Writes, as PDF and PNG:
                          pairwise one-sided Wilcoxon tests with Holm correction, alpha 0.1)
   comparison_pairwise    stlrocket against each other method, one point per dataset; points
                          above the diagonal are datasets where stlrocket is better
-  comparison_time        mean test balanced accuracy against the median training time
-                         (features + fit), one point per method
+  comparison_time        mean test balanced accuracy against the median time per dataset of
+                         the whole pipeline (features, fit and prediction, train and test), one
+                         point per method
 and comparison_table.tex, the per-dataset mean and standard deviation over runs, best in bold.
 """
 from __future__ import annotations
@@ -53,7 +54,9 @@ plt.rcParams.update({
 
 def load_rows(res_dir: Path) -> pd.DataFrame:
     df = pd.DataFrame([json.loads(f.read_text()) for f in sorted(res_dir.glob("*/run*/*.json"))])
-    df["train_s"] = df.get("features_s", 0).fillna(0) + df.fit_s
+    # Total time of the pipeline, train and test: the STL and MiniRocket features of both splits
+    # are computed together (features_s), while aeon's classifiers transform the test set in predict
+    df["total_s"] = df.get("features_s", 0).fillna(0) + df.fit_s + df.predict_s.fillna(0)
     return df
 
 
@@ -121,7 +124,7 @@ def plot_pairwise(acc: pd.DataFrame, methods: list[str]):
 
 
 def plot_time(df: pd.DataFrame, acc: pd.DataFrame, methods: list[str]):
-    time = df.groupby(["method", "dataset"]).train_s.mean().groupby("method").median()
+    time = df.groupby(["method", "dataset"]).total_s.mean().groupby("method").median()
     fig, ax = plt.subplots(figsize=(4.6, 3.1), constrained_layout=True)
     for m in methods:
         label, color, marker = METHOD_STYLE[m]
@@ -131,7 +134,7 @@ def plot_time(df: pd.DataFrame, acc: pd.DataFrame, methods: list[str]):
                     fontsize=8, color=INK_2, zorder=4,
                 bbox=dict(facecolor="white", edgecolor="none", alpha=0.8, pad=1))
     ax.set_xscale("log")
-    ax.set_xlabel("Median training time per dataset (s)")
+    ax.set_xlabel("Median time per dataset, train and test (s)")
     ax.set_ylabel("Mean test balanced accuracy")
     ax.margins(x=0.35, y=0.12)
     style_axis(ax)

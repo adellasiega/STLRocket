@@ -2,5 +2,19 @@ notes/
 CLAUDE.md
 env/
 .venv/
-paper_drafts/
 *.swp
+
+# Paper: its own git repo, synced with Overleaf
+paper/
+
+# Generated: results and logs are fetched from the cluster with scripts/sync_results.sh
+results/
+logs/
+scripts/logs/
+local_experiments/results/
+
+# Python and editor artefacts
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+Thumbs.db

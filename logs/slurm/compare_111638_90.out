@@ -1,8 +1,0 @@
-Task 90: python -u scripts/run_comparison.py --datasets Handwriting --runs 3 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
-[16:13:32] Handwriting run 3: 150 train / 850 test series, shape (3, 152), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
-[16:13:56]   STL features: 10000 formulae in 24 s
-[16:14:39]   stlrocket: balanced accuracy test 0.275 (train 1.000), fit 41 s
-[16:14:45]   stl_tree: balanced accuracy test 0.038 (train 0.077), fit 6 s
-[16:14:49]   minirocket: balanced accuracy test 0.506 (train 1.000), fit 0 s
-[16:14:57]   multirockethydra: balanced accuracy test 0.515 (train 1.000), fit 2 s
-[16:15:21]   minirocket_lasso: balanced accuracy test 0.378 (train 1.000), fit 22 s

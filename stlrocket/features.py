@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from .formula_sampler import F0
 from torcheck.stl import Atom, Not, And, Or, Globally, Eventually, Until
+from sklearn.utils.class_weight import compute_sample_weight
 from .config import ExperimentConfig
 
 
@@ -147,21 +148,26 @@ def _make_generator(X_tr: np.ndarray, config: ExperimentConfig, seed: int) -> F0
     )
 
 
-def _center_and_scale(formulas: list, X_tr: np.ndarray, X_te: np.ndarray, F_tr: np.ndarray):
+def _center_and_scale(formulas: list, X_tr: np.ndarray, X_te: np.ndarray, y_tr: np.ndarray, F_tr: np.ndarray):
     """Centre every formula on the train series with the robustness shift property, then
-    scale its robustness to unit train std.
+    scale its robustness to unit train std, both class-balanced.
 
     F_tr: train robustness of formulas as sampled. Each formula is shifted in place by
-    the train mean mu_j of its robustness (phi_j <- phi_j^{-mu_j}), so that the robustness
-    of the stored formula has zero train mean and the sign of a feature is the
-    satisfaction of that formula. Features are recomputed from the shifted formulae
+    the class-balanced train mean mu_j of its robustness (phi_j <- phi_j^{-mu_j}), so that
+    the robustness of the stored formula has zero class-balanced train mean and the sign
+    of a feature is the satisfaction of that formula. Means and stds weight each train
+    series by N / (K N_k), the sample weights of the classifier, so that every class
+    counts equally whatever its size. Features are recomputed from the shifted formulae
     rather than as F - mu, so that they are exactly what the stored formulae evaluate to.
     Returns (X_tr_feats, X_te_feats, sigma) with x_j = rho(phi_j, .) / sigma_j.
     """
-    for phi, mu in zip(formulas, F_tr.mean(axis=0, dtype=np.float64)):
+    w = compute_sample_weight("balanced", y_tr)
+    for phi, mu in zip(formulas, np.average(F_tr.astype(np.float64), axis=0, weights=w)):
         shift_atom_thresholds(phi, -float(mu))
     X_tr_feats, X_te_feats = extract_features(X_tr, formulas), extract_features(X_te, formulas)
-    sigma = X_tr_feats.std(axis=0)
+    # The class-balanced mean of the shifted robustness is 0 (up to float rounding), so the
+    # class-balanced std is the root of its weighted mean square.
+    sigma = np.sqrt(np.average(X_tr_feats.astype(np.float64) ** 2, axis=0, weights=w)).astype(X_tr_feats.dtype)
     # A column constant on train (up to float rounding) carries no information, and
     # dividing by its std would blow up any test value that differs. Set such columns
     # to 0 on both sides, with scale 1.
@@ -176,13 +182,14 @@ def _center_and_scale(formulas: list, X_tr: np.ndarray, X_te: np.ndarray, F_tr: 
 def _build_raw_formula_bank(
     X_tr: np.ndarray,
     X_te: np.ndarray,
+    y_tr: np.ndarray,
     config: ExperimentConfig,
     seed: int,
 ) -> tuple[list, np.ndarray, np.ndarray, np.ndarray]:
     formulas = _make_generator(X_tr, config, seed).sample(config.n_formulas)
     if config.calibrate_thresholds:
         calibrate_thresholds(formulas, X_tr, np.random.default_rng(seed))
-    return formulas, *_center_and_scale(formulas, X_tr, X_te, extract_features(X_tr, formulas))
+    return formulas, *_center_and_scale(formulas, X_tr, X_te, y_tr, extract_features(X_tr, formulas))
 
 
 def correlation_filter(F: np.ndarray, threshold: float, n_keep: int = 0, block: int = 1000) -> np.ndarray:
@@ -212,6 +219,7 @@ def correlation_filter(F: np.ndarray, threshold: float, n_keep: int = 0, block: 
 def build_decorrelated_formula_bank(
     X_tr: np.ndarray,
     X_te: np.ndarray,
+    y_tr: np.ndarray,
     config: ExperimentConfig,
     seed: int,
     threshold: float,
@@ -255,22 +263,24 @@ def build_decorrelated_formula_bank(
     n_sampled = int(keep[M - 1]) + 1 if len(keep) >= M else len(formulas)
     keep = keep[:M]
     formulas = [formulas[i] for i in keep]
-    return formulas, *_center_and_scale(formulas, X_tr, X_te, F_tr[:, keep]), n_sampled
+    return formulas, *_center_and_scale(formulas, X_tr, X_te, y_tr, F_tr[:, keep]), n_sampled
 
 
 def build_formula_bank(
     X_tr: np.ndarray,
     X_te: np.ndarray,
+    y_tr: np.ndarray,
     config: ExperimentConfig,
     seed: int,
 ) -> tuple[list, np.ndarray, np.ndarray, np.ndarray]:
     """Sample STL formulas and compute their standardized robustness features.
 
     Returns (formulas, X_tr_feats, X_te_feats, sigma). X_tr and X_te are expected
-    standardized per variable (data.standardize_series). The returned formulas are the
-    sampled ones shifted to zero mean train robustness (_center_and_scale), and the
-    features are their robustness divided by its train std, x_j = rho(phi_j, tau) / sigma_j;
-    columns constant on train are 0, with sigma_j = 1.
+    standardized per variable (data.standardize_series); y_tr are the train labels, which
+    weight the train statistics by class. The returned formulas are the sampled ones
+    shifted to zero class-balanced mean train robustness (_center_and_scale), and the
+    features are their robustness divided by its class-balanced train std,
+    x_j = rho(phi_j, tau) / sigma_j; columns constant on train are 0, with sigma_j = 1.
     """
 
     # F0 seeds random and torch itself; numpy is seeded here for downstream code.
@@ -278,4 +288,4 @@ def build_formula_bank(
     # Also the default for later eval_robustness calls (explanations, simplification).
     set_device(config.device)
 
-    return _build_raw_formula_bank(X_tr, X_te, config, seed)
+    return _build_raw_formula_bank(X_tr, X_te, y_tr, config, seed)

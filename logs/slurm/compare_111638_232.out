@@ -1,8 +1,0 @@
-Task 232: python -u scripts/run_comparison.py --datasets StandWalkJump --runs 8 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
-[18:02:55] StandWalkJump run 8: 12 train / 15 test series, shape (4, 2500), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
-[18:03:09]   STL features: 10000 formulae in 14 s
-[18:03:10]   stlrocket: balanced accuracy test 0.333 (train 0.333), fit 1 s
-[18:03:12]   stl_tree: balanced accuracy test 0.333 (train 0.667), fit 2 s
-[18:03:15]   minirocket: balanced accuracy test 0.400 (train 1.000), fit 1 s
-[18:03:20]   multirockethydra: balanced accuracy test 0.667 (train 1.000), fit 2 s
-[18:03:22]   minirocket_lasso: balanced accuracy test 0.333 (train 1.000), fit 1 s

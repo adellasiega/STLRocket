@@ -1,8 +1,0 @@
-Task 192: python -u scripts/run_comparison.py --datasets FingerMovements --runs 7 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
-[17:25:06] FingerMovements run 7: 316 train / 100 test series, shape (28, 50), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
-[17:25:18]   STL features: 10000 formulae in 12 s
-[17:25:22]   stlrocket: balanced accuracy test 0.580 (train 1.000), fit 4 s
-[17:25:29]   stl_tree: balanced accuracy test 0.461 (train 0.636), fit 7 s
-[17:25:31]   minirocket: balanced accuracy test 0.581 (train 1.000), fit 0 s
-[17:25:34]   multirockethydra: balanced accuracy test 0.582 (train 1.000), fit 2 s
-[17:25:36]   minirocket_lasso: balanced accuracy test 0.521 (train 0.611), fit 2 s

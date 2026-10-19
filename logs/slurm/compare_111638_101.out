@@ -1,8 +1,0 @@
-Task 101: python -u scripts/run_comparison.py --datasets SelfRegulationSCP2 --runs 3 --methods stlrocket stl_tree minirocket multirockethydra minirocket_lasso --depth 2 --n_formulas 10000 --cv 3 --cut_point 1.0 --base_seed 0 --device cpu --out_dir /share/ai-lab/adsiega/STLRocket/results/comparison
-[16:19:50] SelfRegulationSCP2 run 3: 200 train / 180 test series, shape (7, 1152), methods ['stlrocket', 'stl_tree', 'minirocket', 'multirockethydra', 'minirocket_lasso']
-[16:20:34]   STL features: 10000 formulae in 44 s
-[16:20:36]   stlrocket: balanced accuracy test 0.522 (train 0.745), fit 2 s
-[16:20:42]   stl_tree: balanced accuracy test 0.489 (train 0.695), fit 6 s
-[16:20:48]   minirocket: balanced accuracy test 0.511 (train 1.000), fit 2 s
-[16:21:16]   multirockethydra: balanced accuracy test 0.544 (train 1.000), fit 11 s
-[16:21:20]   minirocket_lasso: balanced accuracy test 0.522 (train 1.000), fit 1 s

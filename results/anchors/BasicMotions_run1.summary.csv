@@ -1,3 +1,0 @@
-dataset,run,method,n_explained,found,pooled_precision_test,mean_precision_test,mean_coverage_test,mean_precision_train,mean_length,time_s,global_precision_test,global_coverage_test,global_f1_test,global_rules
-BasicMotions,1,stlrocket,40,1.0,0.9744408945686901,0.9666666666666668,0.8472222222222221,1.0,1.075,0.006100124900694936,0.9642857142857143,0.875,0.913312693498452,1.0
-BasicMotions,1,anchors,40,1.0,0.9636363636363636,0.9627380952380953,0.8833333333333332,0.996875,2.05,7.427133661496919,0.96875,0.925,0.9444444444444444,1.0

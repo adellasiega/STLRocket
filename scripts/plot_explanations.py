@@ -3,7 +3,7 @@
 Plots the explanation metrics of scripts/run_explanations.py per dataset, against the
 model's balanced accuracy on test. Means over each dataset's complete runs.
 
-    python scripts/plot_explanations.py [--res_dir results/explanations] [--out_dir results/figures]
+    python scripts/plot_explanations.py [--res_dir results/explanations_balanced] [--out_dir results/figures]
 
 Writes, as PDF and PNG:
   explanations_per_dataset_{test,train}
@@ -175,7 +175,7 @@ def save(fig, stem: Path) -> None:
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--res_dir", default="results/explanations")
+    p.add_argument("--res_dir", default="results/explanations_balanced")
     p.add_argument("--out_dir", default="results/figures")
     args = p.parse_args()
     out = Path(args.out_dir)

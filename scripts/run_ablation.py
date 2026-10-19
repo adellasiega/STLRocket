@@ -146,11 +146,11 @@ def run_dataset(args, dataset: str, writer, f, f_paths) -> None:
                 cfg = make_config(args, dataset, M_max, depth_max, until_weight, True, calibrate)
                 t0 = time.perf_counter()
                 if corr_threshold is None:
-                    _, F_fit, F_val, _ = build_formula_bank(X_fit, X_val, cfg, seed)
+                    _, F_fit, F_val, _ = build_formula_bank(X_fit, X_val, y_fit, cfg, seed)
                     n_sampled = M_max
                 else:
                     _, F_fit, F_val, _, n_sampled = build_decorrelated_formula_bank(
-                        X_fit, X_val, cfg, seed, corr_threshold, max_rounds=args.corr_max_rounds)
+                        X_fit, X_val, y_fit, cfg, seed, corr_threshold, max_rounds=args.corr_max_rounds)
                 t_feats = time.perf_counter() - t0
                 if F_fit.shape[1] < M_max:
                     print(f"warning: only {F_fit.shape[1]} formulas passed the filter, "

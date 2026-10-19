@@ -127,10 +127,12 @@ class Anchors:
 
 
 def global_scores(rules: list[dict], pred_tr: np.ndarray, pred_te: np.ndarray, min_new_share: float) -> list[dict]:
-    """Greedy-cover global explanation per class predicted on train from instance rules
-    {k, length, tp_train, mask_train, mask_test}, scored on test."""
+    """Greedy-cover global explanation per class from instance rules {k, length, tp_train,
+    mask_train, mask_test}, scored on test. Classes are those predicted on test, as in
+    run_explanation_ablation.global_summary: a class without rules (e.g. never predicted on
+    train) has the empty explanation, coverage and F1 0; a class not predicted on test is skipped."""
     out = []
-    for k in np.unique(pred_tr):
+    for k in np.unique(np.r_[pred_tr, pred_te]):
         distinct = {}
         for r in rules:
             if r["k"] != k or r["mask_train"] is None:
@@ -182,7 +184,7 @@ def run(args, dataset: str, run_id: int) -> None:
             "batch_size": args.anchor_batch_size, "beam_size": args.anchor_beam_size, "n_max": args.n_max}
     done.update(rules=dataclasses.asdict(rcfg), anchors=acfg)
 
-    formulas, F_tr, F_te, sigma = build_formula_bank(X_tr, X_te, cfg, seed)
+    formulas, F_tr, F_te, sigma = build_formula_bank(X_tr, X_te, y_tr, cfg, seed)
     model = train_classifier(F_tr, y_tr, cfg, seed=seed)
     W = ir.model_logits_matrix(model)
     classes = model.classes_
