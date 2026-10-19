@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from stlrocket.config import ExperimentConfig
 from stlrocket.features import build_formula_bank, eval_robustness
-from stlrocket.tree import path_formulas, train_tree
+from stlrocket.tree import DEPTHS, path_formulas, train_tree
 
 
 def test_path_formulas():
@@ -47,8 +47,9 @@ def test_train_tree():
     F = rng.standard_normal((90, 10))
     y = (F[:, 0] > 0).astype(int) + (F[:, 1] > 0.5)
     search = train_tree(F, y, cv=3, seed=0)
-    assert search.best_params_["max_depth"] in (1, 2, 3, 4, 5)
-    assert search.best_estimator_.get_depth() <= search.best_params_["max_depth"]
+    d = search.best_params_["max_depth"]
+    assert d in DEPTHS
+    assert d is None or search.best_estimator_.get_depth() <= d
 
 
 if __name__ == "__main__":

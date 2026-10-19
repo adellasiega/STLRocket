@@ -2,7 +2,7 @@
 """
 Plots the comparison of scripts/run_comparison.py.
 
-    python scripts/plot_comparison.py [--res_dir results/comparison] [--out_dir results/figures]
+    python scripts/plot_comparison.py [--res_dir results/comparison_balanced] [--out_dir results/figures]
 
 Every figure uses the test balanced accuracy averaged over the runs of a dataset, on the
 datasets where every plotted method has all its runs (the others are listed on stdout).
@@ -32,6 +32,7 @@ REFERENCE = "stlrocket"
 METHOD_STYLE = {
     "stlrocket": ("STLRocket", "#2a78d6", "o"),
     "stl_tree": ("STL tree", "#eb6834", "s"),
+    "stl_ridge": ("STL + ridge", "#8a5cc2", "X"),
     "minirocket": ("MiniRocket", "#1baf7a", "^"),
     "multirockethydra": ("MultiRocket-Hydra", "#eda100", "D"),
     "minirocket_lasso": ("MiniRocket + lasso", "#e87ba4", "v"),
@@ -165,7 +166,7 @@ def write_table(df: pd.DataFrame, methods: list[str], path: Path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--res_dir", default="results/comparison")
+    ap.add_argument("--res_dir", default="results/comparison_balanced")
     ap.add_argument("--out_dir", default="results/figures")
     ap.add_argument("--min_datasets", type=int, default=20,
                     help="leave out the methods with fewer complete datasets")

@@ -10,7 +10,7 @@ from sklearn.tree import DecisionTreeClassifier
 from .classifier import cv_splitter
 from .instance_rules import to_stl
 
-DEPTHS = (1, 2, 3, 4, 5)
+DEPTHS = (1, 3, 5, 7, None)   # None: grown until the leaves are pure
 
 
 def train_tree(X_tr_feats: np.ndarray, y_tr: np.ndarray, cv: int, seed: int, n_jobs: int = 1,
