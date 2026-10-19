@@ -13,6 +13,7 @@ is positive robustness, so atoms are printed with strict inequalities.
 """
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 
 import numpy as np
@@ -88,6 +89,20 @@ def _window_text(node, hz: float, nested: bool) -> str:
 def atom_threshold(atom: Atom, mean: np.ndarray, std: np.ndarray) -> float:
     """Threshold of the atom in the units of the original series."""
     return float(mean[atom.var_index] + atom.threshold * std[atom.var_index])
+
+
+def to_original_units(phi, mean: np.ndarray, std: np.ndarray):
+    """Copy of phi with every atom threshold in the units of the original series, to be
+    evaluated on the original series (missing values filled as in data.load_dataset).
+
+    x_v > c on the standardized series is x~_v > mean[v] + c * std[v] on the original one, so
+    every atom, hence the formula, is satisfied by the same series. Robustness is not kept: the
+    robustness of an atom on v is multiplied by std[v], so it is only a rescaling of the
+    original robustness when every atom reads the same variable."""
+    phi = copy.deepcopy(phi)
+    for atom in _atoms(phi):
+        atom.threshold = atom_threshold(atom, mean, std)
+    return phi
 
 
 def to_text(phi, info: DatasetInfo, mean: np.ndarray, std: np.ndarray, _nested: bool = False) -> str:

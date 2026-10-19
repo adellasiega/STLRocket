@@ -2,8 +2,8 @@
 #SBATCH --job-name=stl_explain
 #SBATCH --output=logs/slurm/explain_%A_%a.out
 #SBATCH --error=logs/slurm/explain_%A_%a.err
-#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=8
-#SBATCH --mem=64G --time=2-00:00:00
+#SBATCH --nodes=1 --ntasks=1 --cpus-per-task=4
+#SBATCH --mem=32G --time=2-00:00:00
 #SBATCH --partition=Main
 
 # Full explanation pipeline (scripts/run_explanations.py) as a SLURM array: model,
@@ -25,7 +25,7 @@
 # ============================== configuration ==============================
 PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
 VENV="/share/ai-lab/adsiega/STLRocket/env"
-OUT_DIR="${PROJECT_DIR}/results/explanations"
+OUT_DIR="${PROJECT_DIR}/results/explanations_balanced"
 
 DATASETS=(
     ArticularyWordRecognition AtrialFibrillation BasicMotions Cricket

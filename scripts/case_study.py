@@ -5,7 +5,7 @@ rules say, whether they are readable, and whether what they say is true of the d
 
     python scripts/case_study.py [--datasets BasicMotions Epilepsy] [--run 0] [--stability_runs 0 1 2 3 4]
 
-Reads the runs of scripts/run_explanations.py (results/explanations/<dataset>/run<r>/), rebuilds
+Reads the runs of scripts/run_explanations.py (results/explanations_balanced/<dataset>/run<r>/), rebuilds
 the model and the rules from what they saved, and writes to results/case_study/:
   <dataset>_global.md / .tex   global explanation of each class in readable form (thresholds in
                                the units of the original series, windows in seconds), with its
@@ -326,7 +326,7 @@ def main():
     ap.add_argument("--datasets", nargs="+", default=["BasicMotions", "Epilepsy"])
     ap.add_argument("--run", type=int, default=0, help="run shown in the tables and figures")
     ap.add_argument("--stability_runs", type=int, nargs="+", default=[0, 1, 2, 3, 4])
-    ap.add_argument("--res_dir", default="results/explanations")
+    ap.add_argument("--res_dir", default="results/explanations_balanced")
     ap.add_argument("--out_dir", default="results/case_study")
     args = ap.parse_args()
     res_dir, out_dir = Path(args.res_dir), Path(args.out_dir)

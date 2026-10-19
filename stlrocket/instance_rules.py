@@ -31,9 +31,9 @@ from functools import lru_cache, reduce
 from statistics import NormalDist
 
 import numpy as np
-from torcheck.stl import And, Not
+from torcheck.stl import And, Atom, Not
 
-from .features import shift_atom_thresholds
+from .features import _children, shift_atom_thresholds
 from .simplification import simplify_data_aware
 
 
@@ -447,9 +447,19 @@ def global_explanations(train_rules: list[dict], X_tr_feats: np.ndarray, X_tr: n
     """Global explanation per class: {k: [STL formula, ...]}, the OR of the listed rules.
 
     Rules come from global_rules, each simplified (simplify_rule) unless simplify is
-    False; rules that become identical are kept once."""
+    False; rules that become identical (formula_key) are kept once."""
     out = {}
     for k, R in global_rules(train_rules, X_tr_feats, ref_labels, cfg).items():
         phis = [rule_formula(lits, formulas, sigma, X_tr, simplify) for lits in R]
-        out[k] = list({str(phi): phi for phi in phis}.values())
+        out[k] = list({formula_key(phi): phi for phi in phis}.values())
     return out
+
+
+def formula_key(phi) -> tuple:
+    """Hashable form of an STL formula, equal only for identical formulae: node types, atom
+    variables, directions and exact thresholds, and time bounds. str() is not enough, since
+    torcheck prints thresholds rounded to 4 decimals."""
+    if isinstance(phi, Atom):
+        return ("Atom", phi.var_index, bool(phi.lte), float(phi.threshold))
+    bounds = tuple(getattr(phi, a, None) for a in ("unbound", "right_unbound", "left_time_bound", "right_time_bound"))
+    return (type(phi).__name__, bounds, *(formula_key(c) for c in _children(phi)))

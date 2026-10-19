@@ -27,7 +27,7 @@ def test_path_formulas():
         dataset="synthetic", n_formulas=200, depth_max=2, until_weight=0.0, cv=3, cut_point=1.0,
         fit_intercept=False, n_run=1, base_seed=0, output_dir=".", device="cpu", explain=False, pool_size=0,
         precision_threshold=0.0, simplify_agreement=0.0, simplify_min_gain=0.0, simplify_decimals=0)
-    formulas, F_tr, F_te, sigma = build_formula_bank(X[:80], X[80:], cfg, 0)
+    formulas, F_tr, F_te, sigma = build_formula_bank(X[:80], X[80:], y[:80], cfg, 0)
     tree = DecisionTreeClassifier(max_depth=4, class_weight="balanced", random_state=0).fit(F_tr, y[:80])
     leaves = path_formulas(tree, formulas, sigma)
     assert len(leaves) == tree.get_n_leaves() > 1

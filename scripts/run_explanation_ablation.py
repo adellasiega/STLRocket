@@ -226,7 +226,7 @@ def run(args, dataset: str, run_id: int) -> None:
         simplify_decimals=0,
     )
     t = time.perf_counter()
-    formulas, F_fit, F_val, sigma = build_formula_bank(X["fit"], X["val"], cfg, seed)
+    formulas, F_fit, F_val, sigma = build_formula_bank(X["fit"], X["val"], y[fit_idx], cfg, seed)
     model = train_classifier(F_fit, y[fit_idx], cfg, seed=seed)
     W = ir.model_logits_matrix(model)
     index = {c: i for i, c in enumerate(model.classes_)}

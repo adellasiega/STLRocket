@@ -89,7 +89,7 @@ def test_stl_and_simplification():
         dataset="synthetic", n_formulas=200, depth_max=2, until_weight=0.0, cv=3, cut_point=1.0,
         fit_intercept=False, n_run=1, base_seed=0, output_dir=".", device="cpu", explain=False, pool_size=0,
         precision_threshold=0.0, simplify_agreement=0.0, simplify_min_gain=0.0, simplify_decimals=0)
-    formulas, F, _, sigma = build_formula_bank(X, X[:5], cfg, 0)
+    formulas, F, _, sigma = build_formula_bank(X, X[:5], np.zeros(len(X), dtype=int), cfg, 0)
     W = rng.standard_normal((3, F.shape[1])) * (rng.random((3, F.shape[1])) < 0.1)
     pred = ir.predict_indices(F, W)
     rcfg = ir.RuleConfig()
@@ -104,6 +104,20 @@ def test_stl_and_simplification():
         assert np.array_equal(eval_robustness(raw, X) > 0, mask)
         assert np.array_equal(eval_robustness(ir.simplify_rule(raw, X), X) > 0, mask)
     assert n_rules > 0
+
+
+def test_formula_key():
+    """Disjuncts are deduplicated by exact thresholds and bounds, not by their printed form,
+    which rounds thresholds to 4 decimals."""
+    from torcheck.stl import And, Atom, Globally
+
+    def phi(c, b):
+        return Globally(And(Atom(var_index=0, threshold=c, lte=False), Atom(var_index=1, threshold=-1.0, lte=True)),
+                        unbound=False, left_time_bound=2, right_time_bound=b)
+    assert ir.formula_key(phi(0.12341, 5)) == ir.formula_key(phi(0.12341, 5))
+    assert str(phi(0.12341, 5)) == str(phi(0.12342, 5))
+    assert ir.formula_key(phi(0.12341, 5)) != ir.formula_key(phi(0.12342, 5))
+    assert ir.formula_key(phi(0.12341, 5)) != ir.formula_key(phi(0.12341, 6))
 
 
 if __name__ == "__main__":

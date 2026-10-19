@@ -92,8 +92,8 @@ def lasso_details(model) -> dict:
 class STLFeatures:
     """The STL feature matrix of a run, built at most once (or loaded from the cache)."""
 
-    def __init__(self, args, out: Path, X_tr, X_te, cfg: ExperimentConfig, seed: int, stem: str):
-        self.args, self.out, self.X_tr, self.X_te, self.cfg, self.seed = args, out, X_tr, X_te, cfg, seed
+    def __init__(self, args, out: Path, X_tr, y_tr, X_te, cfg: ExperimentConfig, seed: int, stem: str):
+        self.args, self.out, self.X_tr, self.y_tr, self.X_te, self.cfg, self.seed = args, out, X_tr, y_tr, X_te, cfg, seed
         self.cache = Path(args.feature_cache) / f"{stem}.npz" if args.feature_cache else None
         self._F = None
 
@@ -105,7 +105,7 @@ class STLFeatures:
                 self._F = (z["F_tr"], z["F_te"], float(z["time_s"]))
                 log(f"  STL features loaded from {self.cache}")
             else:
-                formulas, F_tr, F_te, sigma = build_formula_bank(self.X_tr, self.X_te, self.cfg, self.seed)
+                formulas, F_tr, F_te, sigma = build_formula_bank(self.X_tr, self.X_te, self.y_tr, self.cfg, self.seed)
                 elapsed = time.perf_counter() - t
                 with gzip.open(self.out / "formulas.pkl.gz", "wb") as f:
                     pickle.dump(formulas, f)
@@ -278,7 +278,7 @@ def run(args, dataset: str, run_id: int) -> None:
     )
     ctx = {"args": args, "out": out, "seed": seed, "cfg": cfg, "n_jobs": args.n_jobs,
            "X_tr": X_tr, "y_tr": y_tr, "X_te": X_te, "y_te": y_te,
-           "stl": STLFeatures(args, out, X_tr, X_te, cfg, seed, f"{dataset}_run{run_id}")}
+           "stl": STLFeatures(args, out, X_tr, y_tr, X_te, cfg, seed, f"{dataset}_run{run_id}")}
     log(f"{dataset} run {run_id}: {len(X_tr)} train / {len(X_te)} test series, shape {X_tr.shape[1:]}, "
         f"methods {todo}")
     base = {"dataset": dataset, "run": run_id, "seed": seed, "n_train": len(X_tr), "n_test": len(X_te),
