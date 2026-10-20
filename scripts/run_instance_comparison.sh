@@ -11,7 +11,7 @@
 # venv: pip install --no-deps anchor-exp lime && pip install lore-sa wittgenstein
 #
 # Usage, from PROJECT_DIR:
-#   SET=fast bash scripts/run_instance_comparison.sh     # every method on the FAST datasets
+#   SET=fast bash scripts/run_instance_comparison.sh     # every method but LORE on the FAST datasets
 #   SET=rest bash scripts/run_instance_comparison.sh     # the others, without LORE and Anchors
 #   DRY_RUN=1 bash scripts/run_instance_comparison.sh    # print every task's command, submit nothing
 #   ONLY=BasicMotions RUNS="0" bash scripts/run_instance_comparison.sh   # smoke test
@@ -35,9 +35,11 @@ PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
 VENV="/share/ai-lab/adsiega/STLRocket/env"
 OUT_DIR="${PROJECT_DIR}/results/instance_comparison"
 
-# The 26 datasets and 10 runs of scripts/run_explanations.sh, in two sets: FAST, where LORE
-# and Anchors explain every series within a few hours per run (few selected formulae, few
-# series), and REST, where only the other methods run (LORE and Anchors would need days per run).
+# The 26 datasets and 10 runs of scripts/run_explanations.sh, in two sets: FAST, where Anchors
+# explains every series within a few hours per run (few selected formulae, few series), and
+# REST, where only the other methods run (Anchors would need days per run). LORE is not run: it
+# explains a black box without its training data, on a synthetic neighbourhood, so its rules
+# are not meant to hold on the data (the run script still supports it).
 # Both write to OUT_DIR: their datasets differ, so their files do not collide.
 FAST=(
     BasicMotions DuckDuckGeese EigenWorms Epilepsy ERing
@@ -49,7 +51,7 @@ REST=(
     PhonemeSpectra SelfRegulationSCP2 StandWalkJump
 )
 case "$SET" in
-    fast) DATASETS=("${FAST[@]}"); SKIP="" ;;
+    fast) DATASETS=("${FAST[@]}"); SKIP="lore" ;;
     rest) DATASETS=("${REST[@]}"); SKIP="lore anchors" ;;
     *) echo "SET must be fast or rest" >&2; exit 1 ;;
 esac
