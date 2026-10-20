@@ -11,7 +11,7 @@
 # venv: pip install --no-deps anchor-exp lime && pip install lore-sa wittgenstein
 #
 # Usage, from PROJECT_DIR:
-#   SET=fast bash scripts/run_instance_comparison.sh     # every method but LORE on the FAST datasets
+#   SET=fast bash scripts/run_instance_comparison.sh     # every method but LORE and AXp on the FAST datasets
 #   SET=rest bash scripts/run_instance_comparison.sh     # the others, without LORE and Anchors
 #   DRY_RUN=1 bash scripts/run_instance_comparison.sh    # print every task's command, submit nothing
 #   ONLY=BasicMotions RUNS="0" bash scripts/run_instance_comparison.sh   # smoke test
@@ -39,7 +39,9 @@ OUT_DIR="${PROJECT_DIR}/results/instance_comparison"
 # explains every series within a few hours per run (few selected formulae, few series), and
 # REST, where only the other methods run (Anchors would need days per run). LORE is not run: it
 # explains a black box without its training data, on a synthetic neighbourhood, so its rules
-# are not meant to hold on the data (the run script still supports it).
+# are not meant to hold on the data (the run script still supports it). Of the abductive
+# explanations only the inflated AXp is kept: it has the features of a subset-minimal AXp and
+# the same guarantee on a larger region.
 # Both write to OUT_DIR: their datasets differ, so their files do not collide.
 FAST=(
     BasicMotions DuckDuckGeese EigenWorms Epilepsy ERing
@@ -51,8 +53,8 @@ REST=(
     PhonemeSpectra SelfRegulationSCP2 StandWalkJump
 )
 case "$SET" in
-    fast) DATASETS=("${FAST[@]}"); SKIP="lore" ;;
-    rest) DATASETS=("${REST[@]}"); SKIP="lore anchors" ;;
+    fast) DATASETS=("${FAST[@]}"); SKIP="lore axp" ;;
+    rest) DATASETS=("${REST[@]}"); SKIP="lore anchors axp" ;;
     *) echo "SET must be fast or rest" >&2; exit 1 ;;
 esac
 RUNS=(${RUNS:-0 1 2 3 4 5 6 7 8 9})
