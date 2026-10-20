@@ -1,24 +1,30 @@
 #!/bin/bash
-#SBATCH --job-name=stl_anchors
-#SBATCH --output=logs/slurm/anchors_%A_%a.out
-#SBATCH --error=logs/slurm/anchors_%A_%a.err
+#SBATCH --job-name=stl_instcmp
+#SBATCH --output=logs/slurm/instcmp_%A_%a.out
+#SBATCH --error=logs/slurm/instcmp_%A_%a.err
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=4
-#SBATCH --mem=16G --time=2-00:00:00
+#SBATCH --mem=32G --time=2-00:00:00
 #SBATCH --partition=Main
 
-# STLRocket instance explanations against Anchors (scripts/run_anchors_comparison.py) as a
-# SLURM array. Needs anchor-exp in the venv: pip install --no-deps anchor-exp lime
+# STLRocket instance and global explanations against AXp, inflated AXp, LORE, Anchors, a
+# surrogate tree and RIPPER (scripts/run_instance_comparison.py) as a SLURM array. Needs in the
+# venv: pip install --no-deps anchor-exp lime && pip install lore-sa wittgenstein
 #
 # Usage, from PROJECT_DIR:
-#   bash scripts/run_anchors_comparison.sh              # submit the whole array
-#   DRY_RUN=1 bash scripts/run_anchors_comparison.sh    # print every task's command, submit nothing
-#   ONLY=BasicMotions RUNS="0" bash scripts/run_anchors_comparison.sh   # smoke test
+#   SET=fast bash scripts/run_instance_comparison.sh     # every method on the FAST datasets
+#   SET=rest bash scripts/run_instance_comparison.sh     # the others, without LORE and Anchors
+#   DRY_RUN=1 bash scripts/run_instance_comparison.sh    # print every task's command, submit nothing
+#   ONLY=BasicMotions RUNS="0" bash scripts/run_instance_comparison.sh   # smoke test
 #
 # Each array task runs one (dataset, run); results go to OUT_DIR/<dataset>_run<r>.*.
 # A run whose .done.json exists is skipped, so resubmitting the array only redoes
 # unfinished runs. seed = BASE_SEED + run (same model as scripts/run_explanations.sh).
-# Anchors runs serially (about 1-5 s per series); anchor-exp preallocates 10^6 sample rows,
-# about 1-3 GB with ~100 selected formulae, hence the memory request.
+# Every method explains every train and test series. LORE and Anchors run in one process per CPU; per series LORE takes about 8 s with 22 selected formulae,
+# 90 s with 500 and 1000 s with 2000, and Anchors grows about as the square of the number of
+# selected formulae (4 s with 17, 114 s with 73). A series not explained within its timeout is
+# recorded as such, and after MAX_TIMEOUTS consecutive timeouts the method stops for the run.
+# Anchors' processes are bounded so that its samples fit in ANCHOR_MEM_GB. Ours, AXp and
+# inflated AXp take milliseconds per series; RIPPER a few minutes per class on the largest.
 #
 # After the array drains:
 #   sacct -j <JOBID> -X --format=JobID,State,Elapsed,MaxRSS | grep -v COMPLETED
@@ -27,14 +33,27 @@
 # ============================== configuration ==============================
 PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
 VENV="/share/ai-lab/adsiega/STLRocket/env"
-OUT_DIR="${PROJECT_DIR}/results/anchors"
+OUT_DIR="${PROJECT_DIR}/results/instance_comparison"
 
-# The fast datasets (T < 1000) of the Until and correlation ablations
-DATASETS=(
-    ERing RacketSports BasicMotions Libras NATOPS
-    FingerMovements DuckDuckGeese Epilepsy PEMS-SF UWaveGestureLibrary
+# The 26 datasets and 10 runs of scripts/run_explanations.sh, in two sets: FAST, where LORE
+# and Anchors explain every series within a few hours per run (few selected formulae, few
+# series), and REST, where only the other methods run (LORE and Anchors would need days per run).
+# Both write to OUT_DIR: their datasets differ, so their files do not collide.
+FAST=(
+    BasicMotions DuckDuckGeese EigenWorms Epilepsy ERing
+    FingerMovements NATOPS RacketSports SelfRegulationSCP1 UWaveGestureLibrary
 )
-RUNS=(${RUNS:-0 1 2 3 4})
+REST=(
+    ArticularyWordRecognition AtrialFibrillation Cricket EthanolConcentration FaceDetection
+    HandMovementDirection Handwriting Heartbeat Libras LSST MotorImagery PenDigits PEMS-SF
+    PhonemeSpectra SelfRegulationSCP2 StandWalkJump
+)
+case "$SET" in
+    fast) DATASETS=("${FAST[@]}"); SKIP="" ;;
+    rest) DATASETS=("${REST[@]}"); SKIP="lore anchors" ;;
+    *) echo "SET must be fast or rest" >&2; exit 1 ;;
+esac
+RUNS=(${RUNS:-0 1 2 3 4 5 6 7 8 9})
 [[ -n "$ONLY" ]] && DATASETS=($ONLY)
 
 # Model
@@ -45,12 +64,20 @@ CUT_POINT=1.0
 BASE_SEED=0
 
 # Explanations: ours with the defaults of stlrocket.instance_rules.RuleConfig, Anchors with
-# the defaults of AnchorTabularExplainer.explain_instance; both at most N_MAX literals/predicates
+# the defaults of AnchorTabularExplainer.explain_instance, both at most N_MAX
+# literals/predicates; LORE with the defaults of lore_sa.TabularGeneticGeneratorLore
 N_MAX=3
 CONFIDENCE=0.95
 MIN_NEW_SHARE=0.05
 ANCHOR_THRESHOLD=0.95
-MAX_EXPLAINED=200     # series explained per split, the same for both methods
+ANCHOR_TIMEOUT=300         # seconds per series
+LORE_TIMEOUT=600
+MAX_TIMEOUTS=8
+ANCHOR_MEM_GB=24
+# if LORE and Anchors run on the models with thousands of series and hundreds of selected
+# formulae (ONLY=... SET=fast), they explain only SAMPLED_MAX_EXPLAINED series per split there
+BIG=" FaceDetection LSST PenDigits PhonemeSpectra "
+SAMPLED_MAX_EXPLAINED=500
 
 MAX_ARRAY_SIZE=1001   # cluster's MaxArraySize: task ids must be < this
 # ===========================================================================
@@ -63,11 +90,14 @@ task_command() {  # $1 = task id -> prints the python command
     local id=$1
     local dataset=${DATASETS[$(( id % N_D ))]}
     local run=${RUNS[$(( id / N_D ))]}
-    echo python -u scripts/run_anchors_comparison.py \
+    echo python -u scripts/run_instance_comparison.py \
         --datasets "$dataset" --runs "$run" --depth "$DEPTH" --n_formulas "$N_FORMULAS" \
         --cv "$CV" --cut_point "$CUT_POINT" --base_seed "$BASE_SEED" --device cpu \
         --n_max "$N_MAX" --confidence "$CONFIDENCE" --min_new_share "$MIN_NEW_SHARE" \
-        --anchor_threshold "$ANCHOR_THRESHOLD" --max_explained "$MAX_EXPLAINED" \
+        --anchor_threshold "$ANCHOR_THRESHOLD" --anchor_timeout "$ANCHOR_TIMEOUT" \
+        --lore_timeout "$LORE_TIMEOUT" --max_timeouts "$MAX_TIMEOUTS" --anchor_mem_gb "$ANCHOR_MEM_GB" \
+        $([[ "$BIG" == *" $dataset "* ]] && echo --sampled_max_explained "$SAMPLED_MAX_EXPLAINED") \
+        $([[ -n "$SKIP" ]] && echo --skip $SKIP) \
         --out_dir "$OUT_DIR"
 }
 
@@ -83,7 +113,7 @@ if [[ -z "$SLURM_ARRAY_TASK_ID" ]]; then
     fi
     mkdir -p logs/slurm "$OUT_DIR"
     # The task list depends on ONLY and RUNS: pass them to the tasks.
-    sbatch --export=ALL,ONLY="$ONLY",RUNS="${RUNS[*]}" --array=0-$(( N_TASKS - 1 )) "$0"
+    sbatch --export=ALL,SET="$SET",ONLY="$ONLY",RUNS="${RUNS[*]}" --array=0-$(( N_TASKS - 1 )) "$0"
     exit $?
 fi
 
