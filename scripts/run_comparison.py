@@ -21,8 +21,9 @@ Methods (METHODS):
                      RidgeClassifierCV(alphas=logspace(-3, 3, 10)); differs from minirocket only
                      in the feature map and from stlrocket only in the classifier
   minirocket         aeon MiniRocketClassifier, default parameters; series shorter than 9
-                     time steps (PenDigits) are zero-padded to 9, as for every Rocket method
-  multirockethydra   aeon MultiRocketHydraClassifier, default parameters
+                     time steps (PenDigits) are zero-padded to 9 (ROCKET_MIN_LENGTH)
+  multirockethydra   aeon MultiRocketHydraClassifier, default parameters; series zero-padded
+                     to 10 (MULTIROCKET_MIN_LENGTH)
   mrseql             aeon MrSEQLClassifier, default parameters; univariate only, so on
                      multivariate data one MrSEQL per channel, fitted in parallel, with
                      probabilities summed as in aeon's ClassifierChannelEnsemble; recorded
@@ -68,7 +69,10 @@ from stlrocket.data import load_dataset
 from stlrocket.features import build_formula_bank
 from stlrocket.tree import train_tree
 
-ROCKET_MIN_LENGTH = 9   # shortest series MiniRocket and MultiRocket accept
+ROCKET_MIN_LENGTH = 9   # shortest series MiniRocket accepts
+# MultiRocket also reads the first-order difference of each series, one step shorter: aeon
+# accepts 9 time steps but then fails ("unable to broadcast"), so it needs 10
+MULTIROCKET_MIN_LENGTH = 10
 METHODS = ("stlrocket", "stl_tree", "stl_ridge", "minirocket", "multirockethydra", "mrseql", "minirocket_lasso")
 # settings of the experiments each method depends on, recorded in its json
 LASSO_SETTINGS = {"stlrocket": ("depth", "n_formulas", "cv", "cut_point"), "stl_tree": ("depth", "n_formulas", "cv"),
@@ -281,7 +285,7 @@ RUNNERS = {
     "stl_tree": run_stl_tree,
     "stl_ridge": run_stl_ridge,
     "minirocket": lambda ctx: run_aeon(ctx, make_minirocket, ROCKET_MIN_LENGTH),
-    "multirockethydra": lambda ctx: run_aeon(ctx, make_multirockethydra, ROCKET_MIN_LENGTH),
+    "multirockethydra": lambda ctx: run_aeon(ctx, make_multirockethydra, MULTIROCKET_MIN_LENGTH),
     "mrseql": run_mrseql,
     "minirocket_lasso": run_minirocket_lasso,
 }
