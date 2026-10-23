@@ -2,13 +2,10 @@
 Random STL formula grammar sampler.
 """
 
-import math
 import random
 from typing import Optional
 import torch
 from torcheck import stl
-from .average import Average
-from .linear_atom import LinearAtom
 
 
 class F0:
@@ -21,8 +18,6 @@ class F0:
         depth_max: int,
         until_weight: float,
         seed: Optional[int],
-        average_prob: float = 0.0,  # probability that an atom is a moving-average atom (Average)
-        cross_prob: float = 0.0,    # probability that an atom is a two-variable linear atom (LinearAtom)
     ):
         self.n_vars = n_vars
         self.v_min = v_min
@@ -30,8 +25,6 @@ class F0:
         self.t_max = t_max
         self.depth_max = depth_max
         self.until_weight = until_weight
-        self.average_prob = average_prob
-        self.cross_prob = cross_prob
 
         if seed is not None:
             random.seed(seed)
@@ -52,9 +45,9 @@ class F0:
         """
         if current_depth >= target_depth:
             assert guarded, "unguarded branch ran out of depth"
-            return self._sample_atomic_predicate(remaining_time)
+            return self._sample_atomic_predicate()
         if guarded and not must_reach and random.random() < current_depth / target_depth:
-            return self._sample_atomic_predicate(remaining_time)
+            return self._sample_atomic_predicate()
         return self._sample_operator_node(remaining_time, current_depth, target_depth, must_reach, guarded)
 
     @staticmethod
@@ -68,7 +61,7 @@ class F0:
         a = random.randint(0, remaining_time - width)
         return a, a + width
 
-    def _sample_atomic_predicate(self, remaining_time: int):
+    def _sample_atomic_predicate(self):
         var_idx = random.randint(0, self.n_vars - 1)
         v_low = self.v_min[var_idx].item()
         v_high = self.v_max[var_idx].item()
@@ -76,26 +69,6 @@ class F0:
         threshold = random.uniform(v_low, v_high)
         lte = random.choice([True, False])
 
-        # Drawn after the atom and only if cross_prob > 0, as for Average below. The
-        # direction (a, b) is uniform on the half circle a > 0 (lte covers the other half),
-        # and the threshold uniform on the range of a*x_i + b*x_j implied by the variable
-        # ranges, which can be wider than its range on the data. A LinearAtom is never
-        # wrapped in an Average.
-        if self.cross_prob > 0 and self.n_vars > 1 and random.random() < self.cross_prob:
-            j = random.randrange(self.n_vars - 1)
-            j += j >= var_idx
-            theta = random.uniform(-math.pi / 2, math.pi / 2)
-            a, b = math.cos(theta), math.sin(theta)
-            lo = a * v_low + min(b * self.v_min[j].item(), b * self.v_max[j].item())
-            hi = a * v_high + max(b * self.v_min[j].item(), b * self.v_max[j].item())
-            return LinearAtom(var_index=var_idx, var_index2=j, a=a, b=b, threshold=random.uniform(lo, hi), lte=lte)
-
-        # Drawn after the atom and only if average_prob > 0: with average_prob = 0 the
-        # draws are those of the sampler without Average. The window takes the remaining
-        # time budget like any temporal operator.
-        if self.average_prob > 0 and remaining_time > 0 and random.random() < self.average_prob:
-            a, b = self._sample_interval(remaining_time)
-            return Average(var_index=var_idx, threshold=threshold, lte=lte, left_time_bound=a, right_time_bound=b)
         return stl.Atom(var_index=var_idx, threshold=threshold, lte=lte)
 
     def _sample_operator_node(
@@ -201,7 +174,7 @@ class F0:
     @staticmethod
     def formula_depth(formula) -> int:
         """
-            Max nesting depth of a formula tree (0 for a bare atom, Average included).
+            Max nesting depth of a formula tree (0 for a bare atom).
         """
         if isinstance(formula, stl.Atom):
             return 0

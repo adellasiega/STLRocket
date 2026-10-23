@@ -41,11 +41,3 @@ class ExperimentConfig:
     # Set atom thresholds of multi-atom formulae from the train data
     # (features.calibrate_thresholds) instead of uniformly in [min, max]
     calibrate_thresholds: bool = False
-
-    # Probability that a sampled atom is a moving-average atom Average[a,b](x ~ c)
-    # (stlrocket/average.py); 0 = off
-    average_prob: float = 0.0
-
-    # Probability that a sampled atom is a two-variable linear atom a*x_i + b*x_j ~ c
-    # (stlrocket/linear_atom.py); 0 = off
-    cross_prob: float = 0.0

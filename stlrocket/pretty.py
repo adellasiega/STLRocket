@@ -19,9 +19,7 @@ from dataclasses import dataclass
 import numpy as np
 from torcheck.stl import Atom, Not, And, Or, Globally, Eventually, Until
 
-from .average import Average
 from .features import _atoms, _children
-from .linear_atom import LinearAtom
 from .formula_sampler import F0
 
 
@@ -49,12 +47,6 @@ def _temporal(cls, node, child):
 def nnf(phi, negate: bool = False):
     """Copy of phi with every negation pushed down to the atoms (absorbed by flipping the
     atom direction); same robustness on every series. Not Until is kept as it is."""
-    if isinstance(phi, LinearAtom):
-        return LinearAtom(var_index=phi.var_index, var_index2=phi.var_index2, a=phi.a, b=phi.b,
-                          threshold=phi.threshold, lte=phi.lte != negate)
-    if isinstance(phi, Average):
-        return Average(var_index=phi.var_index, threshold=phi.threshold, lte=phi.lte != negate,
-                       left_time_bound=phi.left_time_bound, right_time_bound=phi.right_time_bound - 1)
     if isinstance(phi, Atom):
         return Atom(var_index=phi.var_index, threshold=phi.threshold, lte=phi.lte != negate)
     if isinstance(phi, Not):
@@ -95,18 +87,8 @@ def _window_text(node, hz: float, nested: bool) -> str:
 
 
 def atom_threshold(atom: Atom, mean: np.ndarray, std: np.ndarray) -> float:
-    """Threshold of the atom in the units of the original series (for a LinearAtom, against
-    its weights in original units, linear_weights)."""
-    if isinstance(atom, LinearAtom):
-        i, j = atom.var_index, atom.var_index2
-        return float(atom.threshold + atom.a * mean[i] / std[i] + atom.b * mean[j] / std[j])
+    """Threshold of the atom in the units of the original series."""
     return float(mean[atom.var_index] + atom.threshold * std[atom.var_index])
-
-
-def linear_weights(atom: LinearAtom, std: np.ndarray) -> tuple[float, float]:
-    """Weights of a LinearAtom on the original series: a*x_i + b*x_j on the standardized
-    series is (a/std[i])*x~_i + (b/std[j])*x~_j minus a constant (see atom_threshold)."""
-    return float(atom.a / std[atom.var_index]), float(atom.b / std[atom.var_index2])
 
 
 def to_original_units(phi, mean: np.ndarray, std: np.ndarray):
@@ -119,29 +101,17 @@ def to_original_units(phi, mean: np.ndarray, std: np.ndarray):
     original robustness when every atom reads the same variable."""
     phi = copy.deepcopy(phi)
     for atom in _atoms(phi):
-        threshold = atom_threshold(atom, mean, std)
-        if isinstance(atom, LinearAtom):
-            atom.a, atom.b = linear_weights(atom, std)
-        atom.threshold = threshold
+        atom.threshold = atom_threshold(atom, mean, std)
     return phi
 
 
 def to_text(phi, info: DatasetInfo, mean: np.ndarray, std: np.ndarray, _nested: bool = False) -> str:
     """Readable form of phi, thresholds in original units and windows in seconds."""
     def rec(node, nested):
-        if isinstance(node, LinearAtom):
-            # Weights in original units; no unit is printed, since the variables can differ in unit.
-            wa, wb = linear_weights(node, std)
-            return (f"{wa:.3g} {info.var_names[node.var_index]} {'-' if wb < 0 else '+'} "
-                    f"{abs(wb):.3g} {info.var_names[node.var_index2]} {'<' if node.lte else '>'} "
-                    f"{atom_threshold(node, mean, std):.3g}")
         if isinstance(node, Atom):
             v = node.var_index
             unit = f" {info.units[v]}" if info.units[v] else ""
-            name = info.var_names[v]
-            if isinstance(node, Average):
-                name = f"mean of {name} over {_window_text(node, info.hz, nested)}"
-            return f"{name} {'<' if node.lte else '>'} {atom_threshold(node, mean, std):.3g}{unit}"
+            return f"{info.var_names[v]} {'<' if node.lte else '>'} {atom_threshold(node, mean, std):.3g}{unit}"
         if isinstance(node, Not):
             return f"not ({rec(node.child, nested)})"
         if isinstance(node, (And, Or)):
@@ -160,16 +130,12 @@ def to_text(phi, info: DatasetInfo, mean: np.ndarray, std: np.ndarray, _nested: 
 
 def atom_spans(phi) -> list[tuple[Atom, int, int | None, bool]]:
     """Every atom of nnf(phi) with the span of absolute time steps it can be read on when phi is
-    read at t = 0 (sum of the windows of the temporal operators above it, and of its own if
-    it is an Average; end None: to the end of the series) and whether it lies under an odd
-    number of negations."""
+    read at t = 0 (sum of the windows of the temporal operators above it; end None: to the
+    end of the series) and whether it lies under an odd number of negations."""
     out = []
 
     def rec(node, a, b, neg):
         if isinstance(node, Atom):
-            if isinstance(node, Average):
-                wa, wb = window(node)
-                a, b = a + wa, (None if b is None else b + wb)
             out.append((node, a, b, neg))
             return
         if isinstance(node, Not):
@@ -186,16 +152,11 @@ def atom_spans(phi) -> list[tuple[Atom, int, int | None, bool]]:
 
 
 def formula_stats(phi) -> dict:
-    """Size (nodes), depth, atoms, distinct variables and temporal operators of phi
-    (A: Average atoms, X: cross-channel atoms, both also counted in atoms)."""
-    counts = {"G": 0, "F": 0, "U": 0, "A": 0, "X": 0}
+    """Size (nodes), depth, atoms, distinct variables and temporal operators of phi."""
+    counts = {"G": 0, "F": 0, "U": 0}
 
     def rec(node):
-        if isinstance(node, LinearAtom):
-            counts["X"] += 1
-        elif isinstance(node, Average):
-            counts["A"] += 1
-        elif isinstance(node, Globally):
+        if isinstance(node, Globally):
             counts["G"] += 1
         elif isinstance(node, Eventually):
             counts["F"] += 1
@@ -207,4 +168,4 @@ def formula_stats(phi) -> dict:
     rec(phi)
     atoms = _atoms(phi)
     return {"size": F0.formula_size(phi), "depth": F0.formula_depth(phi), "atoms": len(atoms),
-            "variables": len({v for a in atoms for v in (a.var_index, getattr(a, "var_index2", a.var_index))}), **{f"n_{k}": v for k, v in counts.items()}}
+            "variables": len({a.var_index for a in atoms}), **{f"n_{k}": v for k, v in counts.items()}}
