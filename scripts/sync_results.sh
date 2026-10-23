@@ -34,5 +34,6 @@ fi
 for p in "${PATHS[@]}"; do
     mkdir -p "$(dirname "$p")"
     echo "== $CLUSTER:$REMOTE_DIR/$p -> ./$p"
-    rsync -az --update --human-readable --info=stats1 $DRY_RUN "$CLUSTER:$REMOTE_DIR/$p/" "./$p/"
+    # progress2: one overall progress line; no-inc-recursive: scan the full file list first so the total is known
+    rsync -az --update --human-readable --info=stats1,progress2 --no-inc-recursive $DRY_RUN "$CLUSTER:$REMOTE_DIR/$p/" "./$p/"
 done

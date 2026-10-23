@@ -4,7 +4,9 @@ Plots the comparison of scripts/run_instance_comparison.py (STLRocket instance a
 explanations against other explainers of the same classifier and features).
 
     python scripts/plot_instance_comparison.py [--res_dir results/instance_comparison]
-                                               [--out_dir results/figures]
+                                               [--out_dir results/figures] [--exclude DATASET ...]
+
+Only complete runs (with a .done.json) with a non-empty model enter.
 
 Instance metrics are computed from the explained test series, on the test set and w.r.t. the
 model's predictions, per (dataset, run, method) and then averaged over the runs of a dataset.
@@ -22,10 +24,12 @@ Writes:
                                the series it explained
   instance_table.tex           per dataset and method: precision, coverage, length, time per
                                series, each method on the series it explained
-  instance_summary.tex         the paper's table: per comparison and metric, the mean over
-                               datasets of each method and the two-sided Wilcoxon signed-rank
-                               p-value of STLRocket against it over datasets
-  global_summary.tex           the same for the global explanations
+  instance_summary.tex         the paper's table: per comparison, one row per method: the number of
+                               datasets with a result and, per metric, the mean over
+                               datasets (the two-sided Wilcoxon signed-rank p-value
+                               of STLRocket against each method is only printed)
+  global_summary.tex           the same for the global explanations, built from every explained
+                               train series and from those LORE and Anchors attempted
 and prints how often the precision claims of Anchors and AXp hold on test.
 """
 from __future__ import annotations
@@ -49,26 +53,42 @@ METHOD_STYLE = {"stlrocket": ("STLRocket", "#2a78d6", "o"), "axp": ("AXp", "#3a9
                 "iaxp": ("Inflated AXp", "#8bc34a", "v"), "lore": ("LORE", "#9c27b0", "D"),
                 "anchors": ("Anchors", "#eb6834", "s"), "tree": ("Surrogate tree", "#795548", "P"),
                 "ripper": ("RIPPER", "#607d8b", "X")}
+# short labels for the columns of the per-dataset table
+SHORT = {"stlrocket": "Ours", "axp": "AXp", "iaxp": "IAXp", "lore": "LORE", "anchors": "Anch."}
 INSTANCE = ("stlrocket", "axp", "iaxp", "lore", "anchors")
 SAMPLED = ("lore", "anchors")
 METRICS = [("precision", "Precision", "{:.3f}"), ("coverage", "Coverage", "{:.3f}"),
            ("length", "Length", "{:.2f}"), ("found", "Found", "{:.2f}"), ("time_s", "Time (s)", "{:.2g}")]
 GLOBAL_METRICS = [("f1", "$F_1$", "{:.3f}"), ("n_rules", "Rules", "{:.1f}"), ("length", "Literals", "{:.1f}")]
-SUBSET_LABEL = {"all": "All series", "lore": "Series explained by LORE", "anchors": "Series explained by Anchors"}
+GLOBAL_LABEL = {"all": "All datasets", "lore": "Datasets on which LORE ran",
+                "anchors": "Datasets on which Anchors ran"}
+SUBSET_LABEL = {"all": "All test series", "lore": "Test series explained by LORE",
+                "anchors": "Test series explained by Anchors"}
 
 
-def load(res_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
+def load(res_dir: Path, exclude: list[str]) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Results of the complete runs (with a .done.json) with a non-empty model, of the datasets
+    not in exclude."""
     done = [json.loads(f.read_text()) for f in sorted(res_dir.glob("*.done.json"))]
+    done = [d for d in done if d["dataset"] not in exclude]
     empty = [(d["dataset"], d["run"]) for d in done if d["status"] != "ok"]
     if empty:
         print(f"runs with an empty model, left out: {empty}")
+    ok = {(d["dataset"], d["run"]) for d in done if d["status"] == "ok"}
 
-    def tag(f: Path, df: pd.DataFrame) -> pd.DataFrame:
-        return df.assign(dataset=f.name.split("_run")[0], run=int(f.name.split("_run")[1].split(".")[0]))
+    def name(f: Path) -> tuple[str, int]:
+        return f.name.split("_run")[0], int(f.name.split("_run")[1].split(".")[0])
 
-    inst = pd.concat([tag(f, pd.read_csv(f)) for f in sorted(res_dir.glob("*.instances.csv.gz"))], ignore_index=True)
-    glob = pd.concat([tag(f, pd.read_csv(f)) for f in sorted(res_dir.glob("*.global.csv"))], ignore_index=True)
-    return inst, glob
+    def read(pattern: str) -> pd.DataFrame:
+        files = sorted(res_dir.glob(pattern))
+        unfinished = sorted({name(f) for f in files if name(f) not in ok and name(f)[0] not in exclude
+                             and name(f) not in empty})
+        if unfinished and pattern.startswith("*.instances"):
+            print(f"unfinished runs (no .done.json), left out: {unfinished}")
+        return pd.concat([pd.read_csv(f).assign(dataset=name(f)[0], run=name(f)[1])
+                          for f in files if name(f) in ok], ignore_index=True)
+
+    return read("*.instances.csv.gz"), read("*.global.csv")
 
 
 def run_metrics(d: pd.DataFrame) -> pd.Series:
@@ -102,8 +122,17 @@ def per_dataset(inst: pd.DataFrame, subset: str, share: pd.DataFrame, min_share:
     return m[keep]
 
 
-def global_per_dataset(glob: pd.DataFrame) -> pd.DataFrame:
-    g = glob[glob.subset == "all"].groupby(["dataset", "run", "method"])[["f1", "n_rules", "length"]].mean()
+def global_per_dataset(glob: pd.DataFrame, subset: str) -> pd.DataFrame:
+    """(dataset, method) x global metrics, mean over runs and classes. subset "all": the instance
+    methods from every explained train series, without the sampled ones; otherwise every instance
+    method from the train series the subset's method attempted, on the datasets where it ran, and
+    the surrogates (always trained on every train series) on the same datasets."""
+    if subset == "all":
+        g = glob[(glob.subset == "all") & ~glob.method.isin(SAMPLED)]
+    else:
+        ran = glob[glob.method == subset].dataset.unique()
+        g = glob[glob.dataset.isin(ran) & ((glob.subset == subset) | glob.method.isin(["tree", "ripper"]))]
+    g = g.groupby(["dataset", "run", "method"])[["f1", "n_rules", "length"]].mean()
     return g.groupby(["dataset", "method"]).mean()
 
 
@@ -111,9 +140,13 @@ def plot_precision_coverage(p: pd.DataFrame):
     fig, ax = plt.subplots(figsize=(4.6, 3.6), constrained_layout=True)
     p = p.unstack("method")
     methods = [m for m in METHOD_STYLE if ("coverage", m) in p.columns]
+    # each dataset: a segment from STLRocket to each other method
     for d in p.index:
-        ax.plot(p.loc[d, [("coverage", m) for m in methods]], p.loc[d, [("precision", m) for m in methods]],
-                color=INK_2, linewidth=0.3, zorder=1)
+        for m in methods:
+            if m != "stlrocket":
+                ax.plot([p.loc[d, ("coverage", "stlrocket")], p.loc[d, ("coverage", m)]],
+                        [p.loc[d, ("precision", "stlrocket")], p.loc[d, ("precision", m)]],
+                        color=INK_2, linewidth=0.3, zorder=1)
     for m in methods:
         label, color, marker = METHOD_STYLE[m]
         ax.scatter(p[("coverage", m)], p[("precision", m)], s=24, color=color, marker=marker,
@@ -135,7 +168,7 @@ def write_table(p: pd.DataFrame, share: pd.DataFrame, path: Path):
     cols = [c for c in METRICS if c[0] != "found"]
     nm = len(methods)
     head = " & ".join(f"\\multicolumn{{{nm}}}{{c}}{{{label}}}" for _, label, _ in cols)
-    sub = " & ".join(" & ".join(METHOD_STYLE[m][0] for m in methods) for _ in cols)
+    sub = " & ".join(" & ".join(SHORT[m] for m in methods) for _ in cols)
     lines = [r"\begin{tabular}{l" + "c" * nm * len(cols) + "}", r"\toprule", f" & {head} \\\\",
              " ".join(f"\\cmidrule(lr){{{2 + nm * i}-{1 + nm * (i + 1)}}}" for i in range(len(cols))),
              f"Dataset & {sub} \\\\", r"\midrule"]
@@ -146,31 +179,39 @@ def write_table(p: pd.DataFrame, share: pd.DataFrame, path: Path):
     print(f"wrote {path}")
 
 
-def pvalue(a: pd.Series, b: pd.Series) -> str:
+def pvalue(a: pd.Series, b: pd.Series) -> float:
     diff = (a - b).dropna()
-    pv = wilcoxon(diff).pvalue if len(diff) > 1 and diff.abs().sum() > 0 else np.nan
-    return f"{pv:.2g}" if np.isfinite(pv) else "--"
+    return wilcoxon(diff).pvalue if len(diff) > 1 and diff.abs().sum() > 0 else np.nan
 
 
 def write_summary(blocks: dict, metrics: list, methods: list, path: Path):
-    """blocks: label -> per_dataset frame. One block per comparison, one row per metric: the
-    mean over datasets of each method, then the p-value of STLRocket against each other one."""
-    others = [m for m in methods if m != "stlrocket"]
-    ncol = 1 + len(methods) + len(others)
-    lines = [r"\begin{tabular}{l" + "c" * (ncol - 1) + "}", r"\toprule",
-             "Metric & " + " & ".join(METHOD_STYLE[m][0] for m in methods) + " & "
-             + " & ".join(f"$p$ {METHOD_STYLE[m][0]}" for m in others) + r" \\"]
+    """blocks: label -> per_dataset frame. One block per comparison, one row per method with a
+    value: the number of datasets on which it has a result, then per metric the mean over
+    datasets. The two-sided Wilcoxon signed-rank p-value against STLRocket, over the datasets
+    where both have a value, is only printed."""
+    ncol = 2 + len(metrics)
+    lines = [r"\begin{tabular}{lr" + "c" * len(metrics) + "}", r"\toprule",
+             "Method & Datasets & " + " & ".join(name for _, name, _ in metrics) + r" \\"]
     for label, p in blocks.items():
         p = p.unstack("method")
-        n = len(p.dropna(how="all"))
-        lines += [r"\midrule", f"\\multicolumn{{{ncol}}}{{l}}{{\\emph{{{label} ({n} datasets)}}}} \\\\"]
-        print(f"--- {label} ({n} datasets)")
-        for c, name, fmt in metrics:
-            has = lambda m: (c, m) in p.columns and p[(c, m)].notna().any()
-            means = [cell(p[(c, m)].mean(), fmt) if has(m) else "--" for m in methods]
-            pvals = [pvalue(p[(c, "stlrocket")], p[(c, m)]) if has(m) and has("stlrocket") else "--" for m in others]
-            lines.append(f"{name} & " + " & ".join(means + pvals) + r" \\")
-            print(f"{name:12s} " + " ".join(f"{v:>8s}" for v in means) + "   p: " + " ".join(pvals))
+        if len(blocks) > 1:
+            lines += [r"\midrule", f"\\multicolumn{{{ncol}}}{{l}}{{\\emph{{{label}}}}} \\\\"]
+        else:
+            lines.append(r"\midrule")
+        print(f"--- {label}")
+        for m in methods:
+            cols = [(c, m) for c, _, _ in metrics if (c, m) in p.columns]
+            n = int(p[cols].notna().any(axis=1).sum()) if cols else 0
+            if n == 0:
+                continue
+            cells, out = [], []
+            for c, _, fmt in metrics:
+                v = p[(c, m)].mean() if (c, m) in p.columns else np.nan
+                pv = np.nan if m == "stlrocket" or (c, m) not in p.columns else pvalue(p[(c, "stlrocket")], p[(c, m)])
+                cells.append(cell(v, fmt))
+                out.append(f"{cell(v, fmt):>8s} (p {pv:.2g})" if m != "stlrocket" else f"{cell(v, fmt):>8s}")
+            lines.append(f"{METHOD_STYLE[m][0]} & {n} & " + " & ".join(cells) + r" \\")
+            print(f"{METHOD_STYLE[m][0]:15s} {n:3d} datasets " + " ".join(out))
     lines += [r"\bottomrule", r"\end{tabular}"]
     path.write_text("\n".join(lines) + "\n")
     print(f"wrote {path}")
@@ -204,11 +245,12 @@ def main():
     ap.add_argument("--min_share", type=float, default=0.5,
                     help="LORE, Anchors enter a comparison on datasets where they explained this share of "
                          "the series they attempted")
+    ap.add_argument("--exclude", nargs="*", default=[], help="datasets left out")
     args = ap.parse_args()
     res_dir, out_dir = Path(args.res_dir), Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    inst, glob = load(res_dir)
+    inst, glob = load(res_dir, args.exclude)
     print(inst.groupby(["dataset", "method"]).run.nunique().unstack().to_string())
     share = done_share(inst)
     print("share of attempted test series explained:\n" + share.round(2).to_string())
@@ -227,8 +269,9 @@ def main():
     write_summary(blocks, METRICS, methods, out_dir / "instance_summary.tex")
 
     g_methods = [m for m in METHOD_STYLE if (glob.method == m).any()]
-    write_summary({"Global explanations": global_per_dataset(glob)}, GLOBAL_METRICS, g_methods,
-                  out_dir / "global_summary.tex")
+    g_blocks = {GLOBAL_LABEL[s]: global_per_dataset(glob, s)
+                for s in ("all",) + tuple(m for m in SAMPLED if m in g_methods)}
+    write_summary(g_blocks, GLOBAL_METRICS, g_methods, out_dir / "global_summary.tex")
     claims(inst, args.threshold)
 
 

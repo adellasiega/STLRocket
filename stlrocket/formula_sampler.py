@@ -6,6 +6,7 @@ import random
 from typing import Optional
 import torch
 from torcheck import stl
+from .average import Average
 
 
 class F0:
@@ -18,6 +19,7 @@ class F0:
         depth_max: int,
         until_weight: float,
         seed: Optional[int],
+        average_prob: float = 0.0,  # probability that an atom is a moving-average atom (Average)
     ):
         self.n_vars = n_vars
         self.v_min = v_min
@@ -25,6 +27,7 @@ class F0:
         self.t_max = t_max
         self.depth_max = depth_max
         self.until_weight = until_weight
+        self.average_prob = average_prob
 
         if seed is not None:
             random.seed(seed)
@@ -45,9 +48,9 @@ class F0:
         """
         if current_depth >= target_depth:
             assert guarded, "unguarded branch ran out of depth"
-            return self._sample_atomic_predicate()
+            return self._sample_atomic_predicate(remaining_time)
         if guarded and not must_reach and random.random() < current_depth / target_depth:
-            return self._sample_atomic_predicate()
+            return self._sample_atomic_predicate(remaining_time)
         return self._sample_operator_node(remaining_time, current_depth, target_depth, must_reach, guarded)
 
     @staticmethod
@@ -61,7 +64,7 @@ class F0:
         a = random.randint(0, remaining_time - width)
         return a, a + width
 
-    def _sample_atomic_predicate(self):
+    def _sample_atomic_predicate(self, remaining_time: int):
         var_idx = random.randint(0, self.n_vars - 1)
         v_low = self.v_min[var_idx].item()
         v_high = self.v_max[var_idx].item()
@@ -69,6 +72,12 @@ class F0:
         threshold = random.uniform(v_low, v_high)
         lte = random.choice([True, False])
 
+        # Drawn after the atom and only if average_prob > 0: with average_prob = 0 the
+        # draws are those of the sampler without Average. The window takes the remaining
+        # time budget like any temporal operator.
+        if self.average_prob > 0 and remaining_time > 0 and random.random() < self.average_prob:
+            a, b = self._sample_interval(remaining_time)
+            return Average(var_index=var_idx, threshold=threshold, lte=lte, left_time_bound=a, right_time_bound=b)
         return stl.Atom(var_index=var_idx, threshold=threshold, lte=lte)
 
     def _sample_operator_node(
@@ -174,7 +183,7 @@ class F0:
     @staticmethod
     def formula_depth(formula) -> int:
         """
-            Max nesting depth of a formula tree (0 for a bare atom).
+            Max nesting depth of a formula tree (0 for a bare atom, Average included).
         """
         if isinstance(formula, stl.Atom):
             return 0

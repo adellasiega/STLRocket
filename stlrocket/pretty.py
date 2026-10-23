@@ -19,6 +19,7 @@ from dataclasses import dataclass
 import numpy as np
 from torcheck.stl import Atom, Not, And, Or, Globally, Eventually, Until
 
+from .average import Average
 from .features import _atoms, _children
 from .formula_sampler import F0
 
@@ -47,6 +48,9 @@ def _temporal(cls, node, child):
 def nnf(phi, negate: bool = False):
     """Copy of phi with every negation pushed down to the atoms (absorbed by flipping the
     atom direction); same robustness on every series. Not Until is kept as it is."""
+    if isinstance(phi, Average):
+        return Average(var_index=phi.var_index, threshold=phi.threshold, lte=phi.lte != negate,
+                       left_time_bound=phi.left_time_bound, right_time_bound=phi.right_time_bound - 1)
     if isinstance(phi, Atom):
         return Atom(var_index=phi.var_index, threshold=phi.threshold, lte=phi.lte != negate)
     if isinstance(phi, Not):
@@ -111,7 +115,10 @@ def to_text(phi, info: DatasetInfo, mean: np.ndarray, std: np.ndarray, _nested: 
         if isinstance(node, Atom):
             v = node.var_index
             unit = f" {info.units[v]}" if info.units[v] else ""
-            return f"{info.var_names[v]} {'<' if node.lte else '>'} {atom_threshold(node, mean, std):.3g}{unit}"
+            name = info.var_names[v]
+            if isinstance(node, Average):
+                name = f"mean of {name} over {_window_text(node, info.hz, nested)}"
+            return f"{name} {'<' if node.lte else '>'} {atom_threshold(node, mean, std):.3g}{unit}"
         if isinstance(node, Not):
             return f"not ({rec(node.child, nested)})"
         if isinstance(node, (And, Or)):
@@ -130,12 +137,16 @@ def to_text(phi, info: DatasetInfo, mean: np.ndarray, std: np.ndarray, _nested: 
 
 def atom_spans(phi) -> list[tuple[Atom, int, int | None, bool]]:
     """Every atom of nnf(phi) with the span of absolute time steps it can be read on when phi is
-    read at t = 0 (sum of the windows of the temporal operators above it; end None: to the
-    end of the series) and whether it lies under an odd number of negations."""
+    read at t = 0 (sum of the windows of the temporal operators above it, and of its own if
+    it is an Average; end None: to the end of the series) and whether it lies under an odd
+    number of negations."""
     out = []
 
     def rec(node, a, b, neg):
         if isinstance(node, Atom):
+            if isinstance(node, Average):
+                wa, wb = window(node)
+                a, b = a + wa, (None if b is None else b + wb)
             out.append((node, a, b, neg))
             return
         if isinstance(node, Not):
@@ -152,11 +163,14 @@ def atom_spans(phi) -> list[tuple[Atom, int, int | None, bool]]:
 
 
 def formula_stats(phi) -> dict:
-    """Size (nodes), depth, atoms, distinct variables and temporal operators of phi."""
-    counts = {"G": 0, "F": 0, "U": 0}
+    """Size (nodes), depth, atoms, distinct variables and temporal operators of phi
+    (A: Average atoms, also counted in atoms)."""
+    counts = {"G": 0, "F": 0, "U": 0, "A": 0}
 
     def rec(node):
-        if isinstance(node, Globally):
+        if isinstance(node, Average):
+            counts["A"] += 1
+        elif isinstance(node, Globally):
             counts["G"] += 1
         elif isinstance(node, Eventually):
             counts["F"] += 1

@@ -33,6 +33,7 @@ from statistics import NormalDist
 import numpy as np
 from torcheck.stl import And, Atom, Not
 
+from .average import Average
 from .features import _children, shift_atom_thresholds
 from .simplification import simplify_data_aware
 
@@ -459,6 +460,9 @@ def formula_key(phi) -> tuple:
     """Hashable form of an STL formula, equal only for identical formulae: node types, atom
     variables, directions and exact thresholds, and time bounds. str() is not enough, since
     torcheck prints thresholds rounded to 4 decimals."""
+    if isinstance(phi, Average):
+        return ("Average", phi.var_index, bool(phi.lte), float(phi.threshold),
+                phi.left_time_bound, phi.right_time_bound)
     if isinstance(phi, Atom):
         return ("Atom", phi.var_index, bool(phi.lte), float(phi.threshold))
     bounds = tuple(getattr(phi, a, None) for a in ("unbound", "right_unbound", "left_time_bound", "right_time_bound"))

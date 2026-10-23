@@ -145,6 +145,7 @@ def _make_generator(X_tr: np.ndarray, config: ExperimentConfig, seed: int) -> F0
         depth_max=config.depth_max,
         seed=seed,
         until_weight=config.until_weight,
+        average_prob=config.average_prob,
     )
 
 
