@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """
 Validation-only ablation over depth_max, number of formulas M, until_weight,
-correlation-filter threshold, threshold calibration, Average atom probability and
-fit_intercept. The TEST split is never loaded.
+correlation-filter threshold, threshold calibration, Average atom probability,
+cross-channel atom probability and fit_intercept. The TEST split is never loaded.
 
 For each dataset and run, the TRAIN split is divided into fit/validation with a
 stratified split seeded by base_seed + run. All configurations in a run share that
 split and the formula seed, so results are paired across configurations.
 
 Features are built once per (dataset, run, depth_max, until_weight, corr_threshold,
-calibrate, average_prob) at max(M): the sampler draws formulas i.i.d. from one seeded stream, the
+calibrate, average_prob, cross_prob) at max(M): the sampler draws formulas i.i.d. from one seeded stream, the
 correlation filter is greedy in stream order, calibration draws from its own stream in
 formula order and features are standardized per column, so the first M columns are exactly the
 M-formula bank. The series are standardized per variable on the fit part, which is also
@@ -52,7 +52,7 @@ from stlrocket.classifier import (train_classifier, evaluate_classifier, selecti
 
 ROW_FIELDS = [
     "dataset", "run", "seed", "val_ratio", "depth_max", "n_formulas", "until_weight",
-    "corr_threshold", "n_sampled", "n_bank", "calibrate", "average_prob",
+    "corr_threshold", "n_sampled", "n_bank", "calibrate", "average_prob", "cross_prob",
     "fit_intercept", "val_balanced_accuracy", "fit_balanced_accuracy", "n_selected",
     # Lambda selection: the selected (1-SE) lambda vs the one with the best CV score.
     "val_balanced_accuracy_cvmax", "n_selected_cvmax", "lambda_index", "lambda_index_cvmax",
@@ -62,7 +62,7 @@ ROW_FIELDS = [
 
 # Columns identifying a fitted model, repeated in every line of OUTPUT.paths.jsonl.
 PATH_KEYS = ["dataset", "run", "seed", "val_ratio", "depth_max", "n_formulas", "until_weight",
-             "corr_threshold", "calibrate", "average_prob", "fit_intercept"]
+             "corr_threshold", "calibrate", "average_prob", "cross_prob", "fit_intercept"]
 
 # train_classifier never uses fewer than 3 CV folds, so each class needs at least
 # 3 samples in the fit part.
@@ -81,7 +81,7 @@ def load_train(name: str) -> tuple[np.ndarray, np.ndarray]:
 
 def make_config(args, dataset: str, n_formulas: int, depth_max: int,
                 until_weight: float, fit_intercept: bool, calibrate: bool = False,
-                average_prob: float = 0.0) -> ExperimentConfig:
+                average_prob: float = 0.0, cross_prob: float = 0.0) -> ExperimentConfig:
     return ExperimentConfig(
         dataset=dataset,
         n_formulas=n_formulas,
@@ -102,6 +102,7 @@ def make_config(args, dataset: str, n_formulas: int, depth_max: int,
         device=args.device,
         calibrate_thresholds=calibrate,
         average_prob=average_prob,
+        cross_prob=cross_prob,
     )
 
 
@@ -143,9 +144,10 @@ def run_dataset(args, dataset: str, writer, f, f_paths) -> None:
             continue
 
         for depth_max in args.depths:
-            for until_weight, corr_threshold, calibrate, average_prob in itertools.product(
-                    args.until_weights, args.corr_thresholds, args.calibrate, args.average_probs):
-                cfg = make_config(args, dataset, M_max, depth_max, until_weight, True, calibrate, average_prob)
+            for until_weight, corr_threshold, calibrate, average_prob, cross_prob in itertools.product(
+                    args.until_weights, args.corr_thresholds, args.calibrate, args.average_probs, args.cross_probs):
+                cfg = make_config(args, dataset, M_max, depth_max, until_weight, True, calibrate, average_prob,
+                                  cross_prob)
                 t0 = time.perf_counter()
                 if corr_threshold is None:
                     _, F_fit, F_val, _ = build_formula_bank(X_fit, X_val, y_fit, cfg, seed)
@@ -171,6 +173,7 @@ def run_dataset(args, dataset: str, writer, f, f_paths) -> None:
                             "n_bank": min(M, F_fit.shape[1]),
                             "calibrate": calibrate,
                             "average_prob": average_prob,
+                            "cross_prob": cross_prob,
                             "fit_intercept": fit_intercept,
                             # Bank built once at M_max; cost is linear in M.
                             "time_feats_s": round(t_feats * M / M_max, 4),
@@ -204,7 +207,7 @@ def run_dataset(args, dataset: str, writer, f, f_paths) -> None:
                             row["status"] = f"error: {type(e).__name__}: {e}"
                         write(row)
                         print(f"{dataset} run={run} depth={depth_max} until={until_weight} corr={corr_threshold} calib={calibrate} "
-                              f"avg={average_prob} M={M} intercept={fit_intercept} -> "
+                              f"avg={average_prob} cross={cross_prob} M={M} intercept={fit_intercept} -> "
                               f"val={row.get('val_balanced_accuracy')} [{row['status']}]", flush=True)
 
 
@@ -240,6 +243,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--calibrate", type=str2bool, nargs="+", default=[False])
     # Probability that a sampled atom is a moving-average atom (stlrocket/average.py); 0 = off.
     p.add_argument("--average_probs", type=float, nargs="+", default=[0.0])
+    # Probability that a sampled atom is a two-variable linear atom (stlrocket/linear_atom.py); 0 = off.
+    p.add_argument("--cross_probs", type=float, nargs="+", default=[0.0])
     p.add_argument("--fit_intercept", type=str2bool, nargs="+", default=[True, False])
     p.add_argument("--cv", type=int, default=5)
     p.add_argument("--cut_point", type=float, default=1.0)

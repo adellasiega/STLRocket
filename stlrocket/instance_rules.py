@@ -34,6 +34,7 @@ import numpy as np
 from torcheck.stl import And, Atom, Not
 
 from .average import Average
+from .linear_atom import LinearAtom
 from .features import _children, shift_atom_thresholds
 from .simplification import simplify_data_aware
 
@@ -460,6 +461,9 @@ def formula_key(phi) -> tuple:
     """Hashable form of an STL formula, equal only for identical formulae: node types, atom
     variables, directions and exact thresholds, and time bounds. str() is not enough, since
     torcheck prints thresholds rounded to 4 decimals."""
+    if isinstance(phi, LinearAtom):
+        return ("LinearAtom", phi.var_index, phi.var_index2, float(phi.a), float(phi.b), bool(phi.lte),
+                float(phi.threshold))
     if isinstance(phi, Average):
         return ("Average", phi.var_index, bool(phi.lte), float(phi.threshold),
                 phi.left_time_bound, phi.right_time_bound)
