@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """
 Validation-only ablation over depth_max, number of formulas M, until_weight,
-correlation-filter threshold, threshold calibration and fit_intercept. The TEST split
-is never loaded.
+correlation-filter threshold, threshold calibration, first-difference channels and
+fit_intercept. The TEST split is never loaded.
 
 For each dataset and run, the TRAIN split is divided into fit/validation with a
 stratified split seeded by base_seed + run. All configurations in a run share that
 split and the formula seed, so results are paired across configurations.
 
 Features are built once per (dataset, run, depth_max, until_weight, corr_threshold,
-calibrate) at max(M): the sampler draws formulas i.i.d. from one seeded stream, the
+calibrate, diff_channels) at max(M): the sampler draws formulas i.i.d. from one seeded stream, the
 correlation filter is greedy in stream order, calibration draws from its own stream in
 formula order and features are standardized per column, so the first M columns are exactly the
 M-formula bank. The series are standardized per variable on the fit part, which is also
@@ -52,7 +52,7 @@ from stlrocket.classifier import (train_classifier, evaluate_classifier, selecti
 
 ROW_FIELDS = [
     "dataset", "run", "seed", "val_ratio", "depth_max", "n_formulas", "until_weight",
-    "corr_threshold", "n_sampled", "n_bank", "calibrate",
+    "corr_threshold", "n_sampled", "n_bank", "calibrate", "diff_channels",
     "fit_intercept", "val_balanced_accuracy", "fit_balanced_accuracy", "n_selected",
     # Lambda selection: the selected (1-SE) lambda vs the one with the best CV score.
     "val_balanced_accuracy_cvmax", "n_selected_cvmax", "lambda_index", "lambda_index_cvmax",
@@ -62,7 +62,7 @@ ROW_FIELDS = [
 
 # Columns identifying a fitted model, repeated in every line of OUTPUT.paths.jsonl.
 PATH_KEYS = ["dataset", "run", "seed", "val_ratio", "depth_max", "n_formulas", "until_weight",
-             "corr_threshold", "calibrate", "fit_intercept"]
+             "corr_threshold", "calibrate", "diff_channels", "fit_intercept"]
 
 # train_classifier never uses fewer than 3 CV folds, so each class needs at least
 # 3 samples in the fit part.
@@ -77,6 +77,18 @@ def load_train(name: str) -> tuple[np.ndarray, np.ndarray]:
         warnings.simplefilter("ignore", FutureWarning)
         X, y = load_classification(name, split="TRAIN")
     return _fill_missing(X.astype(np.float32)), y
+
+
+def add_first_difference(X: np.ndarray) -> np.ndarray:
+    """Append the first difference of every channel: (N, V, T) -> (N, 2V, T).
+
+    d[t] = x[t] - x[t-1] for t >= 1 and d[0] = d[1], so the channel keeps length T without
+    a made-up zero at t=0, where robustness is evaluated. Per series, so it can be applied
+    before the fit/val split without leakage; standardize_series then scales it on the fit
+    part like any other channel.
+    """
+    dX = np.diff(X, axis=-1)
+    return np.concatenate([X, np.concatenate([dX[..., :1], dX], axis=-1)], axis=1)
 
 
 def make_config(args, dataset: str, n_formulas: int, depth_max: int,
@@ -117,6 +129,7 @@ def split_ok(y_fit: np.ndarray, y_val: np.ndarray, classes: np.ndarray) -> bool:
 
 def run_dataset(args, dataset: str, writer, f, f_paths) -> None:
     X, y = load_train(dataset)
+    X_by_diff = {d: add_first_difference(X) if d else X for d in args.diff_channels}
     classes = np.unique(y)
     M_max = max(args.n_formulas)
 
@@ -135,14 +148,14 @@ def run_dataset(args, dataset: str, writer, f, f_paths) -> None:
             write({**base, "status": f"split_error: {e}"})
             continue
         y_fit, y_val = y[fit_idx], y[val_idx]
-        X_fit, X_val = standardize_series(X[fit_idx], X[val_idx])
         if not split_ok(y_fit, y_val, classes):
             write({**base, "status": "skipped: too few samples per class"})
             continue
 
         for depth_max in args.depths:
-            for until_weight, corr_threshold, calibrate in itertools.product(
-                    args.until_weights, args.corr_thresholds, args.calibrate):
+            for until_weight, corr_threshold, calibrate, diff in itertools.product(
+                    args.until_weights, args.corr_thresholds, args.calibrate, args.diff_channels):
+                X_fit, X_val = standardize_series(X_by_diff[diff][fit_idx], X_by_diff[diff][val_idx])
                 cfg = make_config(args, dataset, M_max, depth_max, until_weight, True, calibrate)
                 t0 = time.perf_counter()
                 if corr_threshold is None:
@@ -168,6 +181,7 @@ def run_dataset(args, dataset: str, writer, f, f_paths) -> None:
                             # Formulas actually in the bank: below M if the filter ran out of rounds.
                             "n_bank": min(M, F_fit.shape[1]),
                             "calibrate": calibrate,
+                            "diff_channels": diff,
                             "fit_intercept": fit_intercept,
                             # Bank built once at M_max; cost is linear in M.
                             "time_feats_s": round(t_feats * M / M_max, 4),
@@ -200,7 +214,7 @@ def run_dataset(args, dataset: str, writer, f, f_paths) -> None:
                         except Exception as e:
                             row["status"] = f"error: {type(e).__name__}: {e}"
                         write(row)
-                        print(f"{dataset} run={run} depth={depth_max} until={until_weight} corr={corr_threshold} calib={calibrate} "
+                        print(f"{dataset} run={run} depth={depth_max} until={until_weight} corr={corr_threshold} calib={calibrate} diff={diff} "
                               f"M={M} intercept={fit_intercept} -> "
                               f"val={row.get('val_balanced_accuracy')} [{row['status']}]", flush=True)
 
@@ -235,6 +249,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--corr_max_rounds", type=int, default=20)
     # Calibrate atom thresholds of multi-atom formulae on the fit part (features.calibrate_thresholds).
     p.add_argument("--calibrate", type=str2bool, nargs="+", default=[False])
+    # Append the first difference of every channel (add_first_difference).
+    p.add_argument("--diff_channels", type=str2bool, nargs="+", default=[False])
     p.add_argument("--fit_intercept", type=str2bool, nargs="+", default=[True, False])
     p.add_argument("--cv", type=int, default=5)
     p.add_argument("--cut_point", type=float, default=1.0)

@@ -61,6 +61,22 @@ def test_rules():
             check_rule(rule, i, F, pred, cfg)
 
 
+def test_rule_satisfied_by_tau_alone():
+    """No cut of any candidate is satisfied by another train series (tau alone is positive on
+    every formula): the rule is the first candidate at cut 0, still consistent with tau."""
+    rng = np.random.default_rng(2)
+    F = -np.abs(rng.standard_normal((50, 6)))
+    F[0] = np.abs(F[0])
+    W = rng.standard_normal((3, 6))
+    pred = ir.predict_indices(F, W)
+    for construction in ir.CONSTRUCTIONS:
+        cfg = ir.RuleConfig(construction=construction)
+        rule = ir.explain_instance(F[0], W, F, pred, cfg, exclude=0)
+        j0 = int(ir.candidate_scores(F[0], W, cfg.candidates)[2][0])
+        assert rule["literals"] == [(j0, 1.0, 0.0)]
+        assert (rule["support"], rule["tp"], rule["lcb"]) == (0, 0, 0.0)
+
+
 def test_ordered_rules():
     """Attribution-ordered constructions: literals follow the ranking of the candidates."""
     rng = np.random.default_rng(3)

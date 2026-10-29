@@ -168,8 +168,10 @@ def explain_instance(
     count).
 
     Returns dict(k, literals [(j, e, s)], tp, support, precision, lcb, n_candidates), lcb
-    the Wilson bound of the rule's train precision; literals is empty if no rule is satisfied
-    by a train series. Candidates come from candidate_scores(method=cfg.candidates).
+    the Wilson bound of the rule's train precision. If no rule is satisfied by a train series,
+    the rule is the first candidate at cut 0, satisfied by tau alone (support 0, lcb 0), so
+    literals is empty only without candidates. Candidates come from
+    candidate_scores(method=cfg.candidates).
     """
     k, score, J = candidate_scores(x, W_full, cfg.candidates)
     keep = np.ones(len(X_tr_feats), dtype=bool)
@@ -191,8 +193,8 @@ def explain_instance(
         lits = _ordered_rule(U, grids, keep, pos, cfg)
     else:
         raise ValueError(f"unknown construction {cfg.construction!r}: expected one of {CONSTRUCTIONS}")
-    if not lits:
-        return empty
+    if not lits:   # no cut of any candidate is satisfied by a train series: the top one at cut 0
+        lits = ((0, 0.0),)
     mask = covered([(p, 1.0, s) for p, s in lits], U) & keep
     n, tp = int(mask.sum()), int((mask & pos).sum())
     literals = [(int(J[p]), float(eps[p]), float(s)) for p, s in lits]
