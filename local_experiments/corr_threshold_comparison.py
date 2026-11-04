@@ -95,7 +95,7 @@ def main():
     config = ExperimentConfig(
         dataset=args.dataset, n_formulas=args.n_formulas, depth_max=args.depth_max, until_weight=0.0,
         cv=3, cut_point=1.0, fit_intercept=False, explain=False, pool_size=10, precision_threshold=0.9,
-        simplify_agreement=0.95, simplify_min_gain=0.0, simplify_decimals=1, n_run=len(args.seeds),
+        n_run=len(args.seeds),
         base_seed=0, output_dir="results", device="cpu")
     set_device(config.device)
 

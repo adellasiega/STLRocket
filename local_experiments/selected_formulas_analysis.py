@@ -46,7 +46,7 @@ for d in DATASETS:
     X, y = load_train(d)
     for run in RUNS:
         fit, val = next(StratifiedShuffleSplit(1, test_size=0.25, random_state=run).split(X, y))
-        cfg = ExperimentConfig(d, 10000, 3, 0.0, 3, 1.0, False, False, 0, 0, 0, 0, 0, 1, 0, ".", "cpu")
+        cfg = ExperimentConfig(d, 10000, 3, 0.0, 3, 1.0, False, False, 0, 0, 1, 0, ".", "cpu")
         formulas, F_fit, F_val, _ = build_formula_bank(*standardize_series(X[fit], X[val]), y[fit], cfg, run)
         model = train_classifier(F_fit, y[fit], cfg, seed=run)
         acc = evaluate_classifier(model, F_val, y[val])["balanced_accuracy"]

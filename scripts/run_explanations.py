@@ -93,8 +93,7 @@ def run(args, dataset: str, run_id: int) -> None:
         cv=args.cv, cut_point=args.cut_point, fit_intercept=False, n_run=1, base_seed=args.base_seed,
         output_dir=str(out), device=args.device,
         # fields of the old explanation pipeline, unused here
-        explain=False, pool_size=0, precision_threshold=0.0, simplify_agreement=0.0, simplify_min_gain=0.0,
-        simplify_decimals=0,
+        explain=False, pool_size=0, precision_threshold=0.0,
     )
     rcfg = ir.RuleConfig(n_max=args.n_max, beam_width=args.beam_width,
                          confidence=args.confidence, min_new_share=args.min_new_share,

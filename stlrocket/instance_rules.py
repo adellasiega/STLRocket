@@ -34,6 +34,7 @@ import numpy as np
 from torcheck.stl import And, Atom, Not
 
 from .features import _children, shift_atom_thresholds
+from .formula_sampler import F0
 from .simplification import simplify_data_aware
 
 
@@ -392,51 +393,56 @@ def rule_formula(literals: list, formulas: list, sigma: np.ndarray, X_tr: np.nda
 
 
 def global_rules(train_rules: list[dict], X_tr_feats: np.ndarray, ref_labels: np.ndarray,
-                 cfg: RuleConfig) -> dict[int, list]:
+                 cfg: RuleConfig, size=len) -> dict[int, list]:
     """Rules of the global explanation per class, in feature space: the distinct
     instance rules of the train series predicted as that class, then few, general ones of
     them (select_disjuncts). Returns {k: [literals, ...]}.
 
     Rules are distinct by the set of train series they cover, not by their literals: each
     train series' cut grid leaves that series out, so two series can give slightly
-    different cuts for the same covered set. Of such rules the shorter one is kept, then
+    different cuts for the same covered set. Of such rules the smaller one is kept, then
     the one with more TP. A rule is selected only if it covers at least
     ceil(cfg.min_new_share * class size) new train series of its class (at least 1); the
-    class is w.r.t. ref_labels, the train class indices of the instance rules."""
+    class is w.r.t. ref_labels, the train class indices of the instance rules.
+    size: size of a rule from its literals, the tie-break here and in select_disjuncts;
+    called only on ties. Default: the number of literals (global_explanations passes the
+    node count of the STL formula)."""
     out: dict[int, dict] = {}
     for r in train_rules:
         if r["literals"]:
             key = covered(r["literals"], X_tr_feats).tobytes()
             cur = out.setdefault(r["k"], {}).get(key)
-            if cur is None or (len(r["literals"]), -r["tp"]) < (len(cur["literals"]), -cur["tp"]):
+            if cur is None or (size(r["literals"]), -r["tp"]) < (size(cur["literals"]), -cur["tp"]):
                 out[r["k"]][key] = r
     rules = {k: [r["literals"] for r in v.values()] for k, v in out.items()}
     if cfg.min_new_share is None:
         return rules
     return {k: select_disjuncts(R, X_tr_feats, ref_labels == k,
-                                max(1, int(np.ceil(cfg.min_new_share * (ref_labels == k).sum()))))
+                                max(1, int(np.ceil(cfg.min_new_share * (ref_labels == k).sum()))),
+                                size=size)
             for k, R in rules.items()}
 
 
 def select_disjuncts(rules: list, X_tr_feats: np.ndarray | None, pos: np.ndarray, min_new: int,
-                     masks: list | None = None) -> list:
+                     masks: list | None = None, size=len) -> list:
     """Greedy cover of the train series of the class (pos) by few, general rules: add the
     rule satisfied by the most positives not yet covered (ties: fewer false positives,
-    then shorter), and stop when the best one adds fewer than min_new new positives.
+    then smaller size(rule), then the earlier one), and stop when the best one adds fewer
+    than min_new new positives. size is called only on rules tied on both counts.
     Every disjunct can bring false positives on new series, while the true positives of
     the rules mostly overlap, so a rule covering almost nothing new is not worth it.
     masks: the train series satisfying each rule, for rules that are not literals of
-    X_tr_feats (e.g. another explainer's); len(rules[i]) is then only the length tie-break."""
+    X_tr_feats (e.g. another explainer's); rules[i] is then only passed to size."""
     if masks is None:
         masks = [covered(lits, X_tr_feats) for lits in rules]
     done = np.zeros(len(pos), dtype=bool)
     left, chosen = list(range(len(rules))), []
     while left:
-        def gain(i):
-            return (int((masks[i] & pos & ~done).sum()), -int((masks[i] & ~pos).sum()), -len(rules[i]))
-        best = max(left, key=gain)
-        if gain(best)[0] < max(min_new, 1):
+        gain = {i: (int((masks[i] & pos & ~done).sum()), -int((masks[i] & ~pos).sum())) for i in left}
+        top = max(gain.values())
+        if top[0] < max(min_new, 1):
             break
+        best = min((i for i in left if gain[i] == top), key=lambda i: size(rules[i]))
         chosen.append(best)
         left.remove(best)
         done |= masks[best]
@@ -449,10 +455,21 @@ def global_explanations(train_rules: list[dict], X_tr_feats: np.ndarray, X_tr: n
     """Global explanation per class: {k: [STL formula, ...]}, the OR of the listed rules.
 
     Rules come from global_rules, each simplified (simplify_rule) unless simplify is
-    False; rules that become identical (formula_key) are kept once."""
+    False; rules that become identical (formula_key) are kept once. Ties in global_rules
+    are broken by the node count (F0.formula_size) of the simplified formula, also when
+    simplify is False, so both versions select the same rules."""
+    simplified = {}     # literals -> simplified formula, built only for tied or selected rules
+
+    def simplified_of(lits):
+        key = tuple(lits)
+        if key not in simplified:
+            simplified[key] = rule_formula(lits, formulas, sigma, X_tr)
+        return simplified[key]
+
     out = {}
-    for k, R in global_rules(train_rules, X_tr_feats, ref_labels, cfg).items():
-        phis = [rule_formula(lits, formulas, sigma, X_tr, simplify) for lits in R]
+    for k, R in global_rules(train_rules, X_tr_feats, ref_labels, cfg,
+                             size=lambda lits: F0.formula_size(simplified_of(lits))).items():
+        phis = map(simplified_of, R) if simplify else (to_stl(lits, formulas, sigma) for lits in R)
         out[k] = list({formula_key(phi): phi for phi in phis}.values())
     return out
 

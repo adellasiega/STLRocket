@@ -104,7 +104,7 @@ def test_stl_and_simplification():
     cfg = ExperimentConfig(
         dataset="synthetic", n_formulas=200, depth_max=2, until_weight=0.0, cv=3, cut_point=1.0,
         fit_intercept=False, n_run=1, base_seed=0, output_dir=".", device="cpu", explain=False, pool_size=0,
-        precision_threshold=0.0, simplify_agreement=0.0, simplify_min_gain=0.0, simplify_decimals=0)
+        precision_threshold=0.0)
     formulas, F, _, sigma = build_formula_bank(X, X[:5], np.zeros(len(X), dtype=int), cfg, 0)
     W = rng.standard_normal((3, F.shape[1])) * (rng.random((3, F.shape[1])) < 0.1)
     pred = ir.predict_indices(F, W)

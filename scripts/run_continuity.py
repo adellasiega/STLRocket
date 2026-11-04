@@ -105,8 +105,7 @@ def run(args, run_id: int) -> list[dict]:
     cfg = ExperimentConfig(
         dataset=args.dataset, n_formulas=args.n_formulas, depth_max=args.depth, until_weight=0.0,
         cv=args.cv, cut_point=args.cut_point, fit_intercept=False, n_run=1, base_seed=args.base_seed,
-        output_dir="", device="cpu", explain=False, pool_size=0, precision_threshold=0.0,
-        simplify_agreement=0.0, simplify_min_gain=0.0, simplify_decimals=0)
+        output_dir="", device="cpu", explain=False, pool_size=0, precision_threshold=0.0)
     formulas, F_tr, F_te, sigma = build_formula_bank(X_tr, X_te, y_tr, cfg, seed)
     model = train_classifier(F_tr, y_tr, cfg, seed=seed)
     W = ir.model_logits_matrix(model)

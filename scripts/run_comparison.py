@@ -305,8 +305,7 @@ def run(args, dataset: str, run_id: int) -> None:
         cv=args.cv, cut_point=args.cut_point, fit_intercept=False, n_run=1, base_seed=args.base_seed,
         output_dir=str(out), device=args.device,
         # fields of the old explanation pipeline, unused here
-        explain=False, pool_size=0, precision_threshold=0.0, simplify_agreement=0.0, simplify_min_gain=0.0,
-        simplify_decimals=0,
+        explain=False, pool_size=0, precision_threshold=0.0,
     )
     ctx = {"args": args, "out": out, "seed": seed, "cfg": cfg, "n_jobs": args.n_jobs,
            "X_tr": X_tr, "y_tr": y_tr, "X_te": X_te, "y_te": y_te,

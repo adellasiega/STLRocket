@@ -113,8 +113,7 @@ def run(args, run_id, rows):
     cfg = ExperimentConfig(
         dataset=args.dataset, n_formulas=args.n_formulas, depth_max=args.depth, until_weight=0.0,
         cv=args.cv, cut_point=args.cut_point, fit_intercept=False, n_run=1, base_seed=args.base_seed,
-        output_dir="", device="cpu", explain=False, pool_size=0, precision_threshold=0.0,
-        simplify_agreement=0.0, simplify_min_gain=0.0, simplify_decimals=0)
+        output_dir="", device="cpu", explain=False, pool_size=0, precision_threshold=0.0)
     rcfg = ir.RuleConfig()
     classes = np.unique(y_tr0)
     major, minor = classes[0], classes[1:]

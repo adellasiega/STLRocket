@@ -27,7 +27,7 @@ def test_class_balanced_centring():
     cfg = ExperimentConfig(
         dataset="synthetic", n_formulas=100, depth_max=2, until_weight=0.0, cv=3, cut_point=1.0,
         fit_intercept=False, n_run=1, base_seed=0, output_dir=".", device="cpu", explain=False, pool_size=0,
-        precision_threshold=0.0, simplify_agreement=0.0, simplify_min_gain=0.0, simplify_decimals=0)
+        precision_threshold=0.0)
     formulas, F_tr, F_te, sigma = build_formula_bank(X, X[:5], y, cfg, 0)
     w = compute_sample_weight("balanced", y)
     live = np.any(F_tr != 0, axis=0)

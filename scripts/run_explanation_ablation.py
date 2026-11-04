@@ -222,8 +222,7 @@ def run(args, dataset: str, run_id: int) -> None:
         cv=args.cv, cut_point=args.cut_point, fit_intercept=False, n_run=1, base_seed=args.base_seed,
         output_dir=str(out_dir), device=args.device,
         # fields of the old explanation pipeline, unused here
-        explain=False, pool_size=0, precision_threshold=0.0, simplify_agreement=0.0, simplify_min_gain=0.0,
-        simplify_decimals=0,
+        explain=False, pool_size=0, precision_threshold=0.0,
     )
     t = time.perf_counter()
     formulas, F_fit, F_val, sigma = build_formula_bank(X["fit"], X["val"], y[fit_idx], cfg, seed)

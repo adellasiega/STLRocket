@@ -23,11 +23,6 @@ class ExperimentConfig:
     pool_size: int 
     precision_threshold: float 
 
-    # Global explanation simplification
-    simplify_agreement: float 
-    simplify_min_gain: float 
-    simplify_decimals: int 
-
     # Experiment loop
     n_run: int 
     base_seed: int  # run i uses seed=base_seed+i
