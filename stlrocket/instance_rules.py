@@ -63,6 +63,29 @@ def predict_indices(X_feats: np.ndarray, W_full: np.ndarray) -> np.ndarray:
     return np.argmax(X_feats @ W_full.T, axis=1)
 
 
+def tied_predictions(X_feats: np.ndarray, W_full: np.ndarray) -> np.ndarray:
+    """Mask of the rows whose top logit is not unique, so that the predicted class is an
+    index tie-break (e.g. two classes with all-zero weights, both at logit 0)."""
+    Z = X_feats @ W_full.T
+    return (Z == Z.max(axis=1, keepdims=True)).sum(axis=1) > 1
+
+
+def margin_share(x: np.ndarray, W_full: np.ndarray, formulae) -> float:
+    """Share beta of a rule's formulae (paper, "Instance Explanations"): with k the predicted
+    class, A_lj = (w_kj - w_lj) x_j and m_l = sum_j A_lj = z_k - z_l,
+    beta = min over l != k of sum_{j in formulae} A_lj / m_l. Features are centred, so the
+    numerator is the margin over l with every other formula at its mean: beta > 0 iff the
+    formulae alone give the prediction k. nan if the top logit is tied (some m_l = 0)."""
+    z = W_full @ x
+    k = int(np.argmax(z))
+    others = np.arange(len(z)) != k
+    A = (W_full[k] - W_full[others]) * x       # (K-1, M) margin attributions
+    m = A.sum(axis=1)
+    if np.any(m <= 0):
+        return np.nan
+    return float((A[:, list(formulae)].sum(axis=1) / m).min())
+
+
 CANDIDATE_METHODS = ("gxi", "ig", "union", "all")
 IG_STEPS = 64   # midpoint quadrature of the Integrated Gradients path integral
 

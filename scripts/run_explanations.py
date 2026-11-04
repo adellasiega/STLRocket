@@ -21,15 +21,21 @@ Everything is written to OUT_DIR/<dataset>/run<r>/:
                       with formulas.pkl.gz it rebuilds every rule exactly from its
                       literals (instance_rules.rule_formula)
   rules_train.csv     one row per series: its instance rule as literals (formula index,
-  rules_test.csv      direction, cut), its simplified STL formula, and the formula's
-                      metrics on train and test (the explained series itself left out)
+  rules_test.csv      direction, cut), its simplified STL formula, the formula's metrics on
+                      train and test (the explained series itself left out), the share of
+                      the rule's formulae (instance_rules.margin_share, nan if tied) and
+                      tied: whether the series' top logit is not unique (its predicted class
+                      is an index tie-break)
   global_rules.csv    the rules of each class's global explanation, raw and simplified
   global_metrics.csv  metrics of each global explanation (raw and simplified) on train/test
   summary.json        headline numbers; written last, so it marks the run as complete
 
 All metrics are w.r.t. the classes predicted by the model: support (series satisfying
-the formula), TP, precision and coverage (TP / series of the class). Runs whose
-summary.json exists are skipped, so a resubmitted job only redoes unfinished runs.
+the formula), TP, precision and coverage (TP / series of the class). An empty model (no
+formula selected) predicts one class for every series and has nothing to explain: its run
+stops after model.json, without rules or summary.json. Runs whose summary.json exists, or
+whose model.json is that of an empty model, are skipped, so a resubmitted job only redoes
+unfinished runs.
 """
 from __future__ import annotations
 
@@ -81,6 +87,9 @@ def run(args, dataset: str, run_id: int) -> None:
     out = Path(args.out_dir) / dataset / f"run{run_id}"
     if (out / "summary.json").exists():
         log(f"{dataset} run {run_id}: already complete, skipped")
+        return
+    if (out / "model.json").exists() and json.loads((out / "model.json").read_text())["n_selected"] == 0:
+        log(f"{dataset} run {run_id}: empty model, nothing to explain, skipped")
         return
     out.mkdir(parents=True, exist_ok=True)
     seed = args.base_seed + run_id
@@ -137,6 +146,10 @@ def run(args, dataset: str, run_id: int) -> None:
          "selected": selected.tolist(), "weights": W[:, selected].tolist(), "selection": selection}, indent=1))
     log(f"model: {len(selected)} of {len(formulas)} formulae selected, balanced accuracy "
         f"train {bacc['train']:.3f} / test {bacc['test']:.3f}")
+    if len(selected) == 0:
+        log(f"{dataset} run {run_id}: empty model, nothing to explain")
+        return
+    tied = {s: ir.tied_predictions(F[s], W) for s in SPLITS}
 
     # Instance rules, scored as their simplified STL formula
     rule_tables = {}
@@ -153,7 +166,10 @@ def run(args, dataset: str, run_id: int) -> None:
             row = {"i": i, "true_class": str(classes[true[own][i]]), "pred_class": str(classes[r["k"]]),
                    "k": r["k"], "n_literals": len(r["literals"]), "literals": json.dumps(r["literals"]),
                    "lcb_train": r["lcb"], "size_raw": 0, "size": 0,
-                   **{c: np.nan for s in SPLITS for c in metric_cols(s, dict.fromkeys(METRICS))}, "rule": ""}
+                   **{c: np.nan for s in SPLITS for c in metric_cols(s, dict.fromkeys(METRICS))},
+                   "share": ir.margin_share(F[own][i], W, [j for j, _, _ in r["literals"]])
+                            if r["literals"] else np.nan,
+                   "tied": bool(tied[own][i]), "rule": ""}
             phi = ir.rule_formula(r["literals"], formulas, sigma, X_tr)
             if phi is not None:
                 row["size_raw"] = F0.formula_size(ir.to_stl(r["literals"], formulas, sigma))
@@ -186,7 +202,7 @@ def run(args, dataset: str, run_id: int) -> None:
                                     "n_rules": len(phis), "size": sum(F0.formula_size(p) for p in phis), **m})
     times["global_s"] = time.perf_counter() - t
     pd.DataFrame(rule_rows).to_csv(out / "global_rules.csv", index=False)
-    # Explicit columns: an empty model (no formula selected) has no global rules
+    # Explicit columns: a run with no global rule at all still gets a header
     gm = pd.DataFrame(metric_rows, columns=["class", "k", "version", "evaluated_on", "n_rules", "size", *METRICS])
     gm.to_csv(out / "global_metrics.csv", index=False)
 
@@ -201,7 +217,11 @@ def run(args, dataset: str, run_id: int) -> None:
             **{f"pooled_prec_{s}": float(found[f"tp_{s}"].sum() / max(found[f"support_{s}"].sum(), 1)) for s in SPLITS},
             **{f"mean_coverage_{s}": float(found[f"coverage_{s}"].mean()) for s in SPLITS},
             "mean_lcb_train": float(found.lcb_train.mean()), "mean_length": float(found.n_literals.mean()),
-            "mean_size": float(found["size"].mean()) if len(found) else float("nan")}
+            "mean_size": float(found["size"].mean()) if len(found) else float("nan"),
+            # share is undefined (nan) on tied series; both are over the series with a rule
+            "median_share": float(found.share.median()) if found.share.notna().any() else float("nan"),
+            "share_pos": float((found.share.dropna() > 0).mean()) if found.share.notna().any() else float("nan"),
+            "tied": float(df.tied.mean())}
     simp = gm[gm.version == "simplified"]
     summary["global"] = {s: {"macro_precision": float(simp[simp.evaluated_on == s].precision.mean()),
                              "macro_coverage": float(simp[simp.evaluated_on == s].coverage.mean())} for s in SPLITS}
@@ -234,7 +254,7 @@ def main():
     p.add_argument("--device", default="cpu")
     p.add_argument("--n_jobs", type=int, default=int(os.environ.get("SLURM_CPUS_PER_TASK", 1)),
                    help="processes for the instance rules (default: the SLURM allocation, else 1)")
-    p.add_argument("--out_dir", default="results/explanations_balanced")
+    p.add_argument("--out_dir", default="results/explanations_v3")
     args = p.parse_args()
     for dataset in args.datasets:
         for run_id in args.runs:

@@ -29,6 +29,8 @@ def flatten(s: dict) -> dict:
         "prec_train": r["pooled_prec_train"], "prec_test": r["pooled_prec_test"],
         "cov_test": r["mean_coverage_test"], "lcb": r["mean_lcb_train"],
         "length": r["mean_length"], "size": r["mean_size"],
+        # absent in runs from before share was recorded
+        "share": r.get("median_share", np.nan), "share_pos": r.get("share_pos", np.nan), "tied": r.get("tied", np.nan),
         "g_prec_train": g["train"]["macro_precision"], "g_prec_test": g["test"]["macro_precision"],
         "g_cov_test": g["test"]["macro_coverage"], "g_rules": g["mean_rules"],
         "hours": sum(t.values()) / 3600,
@@ -65,7 +67,7 @@ def main():
 
     pd.set_option("display.width", 250, "display.max_columns", 50)
     show = ["n_train", "n_classes", "n_selected", "bacc_test", "found", "prec_train", "prec_test", "cov_test",
-            "length", "size", "g_prec_test", "g_cov_test", "g_rules", "hours"]
+            "length", "size", "share", "share_pos", "tied", "g_prec_test", "g_cov_test", "g_rules", "hours"]
     print(counts.join(table[show]).to_string(float_format=lambda x: f"{x:.3f}"))
     done = df[df.n_selected > 0]
     print(f"\n{len(df)} complete runs on {df.dataset.nunique()} datasets; "

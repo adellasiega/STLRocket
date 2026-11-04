@@ -15,17 +15,20 @@
 #   ONLY=PenDigits RUNS="0" bash scripts/run_explanations.sh   # smoke test: one dataset, one run
 #
 # Each array task runs one (dataset, run); results go to OUT_DIR/<dataset>/run<r>/.
-# A run whose summary.json exists is skipped, so resubmitting the array only redoes
-# unfinished runs. seed = BASE_SEED + run.
+# A run whose summary.json exists is skipped, and so is an empty model (no formula
+# selected: nothing to explain, only model.json is written), so resubmitting the array
+# only redoes unfinished runs. seed = BASE_SEED + run.
 #
 # After the array drains:
 #   sacct -j <JOBID> -X --format=JobID,State,Elapsed,MaxRSS | grep -v COMPLETED
-#   ls OUT_DIR/*/run*/summary.json | wc -l      # complete runs
+#   ls OUT_DIR/*/run*/summary.json | wc -l      # complete runs with a non-empty model
+#   python scripts/analyze_explanations.py --res_dir OUT_DIR
 
 # ============================== configuration ==============================
 PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
 VENV="/share/ai-lab/adsiega/STLRocket/env"
-OUT_DIR="${PROJECT_DIR}/results/explanations_balanced"
+# explanations_balanced/: Oct 2026 code, before the size tie-break of the global rules
+OUT_DIR="${PROJECT_DIR}/results/explanations_v3"
 
 DATASETS=(
     ArticularyWordRecognition AtrialFibrillation BasicMotions Cricket
