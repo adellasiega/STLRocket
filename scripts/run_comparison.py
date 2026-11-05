@@ -28,6 +28,12 @@ Methods (METHODS):
                      multivariate data one MrSEQL per channel, fitted in parallel, with
                      probabilities summed as in aeon's ClassifierChannelEnsemble; recorded
                      as "mode"
+  bombara            decision tree of STL primitives learned from the series, after Bombara and
+                     Belta 2021 (stlrocket.bombara): primitives P1 and P2, multiclass information
+                     gain on balanced class weights, PSO (--pso_particles, --pso_iter) over the
+                     time parameters with the exact threshold; max depth in bombara.DEPTHS
+                     (1, 3, 5) chosen by CV on balanced accuracy over the same folds, ties to the
+                     shallower tree
   minirocket_lasso   ablation: aeon MiniRocket transform fitted on train, each feature
                      standardized with its class-balanced train mean and std, as the STL
                      features (constant features set to 0), then exactly the lasso of
@@ -37,11 +43,14 @@ Written to OUT_DIR/<dataset>/run<r>/:
   <method>.json      balanced accuracy and accuracy on train and test, fit and predict times,
                      and per-method details (stlrocket and minirocket_lasso: lambda and
                      number of selected features; stl_tree: chosen depth (null: unlimited), depth,
-                     leaves and CV scores; stl_ridge: alpha; mrseql: mode). Written last, so it marks the method as complete
+                     leaves and CV scores; bombara: the same, and the node count of each
+                     class's STL formula; stl_ridge: alpha; mrseql: mode). Written last, so it marks the method as complete
   formulas.pkl.gz,   the formula bank and feature scales (sigma) of the run, written with the
   bank_stats.npz     STL features
   stl_tree.pkl       the fitted tree, which with the bank gives the STL formula of each leaf
                      (stlrocket.tree.path_formulas)
+  bombara_tree.json  the fitted Bombara tree: every node's split (primitive kind, variable,
+                     time parameters, threshold) and weighted class counts
 
 Methods whose json exists are skipped. The STL feature matrix is computed only if a method
 needing it is not complete; with --feature_cache it is also saved, and loaded by later jobs.
@@ -49,6 +58,7 @@ needing it is not complete; with --feature_cache it is also saved, and loaded by
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import gzip
 import json
 import pickle
@@ -63,7 +73,8 @@ from sklearn.utils.class_weight import compute_sample_weight
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from stlrocket.classifier import available_cpus, train_classifier
+from stlrocket import bombara
+from stlrocket.classifier import available_cpus, cv_splitter, train_classifier
 from stlrocket.config import ExperimentConfig
 from stlrocket.data import load_dataset
 from stlrocket.features import build_formula_bank
@@ -73,10 +84,11 @@ ROCKET_MIN_LENGTH = 9   # shortest series MiniRocket accepts
 # MultiRocket also reads the first-order difference of each series, one step shorter: aeon
 # accepts 9 time steps but then fails ("unable to broadcast"), so it needs 10
 MULTIROCKET_MIN_LENGTH = 10
-METHODS = ("stlrocket", "stl_tree", "stl_ridge", "minirocket", "multirockethydra", "mrseql", "minirocket_lasso")
+METHODS = ("stlrocket", "stl_tree", "stl_ridge", "minirocket", "multirockethydra", "mrseql", "minirocket_lasso",
+           "bombara")
 # settings of the experiments each method depends on, recorded in its json
 LASSO_SETTINGS = {"stlrocket": ("depth", "n_formulas", "cv", "cut_point"), "stl_tree": ("depth", "n_formulas", "cv"),
-                  "minirocket_lasso": ("cv", "cut_point")}
+                  "minirocket_lasso": ("cv", "cut_point"), "bombara": ("cv", "pso_particles", "pso_iter")}
 
 
 def log(msg: str) -> None:
@@ -156,6 +168,25 @@ def run_stl_tree(ctx) -> dict:
             "n_leaves": int(tree.get_n_leaves()), "n_splits": int(search.n_splits_),
             "cv_bacc": {str(d): float(s) for d, s in zip(search.cv_results_["param_max_depth"],
                                                         search.cv_results_["mean_test_score"])}}
+
+
+def run_bombara(ctx) -> dict:
+    args, X_tr, y_tr, seed = ctx["args"], ctx["X_tr"], ctx["y_tr"], ctx["seed"]
+    cfg = bombara.PSOConfig(n_particles=args.pso_particles, n_iter=args.pso_iter)
+    t = time.perf_counter()
+    folds = list(cv_splitter(y_tr, args.cv, seed).split(X_tr, y_tr))
+    depth, cv_bacc = bombara.choose_depth(X_tr, y_tr, folds, seed, cfg=cfg, n_jobs=ctx["n_jobs"])
+    tree = bombara.fit_tree(X_tr, y_tr, depth, seed, cfg, ctx["n_jobs"])
+    fit_s = time.perf_counter() - t
+    (ctx["out"] / "bombara_tree.json").write_text(json.dumps(tree.to_json()))
+    t = time.perf_counter()
+    p_te = tree.predict(ctx["X_te"])
+    predict_s = time.perf_counter() - t
+    sizes = bombara.formula_sizes(tree)
+    return {**scores(y_tr, tree.predict(X_tr), ctx["y_te"], p_te),
+            "fit_s": fit_s, "predict_s": predict_s, "max_depth": depth, "depth": tree.depth(),
+            "n_leaves": tree.n_leaves(), "formula_size": int(sum(sizes)), "class_formula_sizes": sizes,
+            "cv_bacc": {str(d): s for d, s in cv_bacc.items()}, "pso": dataclasses.asdict(cfg)}
 
 
 def run_stl_ridge(ctx) -> dict:
@@ -288,6 +319,7 @@ RUNNERS = {
     "multirockethydra": lambda ctx: run_aeon(ctx, make_multirockethydra, MULTIROCKET_MIN_LENGTH),
     "mrseql": run_mrseql,
     "minirocket_lasso": run_minirocket_lasso,
+    "bombara": run_bombara,
 }
 
 
@@ -343,6 +375,8 @@ def main():
     p.add_argument("--base_seed", type=int, default=0)
     p.add_argument("--device", default="cpu")
     p.add_argument("--n_jobs", type=int, default=available_cpus())
+    p.add_argument("--pso_particles", type=int, default=bombara.PSOConfig.n_particles, help="bombara: swarm size")
+    p.add_argument("--pso_iter", type=int, default=bombara.PSOConfig.n_iter, help="bombara: PSO iterations")
     p.add_argument("--feature_cache", default=None, help="directory where STL feature matrices are saved and reused")
     p.add_argument("--raise_errors", action="store_true", help="stop at the first failing method")
     p.add_argument("--out_dir", default="results/comparison_balanced")

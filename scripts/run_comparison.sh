@@ -17,6 +17,7 @@
 #   DRY_RUN=1 bash scripts/run_comparison.sh    # print every task's command, submit nothing
 #   ONLY=ERing RUNS="0" bash scripts/run_comparison.sh            # smoke test: one dataset, one run
 #   METHODS="mrseql" bash scripts/run_comparison.sh               # only some methods
+#   OUT_DIR=/path/to/dir bash scripts/run_comparison.sh           # another output directory
 #
 # Each array task runs every method on one (dataset, run); results go to
 # OUT_DIR/<dataset>/run<r>/<method>.json. Methods whose json exists are skipped, so
@@ -29,7 +30,7 @@
 # ============================== configuration ==============================
 PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
 VENV="/share/ai-lab/adsiega/STLRocket/env"
-OUT_DIR="${PROJECT_DIR}/results/comparison_balanced"
+OUT_DIR="${OUT_DIR:-${PROJECT_DIR}/results/comparison_balanced}"
 
 DATASETS=(
     ArticularyWordRecognition AtrialFibrillation BasicMotions Cricket
@@ -78,8 +79,8 @@ if [[ -z "$SLURM_ARRAY_TASK_ID" ]]; then
         exit 1
     fi
     mkdir -p logs/slurm "$OUT_DIR"
-    # The task list depends on ONLY, RUNS and METHODS: pass them to the tasks.
-    sbatch --export=ALL,ONLY="$ONLY",RUNS="${RUNS[*]}",METHODS="${METHODS[*]}" --array=0-$(( N_TASKS - 1 )) "$0"
+    # The task list depends on ONLY, RUNS and METHODS, the output on OUT_DIR: pass them to the tasks.
+    sbatch --export=ALL,ONLY="$ONLY",RUNS="${RUNS[*]}",METHODS="${METHODS[*]}",OUT_DIR="$OUT_DIR" --array=0-$(( N_TASKS - 1 )) "$0"
     exit $?
 fi
 
