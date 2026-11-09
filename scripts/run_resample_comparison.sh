@@ -6,20 +6,25 @@
 # Then:
 #   python scripts/plot_comparison.py --res_dir results/comparison_resamples
 #
-# Bombara is far slower than the other methods (hours per run on the largest datasets), so it
-# goes in its own array, which does not hold back the others. Results are per (dataset,
-# resample, method) and complete methods are skipped, so resubmitting redoes only the
-# unfinished ones.
+# Three arrays, so the slow methods do not hold back the others:
+#   fast     stlrocket, multirockethydra, catch22 (the SBATCH settings of run_comparison.sh)
+#   ztime    Z-Time: the authors' implementation is single-threaded, so 1 CPU per task;
+#            on the largest datasets it can take days (their own timings: 42 h for a single
+#            configuration on PEMS-SF), so pass a longer limit with ZTIME_SBATCH
+#   bombara  hours per run on the largest datasets; extra options with BOMBARA_SBATCH
+# Results are per (dataset, resample, method) and complete methods are skipped, so
+# resubmitting redoes only the unfinished ones.
 #
 # Z-Time runs the authors' code: clone https://github.com/zedshape/ztime and set ZTIME_DIR
 # to the checkout before submitting (the tasks inherit the environment).
 #
 # Usage, from PROJECT_DIR (the environment variables of run_comparison.sh apply):
-#   ZTIME_DIR=/path/to/ztime bash scripts/run_resample_comparison.sh          # both arrays
-#   PART=fast bash scripts/run_resample_comparison.sh     # only stlrocket, multirockethydra, catch22, ztime
-#   PART=bombara bash scripts/run_resample_comparison.sh  # only bombara
-#   DRY_RUN=1 bash scripts/run_resample_comparison.sh     # print the commands
-#   ONLY=BasicMotions RUNS="0 1" bash scripts/run_resample_comparison.sh       # smoke test
+#   ZTIME_DIR=/path/to/ztime bash scripts/run_resample_comparison.sh          # all three arrays
+#   PART=fast bash scripts/run_resample_comparison.sh                         # one array: fast, ztime or bombara
+#   PART=ztime ZTIME_SBATCH="--time=7-00:00:00" bash scripts/run_resample_comparison.sh
+#   DRY_RUN=1 bash scripts/run_resample_comparison.sh                         # print the commands
+#   ONLY=BasicMotions RUNS="0 1" bash scripts/run_resample_comparison.sh      # smoke test
+# The longest time limit of each partition: sinfo -o "%P %l"
 
 PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
 export OUT_DIR="${OUT_DIR:-${PROJECT_DIR}/results/comparison_resamples}"
@@ -28,14 +33,21 @@ export RUNS="${RUNS:-$(seq -s ' ' 0 29)}"
 PART="${PART:-all}"
 HERE="$(dirname "$0")"
 
-if [[ -z "$ZTIME_DIR" && "$PART" != "bombara" && -z "$DRY_RUN" ]]; then
+case "$PART" in all|fast|ztime|bombara) ;; *) echo "PART must be all, fast, ztime or bombara" >&2; exit 1 ;; esac
+
+if [[ -z "$ZTIME_DIR" && ( "$PART" == "all" || "$PART" == "ztime" ) && -z "$DRY_RUN" ]]; then
     echo "set ZTIME_DIR to a checkout of https://github.com/zedshape/ztime" >&2
     exit 1
 fi
 
 if [[ "$PART" == "all" || "$PART" == "fast" ]]; then
-    METHODS="stlrocket multirockethydra catch22 ztime" bash "$HERE/run_comparison.sh" || exit $?
+    METHODS="stlrocket multirockethydra catch22" bash "$HERE/run_comparison.sh" || exit $?
+fi
+if [[ "$PART" == "all" || "$PART" == "ztime" ]]; then
+    METHODS="ztime" SBATCH_EXTRA="--job-name=stl_ztime --cpus-per-task=1 ${ZTIME_SBATCH:-}" \
+        bash "$HERE/run_comparison.sh" || exit $?
 fi
 if [[ "$PART" == "all" || "$PART" == "bombara" ]]; then
-    METHODS="bombara" SBATCH_EXTRA="${BOMBARA_SBATCH:-}" bash "$HERE/run_comparison.sh" || exit $?
+    METHODS="bombara" SBATCH_EXTRA="--job-name=stl_bombara ${BOMBARA_SBATCH:-}" \
+        bash "$HERE/run_comparison.sh" || exit $?
 fi

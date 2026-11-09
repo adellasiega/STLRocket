@@ -30,6 +30,7 @@ from __future__ import annotations
 import os
 import sys
 import time
+import warnings
 
 import numpy as np
 from scipy.sparse import csr_matrix, hstack
@@ -92,9 +93,13 @@ class ZTimeClassifier:
     # -- one configuration -------------------------------------------------------------
     def _database(self, part: np.ndarray):
         p = self.params_
-        return self._helper.createMultivariateDatabase(
-            part, window_size=p["window_size"], window_size_slope=1, alphabet_size=p["alphabet_size"],
-            alphabet_size_slope=p["alphabet_size_slope"], glob=False)
+        # pyts warns, for every call, when quantile bins of a series coincide (runs of equal
+        # values, common in the differences) and then uses fewer bins, as in the authors' runs
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="Some quantiles are equal", category=UserWarning)
+            return self._helper.createMultivariateDatabase(
+                part, window_size=p["window_size"], window_size_slope=1, alphabet_size=p["alphabet_size"],
+                alphabet_size_slope=p["alphabet_size_slope"], glob=False)
 
     def _fit_config(self, X: np.ndarray, y: np.ndarray):
         self._helper, ZTime = _import_ztime()
