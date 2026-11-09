@@ -4,7 +4,9 @@ Test-set comparison of STLRocket's classifier with other classifiers (no explana
 method is trained on the official train split and evaluated on the official test split of
 each dataset, both preprocessed as in the experiments (stlrocket.data.load_dataset: missing
 values filled, each variable standardized on train). Run r uses seed = base_seed + r for
-every random choice of every method.
+every random choice of every method. With --resample, run r is also trained and tested on
+resample r of the dataset (load_dataset(resample=r)): run 0 is the official split, run r > 0
+a stratified resample with the same train size and train class counts.
 
     python scripts/run_comparison.py --datasets ERing --runs 0 1 [--methods stlrocket minirocket ...]
 
@@ -32,12 +34,17 @@ Methods (METHODS):
                      Belta 2021 (stlrocket.bombara): primitives P1 and P2, multiclass information
                      gain on balanced class weights, PSO (--pso_particles, --pso_iter) over the
                      time parameters with the exact threshold; max depth in bombara.DEPTHS
-                     (1, 3, 5) chosen by CV on balanced accuracy over the same folds, ties to the
-                     shallower tree
+                     (1, 3, 5, 7 or unlimited, as stl_tree) chosen by CV on balanced accuracy
+                     over the same folds, ties to the shallower tree
   minirocket_lasso   ablation: aeon MiniRocket transform fitted on train, each feature
                      standardized with its class-balanced train mean and std, as the STL
                      features (constant features set to 0), then exactly the lasso of
                      stlrocket; only the feature map differs
+  catch22            aeon Catch22Classifier, default parameters (catch24 features per channel,
+                     random forest)
+  ztime              Z-Time (stlrocket.ztime_baseline, the authors' code from ZTIME_DIR): its
+                     randomized search over 5 configurations on a 67/33 train holdout, then
+                     refitted on the whole train set; records the chosen configuration
 
 Written to OUT_DIR/<dataset>/run<r>/:
   <method>.json      balanced accuracy and accuracy on train and test, fit and predict times,
@@ -85,7 +92,7 @@ ROCKET_MIN_LENGTH = 9   # shortest series MiniRocket accepts
 # accepts 9 time steps but then fails ("unable to broadcast"), so it needs 10
 MULTIROCKET_MIN_LENGTH = 10
 METHODS = ("stlrocket", "stl_tree", "stl_ridge", "minirocket", "multirockethydra", "mrseql", "minirocket_lasso",
-           "bombara")
+           "bombara", "catch22", "ztime")
 # settings of the experiments each method depends on, recorded in its json
 LASSO_SETTINGS = {"stlrocket": ("depth", "n_formulas", "cv", "cut_point"), "stl_tree": ("depth", "n_formulas", "cv"),
                   "minirocket_lasso": ("cv", "cut_point"), "bombara": ("cv", "pso_particles", "pso_iter")}
@@ -242,6 +249,19 @@ def make_multirockethydra(ctx):
     return MultiRocketHydraClassifier(n_jobs=ctx["n_jobs"], random_state=ctx["seed"]), {}
 
 
+def make_catch22(ctx):
+    from aeon.classification.feature_based import Catch22Classifier
+    return Catch22Classifier(n_jobs=ctx["n_jobs"], random_state=ctx["seed"]), {}
+
+
+def run_ztime(ctx) -> dict:
+    from stlrocket.ztime_baseline import ZTimeClassifier
+    clf = ZTimeClassifier(random_state=ctx["seed"])
+    res = run_aeon(ctx, lambda _: (clf, {}))
+    return {**res, "search_s": clf.search_s_, "params": clf.params_, "search": clf.search_,
+            "n_features": clf.n_features_, "alpha": float(clf.clf_.alpha_)}
+
+
 def _channel_proba(make, X_tr, y_tr, X_te):
     """Fit make() on one channel; its classes and class probabilities on train and test."""
     clf = make().fit(X_tr, y_tr)
@@ -320,6 +340,8 @@ RUNNERS = {
     "mrseql": run_mrseql,
     "minirocket_lasso": run_minirocket_lasso,
     "bombara": run_bombara,
+    "catch22": lambda ctx: run_aeon(ctx, make_catch22),
+    "ztime": run_ztime,
 }
 
 
@@ -331,7 +353,8 @@ def run(args, dataset: str, run_id: int) -> None:
         return
     out.mkdir(parents=True, exist_ok=True)
     seed = args.base_seed + run_id
-    X_tr, y_tr, X_te, y_te = load_dataset(dataset)
+    resample = run_id if args.resample else 0
+    X_tr, y_tr, X_te, y_te = load_dataset(dataset, resample=resample)
     cfg = ExperimentConfig(
         dataset=dataset, n_formulas=args.n_formulas, depth_max=args.depth, until_weight=0.0,
         cv=args.cv, cut_point=args.cut_point, fit_intercept=False, n_run=1, base_seed=args.base_seed,
@@ -341,10 +364,11 @@ def run(args, dataset: str, run_id: int) -> None:
     )
     ctx = {"args": args, "out": out, "seed": seed, "cfg": cfg, "n_jobs": args.n_jobs,
            "X_tr": X_tr, "y_tr": y_tr, "X_te": X_te, "y_te": y_te,
-           "stl": STLFeatures(args, out, X_tr, y_tr, X_te, cfg, seed, f"{dataset}_run{run_id}")}
-    log(f"{dataset} run {run_id}: {len(X_tr)} train / {len(X_te)} test series, shape {X_tr.shape[1:]}, "
+           "stl": STLFeatures(args, out, X_tr, y_tr, X_te, cfg, seed,
+                                f"{dataset}_run{run_id}" + (f"_resample{resample}" if args.resample else ""))}
+    log(f"{dataset} run {run_id} (resample {resample}): {len(X_tr)} train / {len(X_te)} test series, shape {X_tr.shape[1:]}, "
         f"methods {todo}")
-    base = {"dataset": dataset, "run": run_id, "seed": seed, "n_train": len(X_tr), "n_test": len(X_te),
+    base = {"dataset": dataset, "run": run_id, "seed": seed, "resample": resample, "n_train": len(X_tr), "n_test": len(X_te),
             "n_channels": int(X_tr.shape[1]), "length": int(X_tr.shape[2]), "n_classes": int(len(np.unique(y_tr)))}
     for method in todo:
         try:
@@ -377,6 +401,8 @@ def main():
     p.add_argument("--n_jobs", type=int, default=available_cpus())
     p.add_argument("--pso_particles", type=int, default=bombara.PSOConfig.n_particles, help="bombara: swarm size")
     p.add_argument("--pso_iter", type=int, default=bombara.PSOConfig.n_iter, help="bombara: PSO iterations")
+    p.add_argument("--resample", action="store_true",
+                   help="run r on resample r of the dataset (0: the official split) instead of the official split")
     p.add_argument("--feature_cache", default=None, help="directory where STL feature matrices are saved and reused")
     p.add_argument("--raise_errors", action="store_true", help="stop at the first failing method")
     p.add_argument("--out_dir", default="results/comparison_balanced")

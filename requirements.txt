@@ -15,3 +15,9 @@ seaborn
 # torcheck is not on PyPI -- install separately from the local project, e.g.:
 #   pip install -e ~/Projects/TorCheck
 # (or wherever TorCheck is checked out on this machine)
+
+# Z-Time baseline (stlrocket/ztime_baseline.py, method "ztime" of scripts/run_comparison.py):
+# the authors' code is not a package and has no license, so it is not vendored. Clone it and
+# point ZTIME_DIR to the checkout; it needs pyts (and numpy, pandas, scipy, scikit-learn):
+#   git clone https://github.com/zedshape/ztime ~/ztime && pip install pyts
+#   export ZTIME_DIR=~/ztime

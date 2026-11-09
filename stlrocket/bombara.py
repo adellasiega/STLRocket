@@ -44,7 +44,10 @@ from torcheck.stl import And, Atom, Eventually, Globally, Not, Or
 from .formula_sampler import F0
 
 KINDS = ("F", "G", "GF", "FG")
-DEPTHS = (1, 3, 5)
+# the depth grid of stl_tree (stlrocket.tree.DEPTHS); None: grown until the leaves are pure
+# or no split lowers the impurity, with UNLIMITED_DEPTH only as a safety cap
+DEPTHS = (1, 3, 5, 7, None)
+UNLIMITED_DEPTH = 20
 MIN_GAIN = 1e-12      # a split must lower the weighted entropy by more than this
 
 
@@ -329,12 +332,18 @@ def _best_split(X: np.ndarray, Yw: np.ndarray, node_id: int, seed: int, cfg: PSO
     return best if best["gain"] > MIN_GAIN else None
 
 
-def fit_tree(X: np.ndarray, y: np.ndarray, max_depth: int, seed: int, cfg: PSOConfig | None = None,
+def _cap(depth: int | None) -> int:
+    return UNLIMITED_DEPTH if depth is None else depth
+
+
+def fit_tree(X: np.ndarray, y: np.ndarray, max_depth: int | None, seed: int, cfg: PSOConfig | None = None,
              n_jobs: int = 1, classes: np.ndarray | None = None, class_weight: np.ndarray | None = None) -> BombaraTree:
     """Grow the tree on X (N, V, T), y to max_depth (their Algorithm 1 with the stopping
-    conditions: maximum depth, a pure node, or no split lowering the impurity). Each node's
-    PSO is seeded by (seed, node id, variable, kind), so the tree cut at a smaller depth is
-    exactly the tree grown to that depth."""
+    conditions: maximum depth, a pure node, or no split lowering the impurity; None: no
+    maximum depth but UNLIMITED_DEPTH). Each node's PSO is seeded by (seed, node id,
+    variable, kind), so the tree cut at a smaller depth is exactly the tree grown to that
+    depth."""
+    max_depth = _cap(max_depth)
     cfg = cfg or PSOConfig()
     classes = np.unique(y) if classes is None else classes
     yi = np.searchsorted(classes, y)
@@ -365,16 +374,17 @@ def fit_tree(X: np.ndarray, y: np.ndarray, max_depth: int, seed: int, cfg: PSOCo
 
 
 def choose_depth(X: np.ndarray, y: np.ndarray, folds, seed: int, depths=DEPTHS, cfg: PSOConfig | None = None,
-                 n_jobs: int = 1) -> tuple[int, dict]:
-    """Max depth with the best mean balanced accuracy over the folds (ties: shallower), each
-    fold growing one tree to max(depths) and cutting it at each depth. Class weights are
-    balanced on each fold's train part, as sklearn's class_weight="balanced" in a CV."""
+                 n_jobs: int = 1) -> tuple[int | None, dict]:
+    """Max depth with the best mean balanced accuracy over the folds (ties: shallower; None,
+    unlimited, is the deepest), each fold growing one tree to the largest depth and cutting
+    it at each depth. Class weights are balanced on each fold's train part, as sklearn's
+    class_weight="balanced" in a CV."""
     classes = np.unique(y)
     scores = {d: [] for d in depths}
     for tr, va in folds:
-        tree = fit_tree(X[tr], y[tr], max(depths), seed, cfg, n_jobs, classes=classes)
+        tree = fit_tree(X[tr], y[tr], max(_cap(d) for d in depths), seed, cfg, n_jobs, classes=classes)
         for d in depths:
-            scores[d].append(balanced_accuracy_score(y[va], tree.predict(X[va], d)))
+            scores[d].append(balanced_accuracy_score(y[va], tree.predict(X[va], _cap(d))))
     mean = {d: float(np.mean(s)) for d, s in scores.items()}
-    best = max(depths, key=lambda d: (round(mean[d], 12), -d))
+    best = max(depths, key=lambda d: (round(mean[d], 12), -_cap(d)))
     return best, mean

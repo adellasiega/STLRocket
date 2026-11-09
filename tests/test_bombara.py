@@ -69,6 +69,26 @@ def test_tree_formulae():
     assert np.array_equal(shallow.predict(X), tree.predict(X, 1))
 
 
+def test_unlimited_depth():
+    """max_depth None grows until the leaves are pure (the tree cut at 3 is the tree grown to
+    3), and choose_depth accepts None in the grid, scoring it as the deepest."""
+    rng = np.random.default_rng(2)
+    X = rng.standard_normal((90, 2, 30)).astype(np.float32)
+    y = np.repeat([0, 1, 2], 30)
+    X[y == 1, 0, 10:15] += 3
+    X[y == 2, 1, 20:] -= 2
+    cfg = bb.PSOConfig(n_particles=10, n_iter=15)
+    full = bb.fit_tree(X, y, None, seed=0, cfg=cfg)
+    assert full.max_depth == bb.UNLIMITED_DEPTH
+    three = bb.fit_tree(X, y, 3, seed=0, cfg=cfg)
+    assert np.array_equal(full.predict(X, 3), three.predict(X))
+    assert (full.predict(X) == y).mean() >= (three.predict(X) == y).mean()
+    idx = np.arange(90)
+    folds = [(idx[idx % 3 != f], idx[idx % 3 == f]) for f in range(3)]
+    depth, mean = bb.choose_depth(X, y, folds, seed=0, cfg=cfg)
+    assert set(mean) == set(bb.DEPTHS) and depth in bb.DEPTHS
+
+
 if __name__ == "__main__":
     for name, f in list(globals().items()):
         if name.startswith("test_"):

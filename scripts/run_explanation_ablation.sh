@@ -13,6 +13,9 @@
 # Usage, from PROJECT_DIR:
 #   bash scripts/run_explanation_ablation.sh              # submit the whole array
 #   DRY_RUN=1 bash scripts/run_explanation_ablation.sh    # print every task's command, submit nothing
+#   CUT_POINT=0 OUT_DIR=/path/to/dir CONSTRUCTIONS=ordered_scan CANDIDATES=gxi CONFIDENCES=0.95 \
+#       bash scripts/run_explanation_ablation.sh          # one variant, at another cut point
+#   ONLY=ERing N_RUNS=1 bash scripts/run_explanation_ablation.sh   # smoke test
 #
 # Each array task runs one dataset for RUNS_PER_TASK consecutive runs (seed = BASE_SEED + run).
 # Complete runs are skipped, so resubmitting the array only redoes the unfinished ones.
@@ -23,7 +26,7 @@
 # ============================== configuration ==============================
 PROJECT_DIR="/share/ai-lab/adsiega/STLRocket"
 VENV="/share/ai-lab/adsiega/STLRocket/env"
-OUT_DIR="${PROJECT_DIR}/results/ablation/explanations_v2"   # explanations/: first, partial ablation with older code
+OUT_DIR="${OUT_DIR:-${PROJECT_DIR}/results/ablation/explanations_v2}"   # explanations/: first, partial ablation with older code
 
 # The datasets of the main ablation (scripts/run_ablation.sh), without Handwriting (too few
 # series per class to split) and the three at chance (AtrialFibrillation, StandWalkJump,
@@ -34,7 +37,8 @@ DATASETS=(
     Libras LSST MotorImagery NATOPS PenDigits PEMS-SF PhonemeSpectra RacketSports
     SelfRegulationSCP1 UWaveGestureLibrary
 )
-N_RUNS=10
+[[ -n "$ONLY" ]] && DATASETS=($ONLY)
+N_RUNS=${N_RUNS:-10}
 RUNS_PER_TASK=2
 
 # Fixed
@@ -42,7 +46,11 @@ DEPTH=2
 N_FORMULAS=10000
 VAL_RATIO=0.25
 CV=3
-CUT_POINT=1.0
+CUT_POINT=${CUT_POINT:-1.0}
+# Variants (empty: every value, the defaults of run_explanation_ablation.py)
+CONSTRUCTIONS="${CONSTRUCTIONS:-}"
+CANDIDATES="${CANDIDATES:-}"
+CONFIDENCES="${CONFIDENCES:-}"
 MAX_EXPLAINED=1000    # series explained per split (larger splits are subsampled)
 MAX_SIMPLIFIED=300    # rules whose simplification is checked
 BASE_SEED=0
@@ -63,7 +71,9 @@ task_command() {  # $1 = task id -> prints the python command
         --datasets "$dataset" --runs $(seq "$first" "$last") \
         --depth "$DEPTH" --n_formulas "$N_FORMULAS" --val_ratio "$VAL_RATIO" --cv "$CV" --cut_point "$CUT_POINT" \
         --max_explained "$MAX_EXPLAINED" --max_simplified "$MAX_SIMPLIFIED" \
-        --base_seed "$BASE_SEED" --device cpu --out_dir "$OUT_DIR"
+        --base_seed "$BASE_SEED" --device cpu --out_dir "$OUT_DIR" \
+        ${CONSTRUCTIONS:+--constructions $CONSTRUCTIONS} ${CANDIDATES:+--candidates $CANDIDATES} \
+        ${CONFIDENCES:+--confidences $CONFIDENCES}
 }
 
 # ---- not inside SLURM: submit (or print) the array ----
@@ -77,7 +87,9 @@ if [[ -z "$SLURM_ARRAY_TASK_ID" ]]; then
         exit 1
     fi
     mkdir -p logs/slurm "$OUT_DIR"
-    sbatch --array=0-$(( N_TASKS - 1 )) "$0"
+    # The task list and the command depend on these: pass them to the tasks.
+    sbatch --export=ALL,ONLY="$ONLY",N_RUNS="$N_RUNS",OUT_DIR="$OUT_DIR",CUT_POINT="$CUT_POINT",CONSTRUCTIONS="$CONSTRUCTIONS",CANDIDATES="$CANDIDATES",CONFIDENCES="$CONFIDENCES" \
+        --array=0-$(( N_TASKS - 1 )) "$0"
     exit $?
 fi
 

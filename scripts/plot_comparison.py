@@ -49,6 +49,9 @@ METHOD_STYLE = {
     "minirocket": ("MiniRocket", "#1baf7a", "^"),
     "multirockethydra": ("MultiRocket-Hydra", "#eda100", "D"),
     "mrseql": ("MrSEQL", "#008300", "P"),
+    "bombara": ("Bombara and Belta", "#c0392b", "p"),
+    "catch22": ("catch22", "#7f7f7f", "h"),
+    "ztime": ("Z-Time", "#00a3a3", "*"),
 }
 ALPHA = 0.05   # significance level of the tests (comparison_tests.tex) and of the CD diagram
 INK, INK_2, GRID = "#000000", "#444444", "#d9d9d9"

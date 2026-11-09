@@ -35,10 +35,14 @@ def standardize_series(X_tr: np.ndarray, X_te: np.ndarray, return_stats: bool = 
     return (*out, m.ravel(), s.ravel()) if return_stats else out
 
 
-def load_dataset(name: str, return_stats: bool = False):
+def load_dataset(name: str, return_stats: bool = False, resample: int = 0):
     """Load a dataset from the aeon library.
 
     Returns X_tr, y_tr, X_te, y_te where X arrays have shape (N, V, T).
+    resample 0 is the official train/test split. resample r > 0 pools train and test and
+    draws a new split with the same size and train class counts as the official one
+    (aeon's stratified_resample_data with random_state=r, the convention of the UEA/UCR
+    bake-offs and tsml-eval).
     Missing values are filled per series (forward fill, then back fill), then every
     variable is standardized on the train split (standardize_series). With return_stats,
     also returns the per-variable train (mean, std) of the original series.
@@ -49,6 +53,9 @@ def load_dataset(name: str, return_stats: bool = False):
         warnings.simplefilter("ignore", FutureWarning)
         X_tr, y_tr = load_classification(name, split="TRAIN")
         X_te, y_te = load_classification(name, split="TEST")
+    if resample:
+        from aeon.benchmarking.resampling import stratified_resample_data
+        X_tr, y_tr, X_te, y_te = stratified_resample_data(X_tr, y_tr, X_te, y_te, random_state=resample)
 
     X_tr = _fill_missing(X_tr.astype(np.float32))
     X_te = _fill_missing(X_te.astype(np.float32))
