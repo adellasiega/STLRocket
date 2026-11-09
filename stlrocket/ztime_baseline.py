@@ -60,12 +60,13 @@ def _import_ztime():
 
 
 def znorm(X: np.ndarray) -> np.ndarray:
-    """Per series and channel z-normalization along time (helper.znorm), constant channels
-    only centred."""
-    X = np.asarray(X, dtype=np.float64)
-    m = X.mean(axis=-1, keepdims=True)
-    s = X.std(axis=-1, keepdims=True)
-    s[s == 0] = 1.0
+    """Per series and channel z-normalization along time, exactly as helper.znorm (same
+    operations, in the input's dtype: the SAX bins are sensitive to rounding), except that
+    a constant channel is only centred."""
+    X = np.asarray(X)
+    m = X.mean(axis=-1)[..., np.newaxis]
+    s = X.std(axis=-1)[..., np.newaxis]
+    s = np.where(s == 0, np.ones_like(s), s)
     return (X - m) / s
 
 
