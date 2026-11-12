@@ -15,6 +15,8 @@
 #   SET=rest bash scripts/run_instance_comparison.sh     # the others, without LORE and Anchors
 #   DRY_RUN=1 bash scripts/run_instance_comparison.sh    # print every task's command, submit nothing
 #   ONLY=BasicMotions RUNS="0" bash scripts/run_instance_comparison.sh   # smoke test
+#   ADD=piaxp SET=fast bash scripts/run_instance_comparison.sh   # add a method to complete runs
+#                                                                (then also SET=rest)
 #
 # Each array task runs one (dataset, run); results go to OUT_DIR/<dataset>_run<r>.*.
 # A run whose .done.json exists is skipped, so resubmitting the array only redoes
@@ -102,6 +104,7 @@ task_command() {  # $1 = task id -> prints the python command
         --lore_timeout "$LORE_TIMEOUT" --max_timeouts "$MAX_TIMEOUTS" --anchor_mem_gb "$ANCHOR_MEM_GB" \
         $([[ "$BIG" == *" $dataset "* ]] && echo --sampled_max_explained "$SAMPLED_MAX_EXPLAINED") \
         $([[ -n "$SKIP" ]] && echo --skip $SKIP) \
+        $([[ -n "$ADD" ]] && echo --add $ADD) \
         --out_dir "$OUT_DIR"
 }
 
@@ -117,7 +120,7 @@ if [[ -z "$SLURM_ARRAY_TASK_ID" ]]; then
     fi
     mkdir -p logs/slurm "$OUT_DIR"
     # The task list depends on ONLY and RUNS: pass them to the tasks.
-    sbatch --export=ALL,SET="$SET",ONLY="$ONLY",RUNS="${RUNS[*]}" --array=0-$(( N_TASKS - 1 )) "$0"
+    sbatch --export=ALL,SET="$SET",ONLY="$ONLY",RUNS="${RUNS[*]}",ADD="$ADD" --array=0-$(( N_TASKS - 1 )) "$0"
     exit $?
 fi
 

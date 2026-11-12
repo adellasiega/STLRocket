@@ -10,8 +10,8 @@ Only complete runs (with a .done.json) with a non-empty model enter.
 
 Instance metrics are computed from the explained test series, on the test set and w.r.t. the
 model's predictions, per (dataset, run, method) and then averaged over the runs of a dataset.
-Precision is pooled over the explanations found (TP / support, as in the explanation ablation);
-coverage and length are means over them; found is the share of series explained. Comparisons:
+Precision, coverage and length are means over the explanations found (an explanation that no
+other test series satisfies has undefined precision and is left out of its mean); found is the share of series explained. Comparisons:
   all      ours, AXp and inflated AXp on every explained test series
   lore     every method on the test series LORE explained (it may be capped or time out)
   anchors  every method on the test series Anchors explained within its timeout
@@ -50,12 +50,13 @@ from plot_comparison import INK_2, style_axis  # also sets the paper's rcParams
 
 # method -> (label, color, marker)
 METHOD_STYLE = {"stlrocket": ("STLRocket", "#2a78d6", "o"), "axp": ("AXp", "#3a9e5c", "^"),
-                "iaxp": ("Inflated AXp", "#8bc34a", "v"), "lore": ("LORE", "#9c27b0", "D"),
+                "iaxp": ("Inflated AXp", "#8bc34a", "v"), "piaxp": ("Prob. inflated AXp", "#c0ca33", "<"),
+                "lore": ("LORE", "#9c27b0", "D"),
                 "anchors": ("Anchors", "#eb6834", "s"), "tree": ("Surrogate tree", "#795548", "P"),
                 "ripper": ("RIPPER", "#607d8b", "X")}
 # short labels for the columns of the per-dataset table
-SHORT = {"stlrocket": "Ours", "axp": "AXp", "iaxp": "IAXp", "lore": "LORE", "anchors": "Anch."}
-INSTANCE = ("stlrocket", "axp", "iaxp", "lore", "anchors")
+SHORT = {"stlrocket": "Ours", "axp": "AXp", "iaxp": "IAXp", "piaxp": "PIAXp", "lore": "LORE", "anchors": "Anch."}
+INSTANCE = ("stlrocket", "axp", "iaxp", "piaxp", "lore", "anchors")
 SAMPLED = ("lore", "anchors")
 METRICS = [("precision", "Precision", "{:.3f}"), ("coverage", "Coverage", "{:.3f}"),
            ("length", "Length", "{:.2f}"), ("found", "Found", "{:.2f}"), ("time_s", "Time (s)", "{:.2g}")]
@@ -93,7 +94,8 @@ def load(res_dir: Path, exclude: list[str]) -> tuple[pd.DataFrame, pd.DataFrame]
 
 def run_metrics(d: pd.DataFrame) -> pd.Series:
     f = d[d.found]
-    return pd.Series({"precision": f.tp_test.sum() / f.support_test.sum() if f.support_test.sum() else np.nan,
+    # precision_test is nan for an explanation that no other test series satisfies: skipped by mean()
+    return pd.Series({"precision": f.precision_test.mean(),
                       "coverage": f.coverage_test.mean(), "length": f.length.mean(), "found": d.found.mean(),
                       "time_s": d.time_s.mean(), "n": len(d)})
 
@@ -231,6 +233,11 @@ def claims(inst: pd.DataFrame, threshold: float):
         if len(x):
             print(f"{m}: test precision 1 for {(x.precision_test == 1).mean():.1%} of the explanations satisfied by a "
                   f"test series ({len(x) / max((d.method == m).sum(), 1):.1%} of them)")
+    for m in ("piaxp",):    # estimated (under the product of the train marginals) against test precision
+        x = d[(d.method == m) & (d.support_test > 0)]
+        if len(x):
+            print(f"{m}: estimated precision {x.est_precision.mean():.3f}, test precision {x.precision_test.mean():.3f}; "
+                  f"test precision >= its estimate for {(x.precision_test >= x.est_precision - 1e-12).mean():.1%}")
     lo = d[d.method == "lore"]
     if len(lo):
         print(f"LORE: mean fidelity on its neighbourhood {lo.fidelity.mean():.3f}, mean test precision "

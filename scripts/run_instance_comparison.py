@@ -14,6 +14,9 @@ Instance explanations (one per explained series):
              the selected formulae, as literals (abductive.axp): sufficient for the prediction on
              the whole box, whatever its length
   iaxp       the inflated AXp (abductive.inflated_axp): the bounds of axp widened as far as possible
+  piaxp      the probabilistic inflated AXp (abductive.probabilistic_inflated_axp): literals that keep
+             the prediction with probability >= --piaxp_delta, estimated with --piaxp_samples draws
+             from the product of the train marginals of the selected formulae
   lore       LORE (Guidotti et al. 2018; package lore_sa, TabularGeneticGeneratorLore with its
              defaults): the root-to-leaf path of the series in a decision tree fitted to a
              genetic neighbourhood of 1000 synthetic samples
@@ -53,6 +56,11 @@ Written to OUT_DIR, one set of files per dataset and run (prefix <dataset>_run<r
                      as complete
 
 Runs whose .done.json exists are skipped, so a resubmitted job only redoes unfinished runs.
+With --add METHOD ..., complete runs are instead extended with those methods only: the model is
+rebuilt (same seed; checked against .done.json), the series of .done.json are explained by the
+added methods, and their rows are merged into the run's files (global explanations of subsets
+"lore" and "anchors" from the train series those methods attempted, read from .instances.csv.gz);
+surrogates are not refitted. Runs that are not complete, or already have the methods, are skipped.
 """
 from __future__ import annotations
 
@@ -80,11 +88,11 @@ from stlrocket.data import load_dataset
 from stlrocket.features import build_formula_bank
 from stlrocket.classifier import train_classifier
 from stlrocket import instance_rules as ir
-from stlrocket.abductive import axp, inflated_axp
+from stlrocket.abductive import MarginalSampler, axp, inflated_axp, probabilistic_inflated_axp
 from stlrocket.global_baselines import ripper_surrogate, tree_surrogate
 
 SPLITS = ("train", "test")
-METHODS = ("stlrocket", "axp", "iaxp", "lore", "anchors")
+METHODS = ("stlrocket", "axp", "iaxp", "piaxp", "lore", "anchors")
 SAMPLED = ("lore", "anchors")          # run in worker processes, with a timeout
 SURROGATES = ("tree", "ripper")
 
@@ -327,13 +335,31 @@ def surrogate_scores(sur: dict, pred_tr: np.ndarray, pred_te: np.ndarray) -> lis
 def run(args, dataset: str, run_id: int) -> None:
     out_dir = Path(args.out_dir)
     prefix = out_dir / f"{dataset}_run{run_id}"
-    if Path(f"{prefix}.done.json").exists():
+    done_path = Path(f"{prefix}.done.json")
+    append = bool(args.add)
+    prev = prev_inst = None
+    if append:
+        if not done_path.exists():
+            log(f"{dataset} run {run_id}: not complete, nothing to add to, skipped")
+            return
+        prev = json.loads(done_path.read_text())
+        if prev.get("status") != "ok":
+            log(f"{dataset} run {run_id}: status {prev.get('status')}, nothing to add to, skipped")
+            return
+        prev_methods = set(pd.read_csv(f"{prefix}.summary.csv").method)
+        methods = [m for m in args.add if m not in prev_methods]
+        if not methods:
+            log(f"{dataset} run {run_id}: already has {args.add}, skipped")
+            return
+        prev_inst = pd.read_csv(f"{prefix}.instances.csv.gz")
+    elif done_path.exists():
         log(f"{dataset} run {run_id}: already complete, skipped")
         return
+    else:
+        methods = [m for m in METHODS if m not in args.skip]
     out_dir.mkdir(parents=True, exist_ok=True)
     seed = args.base_seed + run_id
     done = {"dataset": dataset, "run": run_id, "seed": seed, "args": vars(args)}
-    methods = [m for m in METHODS if m not in args.skip]
 
     t0 = time.perf_counter()
     X_tr, y_tr, X_te, y_te = load_dataset(dataset)
@@ -364,6 +390,11 @@ def run(args, dataset: str, run_id: int) -> None:
                 model_s=time.perf_counter() - t0)
     log(f"{dataset} run {run_id}: {len(S)} formulae selected, balanced accuracy test "
         f"{done['balanced_accuracy']['test']:.3f}")
+    if append and (done["n_selected"] != prev["n_selected"]
+                   or abs(done["balanced_accuracy"]["test"] - prev["balanced_accuracy"]["test"]) > 1e-9):
+        raise RuntimeError(f"rebuilt model differs from .done.json: {done['n_selected']} vs {prev['n_selected']} "
+                           f"formulae, test balanced accuracy {done['balanced_accuracy']['test']} vs "
+                           f"{prev['balanced_accuracy']['test']}")
     if len(S) == 0:
         done["status"] = "empty_model"
         Path(f"{prefix}.done.json").write_text(json.dumps(done, indent=1))
@@ -376,18 +407,31 @@ def run(args, dataset: str, run_id: int) -> None:
     lore = Lore(F_tr, W, S, pred["train"], lcfg) if "lore" in methods else None
     D = {s: anchors.bins(F[s]) for s in SPLITS} if anchors else None
     lo, hi = F_tr.min(axis=0), F_tr.max(axis=0)     # AXp domain: the box of the train values
+    sampler = MarginalSampler(F_tr, W, args.piaxp_samples) if "piaxp" in methods else None
+    prev_att = {}                                    # append: series each sampled method attempted
+    if append:
+        for r in prev_inst[prev_inst.method.isin(SAMPLED)].itertuples():
+            prev_att.setdefault((r.split, int(r.i)), {})[r.method] = r.status in ("ok", "timeout")
 
     rows, rules = [], {m: [] for m in methods}
     times = {}
     for own in SPLITS:
         idx = explained[own]
         res = {}
-        # STLRocket: batched (and possibly parallel), time per series is the mean
-        t = time.perf_counter()
-        ours = ir.explain_instances(F[own][idx], W, F_tr, pred["train"], rcfg, n_jobs=args.n_jobs,
-                                    exclude=list(idx) if own == "train" else None)
-        t_ours = (time.perf_counter() - t) / len(idx)
-        res["stlrocket"] = [("ok" if r["literals"] else "not_found", r, t_ours) for r in ours]
+        seeds = [seed * 1_000_003 + int(i) + (0 if own == "train" else 500_009) for i in idx]
+        if "stlrocket" in methods:
+            # STLRocket: batched (and possibly parallel), time per series is the mean
+            t = time.perf_counter()
+            ours = ir.explain_instances(F[own][idx], W, F_tr, pred["train"], rcfg, n_jobs=args.n_jobs,
+                                        exclude=list(idx) if own == "train" else None)
+            t_ours = (time.perf_counter() - t) / len(idx)
+            res["stlrocket"] = [("ok" if r["literals"] else "not_found", r, t_ours) for r in ours]
+        if "piaxp" in methods:
+            res["piaxp"] = []
+            for i, sd in zip(idx, seeds):
+                t = time.perf_counter()
+                r = probabilistic_inflated_axp(F[own][i], W, lo, hi, sampler, delta=args.piaxp_delta, seed=sd)
+                res["piaxp"].append(("ok" if r["sufficient"] else "not_found", r, time.perf_counter() - t))
         for name, fn in (("axp", axp), ("iaxp", inflated_axp)):
             if name in methods:
                 res[name] = []
@@ -395,7 +439,6 @@ def run(args, dataset: str, run_id: int) -> None:
                     t = time.perf_counter()
                     r = fn(F[own][i], W, lo, hi)
                     res[name].append(("ok" if r["sufficient"] else "not_found", r, time.perf_counter() - t))
-        seeds = [seed * 1_000_003 + int(i) + (0 if own == "train" else 500_009) for i in idx]
         for name, explainer in (("lore", lore), ("anchors", anchors)):
             if explainer is not None:
                 # Anchors' samples take batch_size * 10^4 * |S| bytes per process
@@ -409,7 +452,8 @@ def run(args, dataset: str, run_id: int) -> None:
                 times[f"{name}_{own}_s"] = time.perf_counter() - t
 
         for p, i in enumerate(idx):
-            attempted = {m: res[m][p][0] in ("ok", "timeout") for m in SAMPLED if m in res}
+            attempted = (prev_att.get((own, int(i)), {}) if append
+                         else {m: res[m][p][0] in ("ok", "timeout") for m in SAMPLED if m in res})
             for method in methods:
                 status, r, secs = res[method][p]
                 if status is None:
@@ -421,6 +465,9 @@ def run(args, dataset: str, run_id: int) -> None:
                         extra = {"rule": json.dumps(r["literals"]), "lcb_train": r["lcb"]}
                     elif method in ("axp", "iaxp"):
                         extra = {"rule": json.dumps(r["literals"]), "n_features": len(r["features"])}
+                    elif method == "piaxp":
+                        extra = {"rule": json.dumps(r["literals"]), "n_features": len(r["features"]),
+                                 "est_precision": r["est_precision"]}
                     elif method == "lore":
                         extra = {"rule": json.dumps(r["literals"]), "fidelity": r["fidelity"], "n_calls": r["n_calls"],
                                  "rule_class": r["k"]}
@@ -452,16 +499,16 @@ def run(args, dataset: str, run_id: int) -> None:
                         f" ({sum(x[0] == 'ok' for x in res[m])} ok)" for m in methods))
 
     inst = pd.DataFrame(rows)
-    inst.to_csv(f"{prefix}.instances.csv.gz", index=False)
     # subset "all": from every train series the method explained; "lore", "anchors": from the
     # train series that method attempted (found or timed out), the same for every method
-    subsets = ["all"] + [m for m in SAMPLED if m in methods]
+    sampled_present = set(prev_inst.method) if append else set(methods)
+    subsets = ["all"] + [m for m in SAMPLED if m in sampled_present]
     glob = [{"method": m, "subset": sub, **g} for m in methods for sub in subsets
             for g in global_scores([r for r in rules[m] if sub == "all" or r["attempted"].get(sub)],
                                    pred["train"], pred["test"], args.min_new_share)
             if sub == "all" or any(r["attempted"].get(sub) for r in rules[m])]
     for name in SURROGATES:
-        if name in args.skip:
+        if name in args.skip or append:
             continue
         t = time.perf_counter()
         sur = (tree_surrogate(F, S, pred, args.cv, seed, n_jobs=args.n_jobs) if name == "tree"
@@ -477,10 +524,9 @@ def run(args, dataset: str, run_id: int) -> None:
         glob += [{"method": name, "subset": "all", **g} for g in surrogate_scores(sur, pred["train"], pred["test"])]
         log(f"{name}: test fidelity {done[name]['fidelity']['test']:.3f}, {times[f'{name}_s']:.1f} s")
     glob = pd.DataFrame(glob)
-    glob.to_csv(f"{prefix}.global.csv", index=False)
 
     summary = []
-    for m in list(methods) + [s for s in SURROGATES if s not in args.skip]:
+    for m in list(methods) + ([] if append else [s for s in SURROGATES if s not in args.skip]):
         d = inst[(inst.method == m) & (inst.split == "test") & (inst.status != "skipped")]
         found = d[d.found]
         g = glob[(glob.method == m) & (glob.subset == "all")]
@@ -497,9 +543,24 @@ def run(args, dataset: str, run_id: int) -> None:
             "global_precision_test": float(g.precision.mean()), "global_coverage_test": float(g.coverage.mean()),
             "global_f1_test": float(g.f1.mean()), "global_rules": float(g.n_rules.mean()),
             "global_length": float(g.length.mean())})
-    pd.DataFrame(summary).to_csv(f"{prefix}.summary.csv", index=False)
-    done.update(status="ok", times_s=times, total_s=time.perf_counter() - t0)
-    Path(f"{prefix}.done.json").write_text(json.dumps(done, indent=1, default=float))
+    summary = pd.DataFrame(summary)
+    if append:      # merge the added methods into the run's files
+        def merge(path, new, read=pd.read_csv):
+            old = read(path)
+            pd.concat([old[~old.method.isin(methods)], new], ignore_index=True).to_csv(path, index=False)
+        merge(f"{prefix}.instances.csv.gz", inst)
+        merge(f"{prefix}.global.csv", glob)
+        merge(f"{prefix}.summary.csv", summary)
+        prev.setdefault("added", {}).update({m: {"args": vars(args), "time_s": time.perf_counter() - t0}
+                                             for m in methods})
+        done_path.write_text(json.dumps(prev, indent=1, default=float))
+    else:
+        inst.to_csv(f"{prefix}.instances.csv.gz", index=False)
+        glob.to_csv(f"{prefix}.global.csv", index=False)
+        summary.to_csv(f"{prefix}.summary.csv", index=False)
+        done.update(status="ok", times_s=times, total_s=time.perf_counter() - t0)
+        done_path.write_text(json.dumps(done, indent=1, default=float))
+    summary = summary.to_dict("records")
     for s in summary:
         log(f"  {s['method']:10s} test precision {s['pooled_precision_test']:.3f}, coverage "
             f"{s['mean_coverage_test']:.3f}, length {s['mean_length']:.2f}, global F1 {s['global_f1_test']:.3f} "
@@ -530,6 +591,12 @@ def main():
     p.add_argument("--lore_timeout", type=float, default=900.0, help="LORE: seconds per series")
     p.add_argument("--max_timeouts", type=int, default=8,
                    help="LORE, Anchors: consecutive timeouts after which the method stops for the run")
+    p.add_argument("--piaxp_delta", type=float, default=0.95,
+                   help="probabilistic inflated AXp: probability the literals must keep (as Anchors' threshold)")
+    p.add_argument("--piaxp_samples", type=int, default=2000,
+                   help="probabilistic inflated AXp: Monte Carlo draws per explanation")
+    p.add_argument("--add", nargs="*", default=[], choices=list(METHODS),
+                   help="extend complete runs with these methods only (see the docstring)")
     p.add_argument("--max_explained", type=int, default=None, help="series explained per split (default: all)")
     p.add_argument("--sampled_max_explained", type=int, default=None,
                    help="LORE, Anchors: the first series of those explained per split (default: all)")

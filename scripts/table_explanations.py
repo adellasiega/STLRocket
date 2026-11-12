@@ -5,7 +5,8 @@ summary.json exists), and a last row with the mean over datasets:
   Nonzero        nonzero entries of the weight matrix W (classes x selected formulae)
   instance rules of the test series, scored as their simplified STL formula on test,
   w.r.t. the classifier's predictions:
-    Prec.        pooled precision (summary.json, pooled_prec_test)
+    Prec.        mean precision over the rules (rules_test.csv, prec_test; a rule that no
+                 other test series satisfies has undefined precision and is left out)
     Cov.         mean coverage (mean_coverage_test)
     beta<0       fraction of the rules with negative share beta (series with a tied
                  top logit, whose beta is undefined, left out)
@@ -37,14 +38,14 @@ def run_row(run: Path) -> dict:
     s = json.loads((run / "summary.json").read_text())
     W = np.array(json.loads((run / "model.json").read_text())["weights"])
     r = s["rules_test"]
-    rules = pd.read_csv(run / "rules_test.csv", usecols=["n_literals", "share"])
+    rules = pd.read_csv(run / "rules_test.csv", usecols=["n_literals", "share", "prec_test"])
     beta = rules.loc[rules.n_literals > 0, "share"].dropna()
     g = pd.read_csv(run / "global_metrics.csv")
     g = g[(g.version == "simplified") & (g.evaluated_on == "test")]
     p, c = g.precision.fillna(0.0), g.coverage
     f1 = np.where(g.tp > 0, 2 * p * c / (p + c).where(p + c > 0, 1.0), 0.0)
     return {"dataset": s["dataset"], "nonzero": int((W != 0).sum()),
-            "prec": r["pooled_prec_test"], "cov": r["mean_coverage_test"],
+            "prec": float(rules.loc[rules.n_literals > 0, "prec_test"].mean()), "cov": r["mean_coverage_test"],
             "beta_neg": float((beta < 0).mean()), "beta": float(beta.median()), "nodes": r["mean_size"],
             "g_prec": float(g.precision.mean()), "g_cov": float(c.mean()), "g_f1": float(f1.mean()),
             "g_nodes": float((g["size"] + g.n_rules - 1).mean())}
