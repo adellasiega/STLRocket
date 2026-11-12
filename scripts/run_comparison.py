@@ -42,6 +42,13 @@ Methods (METHODS):
                      stlrocket; only the feature map differs
   catch22            aeon Catch22Classifier, default parameters (catch24 features per channel,
                      random forest)
+  tlinet             TLINet, after Li, Cai, Vasile and Tron 2023 (stlrocket.tlinet): STL formula
+                     learned end to end by gradient descent, 3 predicates per variable, one-vs-rest
+                     with class-balanced hinge, prediction by the authors' evaluation of the hard
+                     network (the exact STL semantics of its formulas recorded as bacc_*_exact);
+                     architecture in tlinet.ARCHITECTURES (one clause, or two layers of 2
+                     or 4 clauses) chosen by CV on balanced accuracy over the same folds, ties to
+                     the simpler one; --tlinet_epochs epochs (500, the authors')
   ztime              Z-Time (stlrocket.ztime_baseline, the authors' code from ZTIME_DIR): its
                      randomized search over 5 configurations on a 67/33 train holdout, then
                      refitted on the whole train set; records the chosen configuration
@@ -51,13 +58,16 @@ Written to OUT_DIR/<dataset>/run<r>/:
                      and per-method details (stlrocket and minirocket_lasso: lambda and
                      number of selected features; stl_tree: chosen depth (null: unlimited), depth,
                      leaves and CV scores; bombara: the same, and the node count of each
-                     class's STL formula; stl_ridge: alpha; mrseql: mode). Written last, so it marks the method as complete
+                     class's STL formula; tlinet: architecture, CV scores, formula sizes and training diagnostics;
+                     stl_ridge: alpha; mrseql: mode). Written last, so it marks the method as complete
   formulas.pkl.gz,   the formula bank and feature scales (sigma) of the run, written with the
   bank_stats.npz     STL features
   stl_tree.pkl       the fitted tree, which with the bank gives the STL formula of each leaf
                      (stlrocket.tree.path_formulas)
   bombara_tree.json  the fitted Bombara tree: every node's split (primitive kind, variable,
                      time parameters, threshold) and weighted class counts
+  tlinet_formulas.json  the STL formula of every TLINet model (one per class, or one for class
+                     1 with two classes), with its size and the configuration
 
 Methods whose json exists are skipped. The STL feature matrix is computed only if a method
 needing it is not complete; with --feature_cache it is also saved, and loaded by later jobs.
@@ -92,10 +102,11 @@ ROCKET_MIN_LENGTH = 9   # shortest series MiniRocket accepts
 # accepts 9 time steps but then fails ("unable to broadcast"), so it needs 10
 MULTIROCKET_MIN_LENGTH = 10
 METHODS = ("stlrocket", "stl_tree", "stl_ridge", "minirocket", "multirockethydra", "mrseql", "minirocket_lasso",
-           "bombara", "catch22", "ztime")
+           "bombara", "catch22", "tlinet", "ztime")
 # settings of the experiments each method depends on, recorded in its json
 LASSO_SETTINGS = {"stlrocket": ("depth", "n_formulas", "cv", "cut_point"), "stl_tree": ("depth", "n_formulas", "cv"),
-                  "minirocket_lasso": ("cv", "cut_point"), "bombara": ("cv", "pso_particles", "pso_iter")}
+                  "minirocket_lasso": ("cv", "cut_point"), "bombara": ("cv", "pso_particles", "pso_iter"),
+                  "tlinet": ("cv", "tlinet_epochs")}
 
 
 def log(msg: str) -> None:
@@ -194,6 +205,29 @@ def run_bombara(ctx) -> dict:
             "fit_s": fit_s, "predict_s": predict_s, "max_depth": depth, "depth": tree.depth(),
             "n_leaves": tree.n_leaves(), "formula_size": int(sum(sizes)), "class_formula_sizes": sizes,
             "cv_bacc": {str(d): s for d, s in cv_bacc.items()}, "pso": dataclasses.asdict(cfg)}
+
+
+def run_tlinet(ctx) -> dict:
+    from stlrocket import tlinet
+    args, X_tr, y_tr, seed = ctx["args"], ctx["X_tr"], ctx["y_tr"], ctx["seed"]
+    cfg = tlinet.TLINetConfig(epochs=args.tlinet_epochs)
+    t = time.perf_counter()
+    folds = list(cv_splitter(y_tr, args.cv, seed).split(X_tr, y_tr))
+    arch, cv_bacc = tlinet.choose_architecture(X_tr, y_tr, folds, seed, cfg, device=args.device)
+    clf = tlinet.TLINetClassifier(arch, cfg, seed, args.device).fit(X_tr, y_tr)
+    fit_s = time.perf_counter() - t
+    (ctx["out"] / "tlinet_formulas.json").write_text(json.dumps(clf.to_json(), indent=1))
+    t = time.perf_counter()
+    p_te = clf.predict(ctx["X_te"])
+    predict_s = time.perf_counter() - t
+    sizes = clf.formula_sizes()
+    exact = scores(y_tr, clf.predict(X_tr, "exact"), ctx["y_te"], clf.predict(ctx["X_te"], "exact"))
+    return {**scores(y_tr, clf.predict(X_tr), ctx["y_te"], p_te),
+            **{f"{k}_exact": v for k, v in exact.items()}, "semantics": cfg.semantics,
+            "fit_s": fit_s, "predict_s": predict_s, "n_clauses": arch,
+            "cv_bacc": {str(a): s for a, s in cv_bacc.items()},
+            "formula_size": int(sum(sizes)), "class_formula_sizes": sizes, "refit_s": clf.fit_s_,
+            **{k: v for k, v in clf.diagnostics_.items() if k not in ("n_clauses", "bacc_train_exact")}}
 
 
 def run_stl_ridge(ctx) -> dict:
@@ -341,6 +375,7 @@ RUNNERS = {
     "minirocket_lasso": run_minirocket_lasso,
     "bombara": run_bombara,
     "catch22": lambda ctx: run_aeon(ctx, make_catch22),
+    "tlinet": run_tlinet,
     "ztime": run_ztime,
 }
 
@@ -401,6 +436,7 @@ def main():
     p.add_argument("--n_jobs", type=int, default=available_cpus())
     p.add_argument("--pso_particles", type=int, default=bombara.PSOConfig.n_particles, help="bombara: swarm size")
     p.add_argument("--pso_iter", type=int, default=bombara.PSOConfig.n_iter, help="bombara: PSO iterations")
+    p.add_argument("--tlinet_epochs", type=int, default=500, help="tlinet: training epochs")
     p.add_argument("--resample", action="store_true",
                    help="run r on resample r of the dataset (0: the official split) instead of the official split")
     p.add_argument("--feature_cache", default=None, help="directory where STL feature matrices are saved and reused")

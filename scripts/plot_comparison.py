@@ -51,6 +51,7 @@ METHOD_STYLE = {
     "mrseql": ("MrSEQL", "#008300", "P"),
     "bombara": ("Bombara and Belta", "#c0392b", "p"),
     "catch22": ("catch22", "#7f7f7f", "h"),
+    "tlinet": ("TLINet", "#6b4423", "d"),
     "ztime": ("Z-Time", "#00a3a3", "*"),
 }
 ALPHA = 0.05   # significance level of the tests (comparison_tests.tex) and of the CD diagram
