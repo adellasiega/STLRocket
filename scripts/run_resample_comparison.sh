@@ -14,6 +14,7 @@
 #   bombara  hours per run on the largest datasets; extra options with BOMBARA_SBATCH
 #   tlinet   TLINet (stlrocket.tlinet): 3 architectures x CV folds + refit, 500 epochs each;
 #            hours on the many-channel or long datasets; extra options with TLINET_SBATCH
+# ROGE has its own submit script, with per-dataset resources: scripts/run_roge_comparison.sh
 # Results are per (dataset, resample, method) and complete methods are skipped, so
 # resubmitting redoes only the unfinished ones.
 #

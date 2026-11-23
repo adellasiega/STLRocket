@@ -49,6 +49,13 @@ Methods (METHODS):
                      architecture in tlinet.ARCHITECTURES (one clause, or two layers of 2
                      or 4 clauses) chosen by CV on balanced accuracy over the same folds, ties to
                      the simpler one; --tlinet_epochs epochs (500, the authors')
+  roge               ROGE, after Nenzi, Silvetti, Bartocci and Bortolussi 2018 (stlrocket.roge_baseline,
+                     the roge package unchanged): one STL formula per binary problem, by a genetic
+                     algorithm on the structure and GP-UCB on the parameters maximizing the
+                     discrimination G, then the threshold shift; one-vs-rest, a series to the class
+                     of largest robustness (two classes: one formula for class 1); its default
+                     settings (--roge_ng generations), population capped at --roge_ne_max by
+                     sampling the templates; no CV (no capacity hyperparameter)
   ztime              Z-Time (stlrocket.ztime_baseline, the authors' code from ZTIME_DIR): its
                      randomized search over 5 configurations on a 67/33 train holdout, then
                      refitted on the whole train set; records the chosen configuration
@@ -68,6 +75,9 @@ Written to OUT_DIR/<dataset>/run<r>/:
                      time parameters, threshold) and weighted class counts
   tlinet_formulas.json  the STL formula of every TLINet model (one per class, or one for class
                      1 with two classes), with its size and the configuration
+  roge_formulas.json the shifted STL formula of every ROGE model (one per class, or one for class
+                     1 with two classes), with the formula before the shift, its G, size, seed
+                     and the per-generation history
 
 Methods whose json exists are skipped. The STL feature matrix is computed only if a method
 needing it is not complete; with --feature_cache it is also saved, and loaded by later jobs.
@@ -102,11 +112,11 @@ ROCKET_MIN_LENGTH = 9   # shortest series MiniRocket accepts
 # accepts 9 time steps but then fails ("unable to broadcast"), so it needs 10
 MULTIROCKET_MIN_LENGTH = 10
 METHODS = ("stlrocket", "stl_tree", "stl_ridge", "minirocket", "multirockethydra", "mrseql", "minirocket_lasso",
-           "bombara", "catch22", "tlinet", "ztime")
+           "bombara", "catch22", "tlinet", "roge", "ztime")
 # settings of the experiments each method depends on, recorded in its json
 LASSO_SETTINGS = {"stlrocket": ("depth", "n_formulas", "cv", "cut_point"), "stl_tree": ("depth", "n_formulas", "cv"),
                   "minirocket_lasso": ("cv", "cut_point"), "bombara": ("cv", "pso_particles", "pso_iter"),
-                  "tlinet": ("cv", "tlinet_epochs")}
+                  "tlinet": ("cv", "tlinet_epochs"), "roge": ("roge_ng", "roge_ne_max")}
 
 
 def log(msg: str) -> None:
@@ -228,6 +238,25 @@ def run_tlinet(ctx) -> dict:
             "cv_bacc": {str(a): s for a, s in cv_bacc.items()},
             "formula_size": int(sum(sizes)), "class_formula_sizes": sizes, "refit_s": clf.fit_s_,
             **{k: v for k, v in clf.diagnostics_.items() if k not in ("n_clauses", "bacc_train_exact")}}
+
+
+def run_roge(ctx) -> dict:
+    from stlrocket import roge_baseline
+    args, X_tr, y_tr = ctx["args"], ctx["X_tr"], ctx["y_tr"]
+    opts = roge_baseline.ROGEOptions(ng=args.roge_ng, ne_max=args.roge_ne_max)
+    t = time.perf_counter()
+    clf = roge_baseline.ROGEClassifier(opts, ctx["seed"], ctx["n_jobs"]).fit(X_tr, y_tr)
+    fit_s = time.perf_counter() - t
+    (ctx["out"] / "roge_formulas.json").write_text(json.dumps(clf.to_json(), indent=1))
+    t = time.perf_counter()
+    p_te = clf.predict(ctx["X_te"])
+    predict_s = time.perf_counter() - t
+    sizes = clf.formula_sizes()
+    return {**scores(y_tr, clf.predict(X_tr), ctx["y_te"], p_te),
+            "fit_s": fit_s, "predict_s": predict_s, "formula_size": int(sum(sizes)),
+            "class_formula_sizes": sizes, "G": [m["G"] for m in clf.models_],
+            "model_fit_s": [m["fit_s"] for m in clf.models_], "ne": clf.models_[0]["ne"],
+            "options": dataclasses.asdict(opts)}
 
 
 def run_stl_ridge(ctx) -> dict:
@@ -376,6 +405,7 @@ RUNNERS = {
     "bombara": run_bombara,
     "catch22": lambda ctx: run_aeon(ctx, make_catch22),
     "tlinet": run_tlinet,
+    "roge": run_roge,
     "ztime": run_ztime,
 }
 
@@ -437,6 +467,9 @@ def main():
     p.add_argument("--pso_particles", type=int, default=bombara.PSOConfig.n_particles, help="bombara: swarm size")
     p.add_argument("--pso_iter", type=int, default=bombara.PSOConfig.n_iter, help="bombara: PSO iterations")
     p.add_argument("--tlinet_epochs", type=int, default=500, help="tlinet: training epochs")
+    p.add_argument("--roge_ng", type=int, default=3, help="roge: generations")
+    p.add_argument("--roge_ne_max", type=int, default=54,
+                   help="roge: population cap (templates sampled when they exceed it)")
     p.add_argument("--resample", action="store_true",
                    help="run r on resample r of the dataset (0: the official split) instead of the official split")
     p.add_argument("--feature_cache", default=None, help="directory where STL feature matrices are saved and reused")

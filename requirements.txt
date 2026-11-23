@@ -21,3 +21,7 @@ seaborn
 # point ZTIME_DIR to the checkout; it needs pyts (and numpy, pandas, scipy, scikit-learn):
 #   git clone https://github.com/zedshape/ztime ~/ztime && pip install pyts
 #   export ZTIME_DIR=~/ztime
+
+# ROGE baseline (stlrocket/roge_baseline.py, method "roge" of scripts/run_comparison.py), MIT:
+#   pip install --no-deps --ignore-requires-python git+https://github.com/LogArtLab/roge@1391e33489c9ddc0a7b08f92be807349534b4cf6
+# its code runs on Python 3.9 although it declares >=3.11; --no-deps keeps numpy/scipy/sklearn as they are

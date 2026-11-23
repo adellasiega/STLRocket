@@ -6,6 +6,8 @@ env/
 
 # Paper: its own git repo, synced with Overleaf
 paper/
+# Prsentation: same
+presentation/
 
 # Generated: results and logs are fetched from the cluster with scripts/sync_results.sh
 results/

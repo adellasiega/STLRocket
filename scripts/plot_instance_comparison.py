@@ -92,6 +92,33 @@ def load(res_dir: Path, exclude: list[str]) -> tuple[pd.DataFrame, pd.DataFrame]
     return read("*.instances.csv.gz"), read("*.global.csv")
 
 
+def complete_only(inst: pd.DataFrame, glob: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Drop the (dataset, method) pairs that lack some complete run of the dataset (a method
+    added to complete runs with run_instance_comparison.py --add, still running), so that every
+    method is averaged over the same runs of a dataset."""
+    runs = inst.groupby("dataset").run.nunique()
+    have = inst.groupby(["dataset", "method"]).run.nunique()
+    partial = [(d, m) for (d, m), n in have.items() if n < runs[d]]
+    if partial:
+        print("methods without every run of a dataset, left out there: "
+              + ", ".join(f"{m} on {d} ({have[(d, m)]}/{runs[d]})" for d, m in partial))
+    drop = lambda df: df[~pd.MultiIndex.from_frame(df[["dataset", "method"]]).isin(partial)]
+    return drop(inst), drop(glob)
+
+
+def full_coverage(p: pd.DataFrame, block: str) -> pd.DataFrame:
+    """Methods of a per-dataset frame with a result on every dataset STLRocket has one, so that
+    the means of a block are over the same datasets; the others are left out (and printed)."""
+    meth = p.index.get_level_values("method")
+    ref = set(p[meth == "stlrocket"].index.get_level_values("dataset"))
+    keep = [m for m in meth.unique()
+            if m == "stlrocket" or ref <= set(p[meth == m].index.get_level_values("dataset"))]
+    left = [m for m in meth.unique() if m not in keep]
+    if left:
+        print(f"{block}: left out, not on every dataset of STLRocket: {left}")
+    return p[meth.isin(keep)]
+
+
 def run_metrics(d: pd.DataFrame) -> pd.Series:
     f = d[d.found]
     # precision_test is nan for an explanation that no other test series satisfies: skipped by mean()
@@ -258,6 +285,7 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     inst, glob = load(res_dir, args.exclude)
+    inst, glob = complete_only(inst, glob)
     print(inst.groupby(["dataset", "method"]).run.nunique().unstack().to_string())
     share = done_share(inst)
     print("share of attempted test series explained:\n" + share.round(2).to_string())
@@ -273,11 +301,14 @@ def main():
         fig.savefig(out_dir / f"instance_precision_coverage.{ext}", dpi=200, facecolor="white", bbox_inches="tight")
     print(f"wrote {out_dir / 'instance_precision_coverage'}.{{pdf,png}}")
     write_table(by_method, share, out_dir / "instance_table.tex")
+    all_label = SUBSET_LABEL["all"]
+    blocks[all_label] = full_coverage(blocks[all_label], all_label)
     write_summary(blocks, METRICS, methods, out_dir / "instance_summary.tex")
 
     g_methods = [m for m in METHOD_STYLE if (glob.method == m).any()]
     g_blocks = {GLOBAL_LABEL[s]: global_per_dataset(glob, s)
                 for s in ("all",) + tuple(m for m in SAMPLED if m in g_methods)}
+    g_blocks[GLOBAL_LABEL["all"]] = full_coverage(g_blocks[GLOBAL_LABEL["all"]], GLOBAL_LABEL["all"])
     write_summary(g_blocks, GLOBAL_METRICS, g_methods, out_dir / "global_summary.tex")
     claims(inst, args.threshold)
 
