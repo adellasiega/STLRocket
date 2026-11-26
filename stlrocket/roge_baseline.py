@@ -149,7 +149,10 @@ def _fit_one(X: np.ndarray, positive: np.ndarray, seed: int, opts: ROGEOptions) 
     # one BLAS thread per model, as the roge README advises (small matrices; the models
     # already run in parallel over the task's CPUs)
     from threadpoolctl import threadpool_limits
-    with lazy_templates(), threadpool_limits(1):
+    # ne=None: ROGE keeps every template and concatenates the list with its random formulae,
+    # which LazyTemplates does not support; the full list is small then, so build it as ROGE does
+    lazy = lazy_templates() if ne is not None else contextlib.nullcontext()
+    with lazy, threadpool_limits(1):
         res = roge(Dp, Dn, space=ParameterSpace.from_data(traces), cfg=cfg)
     clf = make_classifier(res.best, rule=opts.alpha_rule, Dp=Dp, Dn=Dn)
     return {"classifier": clf, "fit_s": time.perf_counter() - t, "G": float(res.best.G),
